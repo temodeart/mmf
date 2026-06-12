@@ -1,0 +1,327 @@
+/* =========================================================================
+   Money Market Fund — Design Tokens
+   Source of truth for colors, type, spacing, radii, shadows, motion.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+
+:root {
+  /* -------- BRAND COLORS -------- */
+  --logo-orange:    #FE5E00;   /* logo top-left wedge — preserved as-is */
+  --logo-blue:      #1677FF;   /* logo bottom-right wedge — preserved as-is */
+
+  --indigo:         #4F46E5;   /* PRIMARY action color */
+  --indigo-soft:    #EEF0FE;   /* primary tint surfaces, focus rings */
+  --blue:           #2D6BFF;   /* brand accent — charts, secondary highlights */
+  --blue-soft:      #E7EEFF;
+  --orange:         #FF6B2C;   /* accent — progress bars, notification dot */
+  --orange-soft:    #FFEDE2;
+  --navy:           #050B1F;   /* dark accent surface */
+  --navy-2:         #0E1631;
+  --navy-3:         #1A2547;
+
+  /* -------- SEMANTIC STATUS -------- */
+  --green:          #0E9F6E;   /* new / approved / income */
+  --green-soft:     #E3F5EE;
+  --amber:          #B7791F;   /* active / warning */
+  --amber-soft:     #FFF3D6;
+  --red:            #DC2626;   /* sell / outflow / error */
+  --red-soft:       #FDECEC;
+  --info:           var(--indigo);
+  --info-soft:      var(--indigo-soft);
+  --surface-warning:#FFFBF2;
+  --border-warning: #FFE9C4;
+
+  /* -------- NEUTRAL / INK -------- */
+  --bg:             #F4F6FA;   /* page wash */
+  --surface:        #FFFFFF;   /* default card surface */
+  --ink:            #0B1020;   /* primary text */
+  --ink-2:          #1F2540;
+  --text:           #2A3052;   /* body text */
+  --muted:          #6B7191;   /* labels, secondary text */
+  --muted-2:        #9099B5;   /* placeholders, tertiary */
+  --line:           #E7E9F2;   /* card borders, dividers */
+  --line-2:         #EFF1F8;   /* internal separators */
+  --field-bg:       #FAFBFE;   /* resting input fill */
+
+  /* -------- TYPOGRAPHY -------- */
+  --font-ui:        'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:      'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale (px) */
+  --t-display:      44px;   /* splash hero, big numbers */
+  --t-title:        30px;   /* onboarding titles */
+  --t-h1:           28px;   /* page titles */
+  --t-h2:           22px;   /* section titles inside screens */
+  --t-h3:           18px;   /* card titles */
+  --t-h4:           16px;   /* section labels */
+  --t-body-lg:      15px;   /* primary body */
+  --t-body:         14px;   /* default body */
+  --t-sm:           13px;   /* card body */
+  --t-xs:           12px;   /* labels */
+  --t-2xs:          11px;   /* meta */
+  --t-3xs:          10px;   /* eyebrows */
+
+  /* Weights */
+  --fw-regular:     400;
+  --fw-medium:      500;
+  --fw-semibold:    600;
+  --fw-bold:        700;
+  --fw-black:       800;
+
+  /* Letter spacing */
+  --ls-display:     -0.02em;
+  --ls-title:       -0.02em;
+  --ls-h:           -0.01em;
+  --ls-body:        0;
+  --ls-eyebrow:     0.08em;
+  --ls-eyebrow-lg:  0.18em;
+
+  /* -------- SPACING SCALE -------- */
+  --s-1:            4px;
+  --s-2:            8px;
+  --s-3:            12px;
+  --s-4:            16px;
+  --s-5:            24px;
+  --s-6:            32px;
+  --s-7:            48px;
+  --margin-h:       24px;   /* mobile horizontal margin */
+  --card-pad:       20px;   /* default card padding */
+  --tabbar-h:       80px;   /* bottom tab bar height incl. safe area */
+
+  /* -------- RADII -------- */
+  --r-1:            6px;    /* checkbox glyph */
+  --r-2:            8px;    /* small chip */
+  --r-3:            10px;   /* badge, icon container */
+  --r-4:            12px;   /* button-small, chip */
+  --r-5:            14px;   /* button, input */
+  --r-6:            16px;   /* card */
+  --r-7:            18px;   /* card */
+  --r-8:            22px;   /* hero card */
+  --r-9:            28px;   /* large hero / device frame */
+  --r-frame:        48px;   /* device frame outer */
+  --r-pill:         999px;
+
+  /* -------- SHADOWS -------- */
+  --shadow-frame:   0 30px 60px -25px rgba(15,20,55,.18),
+                    0 8px 20px -10px rgba(15,20,55,.08);
+  --shadow-card:    0 2px 6px -2px rgba(15,20,55,.04);
+  --shadow-cta:     0 8px 22px -8px rgba(79,70,229,.5);
+  --shadow-floating:0 10px 30px -10px rgba(15,20,55,.25);
+  --shadow-press:   0 1px 3px rgba(15,20,55,.06);
+  --ring-focus:     0 0 0 4px var(--indigo-soft);
+
+  /* -------- MOTION -------- */
+  --ease-default:   cubic-bezier(.2,.8,.2,1);
+  --t-fast:         0.15s;
+  --t-medium:       0.2s;
+  --t-slow:         0.35s;
+
+  /* -------- HERO GRADIENTS -------- */
+  --hero-navy:      linear-gradient(135deg, #050B1F 0%, #4F46E5 130%);
+  --hero-pastel:    linear-gradient(160deg, #EEF0FE 0%, #E7EEFF 60%, #F4F6FA 100%);
+  --hero-promo:     linear-gradient(140deg, #FFFFFF 0%, #F4F1FF 60%, #EEF0FE 100%);
+  --bar-orange:     linear-gradient(90deg, #FF6B2C, #FF8B4F);
+}
+
+/* =========================================================================
+   SEMANTIC ELEMENT RULES
+   Apply these by including this stylesheet on any HTML doc.
+   ========================================================================= */
+
+html, body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+/* SVG icons: brand default = 2px rounded stroke */
+svg.icon, .icon svg {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Display / hero numbers */
+.display, h1.display {
+  font-size: var(--t-display);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-display);
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+h1, .h1 {
+  font-size: var(--t-h1);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-title);
+  line-height: 1.1;
+  margin: 0;
+  color: var(--ink);
+}
+
+h2, .h2 {
+  font-size: var(--t-h2);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-title);
+  line-height: 1.15;
+  margin: 0;
+  color: var(--ink);
+}
+
+h3, .h3 {
+  font-size: var(--t-h3);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-h);
+  line-height: 1.25;
+  margin: 0;
+  color: var(--ink);
+}
+
+h4, .h4 {
+  font-size: var(--t-h4);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-h);
+  margin: 0;
+  color: var(--ink);
+}
+
+p, .body {
+  font-size: var(--t-body);
+  font-weight: var(--fw-medium);
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0;
+}
+
+.body-lg { font-size: var(--t-body-lg); line-height: 1.55; color: var(--muted); }
+.body-sm { font-size: var(--t-sm); line-height: 1.5; color: var(--text); }
+
+.eyebrow {
+  font-size: var(--t-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-eyebrow-lg);
+  text-transform: uppercase;
+  color: var(--indigo);
+}
+
+.label {
+  font-size: var(--t-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--muted);
+}
+
+.meta {
+  font-size: var(--t-2xs);
+  font-weight: var(--fw-semibold);
+  color: var(--muted-2);
+}
+
+.mono, code, kbd, .ticker {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.num, .amount, .currency {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--ls-h);
+}
+
+/* =========================================================================
+   COMPONENT BASELINES
+   ========================================================================= */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-7);
+  padding: var(--card-pad);
+}
+
+.card--hero {
+  border: none;
+  border-radius: var(--r-8);
+  color: #fff;
+  background: var(--hero-navy);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn {
+  height: 52px;
+  padding: 0 22px;
+  border-radius: var(--r-5);
+  font-family: inherit;
+  font-weight: var(--fw-bold);
+  font-size: var(--t-body-lg);
+  letter-spacing: var(--ls-h);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity var(--t-fast), box-shadow var(--t-fast);
+}
+.btn:active { opacity: 0.92; }
+.btn--primary {
+  background: var(--indigo);
+  color: #fff;
+  box-shadow: var(--shadow-cta);
+}
+.btn--ink     { background: var(--ink); color: #fff; }
+.btn--ghost   {
+  background: transparent;
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+}
+.btn--pill    { border-radius: var(--r-pill); }
+.btn--sm      { height: 36px; padding: 0 16px; font-size: var(--t-sm); border-radius: var(--r-4); }
+.btn--full    { width: 100%; }
+
+.input {
+  height: 52px;
+  border-radius: var(--r-5);
+  background: var(--field-bg);
+  border: 1.5px solid var(--line);
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: var(--t-body-lg);
+  font-weight: var(--fw-medium);
+  color: var(--ink);
+  width: 100%;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+}
+.input:focus, .input.is-focused {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--indigo);
+  box-shadow: var(--ring-focus);
+}
+.input::placeholder { color: var(--muted-2); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--t-2xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.01em;
+}
+.badge::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.badge--new    { background: var(--green-soft);  color: var(--green); }
+.badge--active { background: var(--amber-soft);  color: var(--amber); }
+.badge--sell   { background: var(--red-soft);    color: var(--red); }
+.badge--buy    { background: var(--blue-soft);   color: var(--blue); }
+.badge--info   { background: var(--indigo-soft); color: var(--indigo); }

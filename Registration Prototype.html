@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MMF — Бүртгэл &amp; нэвтрэлтийн прототип</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; height:100%; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% 0%, #EEF0FE 0%, transparent 60%),
+      radial-gradient(1000px 500px at 80% 100%, #FFEDE2 0%, transparent 60%),
+      #F6F7FB;
+    min-height: 100vh; color: #0B1020;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+  button, input { font-family: inherit; }
+  *::-webkit-scrollbar { width: 0; height: 0; }
+  * { scrollbar-width: none; }
+
+  /* the scaled phone host */
+  .rp-host { transition: transform .15s ease; }
+  /* hide the Frame's monospace artboard label so only the device shows */
+  .rp-screen > div > :first-child { display: none !important; }
+
+  /* animation helpers reused by the real screens */
+  @keyframes omf-spin { to { transform: rotate(360deg); } }
+  .omf-spin { animation: omf-spin 0.9s linear infinite; }
+  @keyframes omf-pulse { 0% { transform: scale(.7); opacity:.7; } 70% { transform: scale(1.5); opacity:0; } 100% { opacity:0; } }
+  .omf-pulse { animation: omf-pulse 2s cubic-bezier(.2,.8,.2,1) infinite; }
+  .omf-pulse-2 { animation-delay: 1s; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail" data-bg-color="#F6F7FB">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#F6F7FB"/>
+    <rect x="470" y="170" width="260" height="500" rx="46" fill="#FFFFFF" stroke="#E7E9F2" stroke-width="3"/>
+    <g transform="translate(540,250)">
+      <path d="M24 28.5V71.5L0 86V0h24.75L60 21 95.25 0H120v14L60 50 24 28.5z" fill="#FF6B2C"/>
+      <path d="M96 91.5V48.5L120 34v86h-24.75L60 99 24.75 120H0v-14L60 70l36 21.5z" fill="#2D6BFF"/>
+    </g>
+    <rect x="505" y="430" width="190" height="22" rx="11" fill="#0B1020"/>
+    <rect x="505" y="468" width="130" height="16" rx="8" fill="#9099B5"/>
+    <rect x="505" y="560" width="190" height="44" rx="14" fill="#4F46E5"/>
+  </svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- The ACTUAL screens, loaded unchanged from the main app -->
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="onboarding_v2.jsx"></script>
+<script type="text/babel" src="flow_kit.jsx"></script>
+<script type="text/babel" src="bank_verify.jsx"></script>
+<script type="text/babel" src="reset_password.jsx"></script>
+
+<!-- The prototype navigator -->
+<script type="text/babel" src="registration_proto.jsx"></script>
+
+<script type="text/babel">
+  ReactDOM.createRoot(document.getElementById('root')).render(<RegProtoApp/>);
+</script>
+</body>
+</html>

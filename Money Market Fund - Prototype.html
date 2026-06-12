@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Money Market Fund — Прототип</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% 0%, #EEF0FE 0%, transparent 60%),
+      radial-gradient(1000px 500px at 80% 100%, #FFEDE2 0%, transparent 60%),
+      #F6F7FB;
+    min-height: 100vh; color: #0B1020;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    overflow: hidden;
+  }
+  button, input { font-family: inherit; }
+  *::-webkit-scrollbar { width: 0; height: 0; }
+  * { scrollbar-width: none; }
+
+  .rp-host { transition: transform .15s ease; }
+  /* hide the Frame's monospace artboard label so only the device shows */
+  .rp-screen > div > :first-child { display: none !important; }
+
+  @keyframes omf-spin { to { transform: rotate(360deg); } }
+  .omf-spin { animation: omf-spin 0.9s linear infinite; }
+  @keyframes omf-pulse { 0% { transform: scale(.7); opacity:.7; } 70% { transform: scale(1.5); opacity:0; } 100% { opacity:0; } }
+  .omf-pulse { animation: omf-pulse 2s cubic-bezier(.2,.8,.2,1) infinite; }
+  .omf-pulse-2 { animation-delay: 1s; }
+  .loan-range { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; outline:none; cursor:pointer; }
+  .loan-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:999px; background:#4F46E5; border:3px solid #fff; box-shadow:0 4px 12px -2px rgba(79,70,229,.5); cursor:pointer; }
+  .loan-range::-moz-range-thumb { width:24px; height:24px; border-radius:999px; background:#4F46E5; border:3px solid #fff; box-shadow:0 4px 12px -2px rgba(79,70,229,.5); cursor:pointer; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- All app screens -->
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="onboarding_v2.jsx"></script>
+<script type="text/babel" src="loan_eligibility.jsx"></script>
+<script type="text/babel" src="flow_kit.jsx"></script>
+<script type="text/babel" src="primary_flow.jsx"></script>
+<script type="text/babel" src="secondary_flow.jsx"></script>
+<script type="text/babel" src="sell_flow.jsx"></script>
+<script type="text/babel" src="trading_states.jsx"></script>
+<script type="text/babel" src="bank_verify.jsx"></script>
+<script type="text/babel" src="reset_password.jsx"></script>
+<script type="text/babel" src="wallet_flows.jsx"></script>
+
+<!-- Registration flow definition (RP_FLOW) reused by the app navigator -->
+<script type="text/babel" src="registration_proto.jsx"></script>
+<!-- The full-app navigator -->
+<script type="text/babel" src="app_proto.jsx"></script>
+
+<script type="text/babel">
+  ReactDOM.createRoot(document.getElementById('root')).render(<AppProtoApp/>);
+</script>
+</body>
+</html>

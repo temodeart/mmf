@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Money Market Fund — Mobile App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% 0%, #EEF0FE 0%, transparent 60%),
+      radial-gradient(1000px 500px at 80% 100%, #FFEDE2 0%, transparent 60%),
+      #F6F7FB;
+    min-height: 100vh;
+    color: #0B1020;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  button { font-family: inherit; }
+
+  .artboard-header {
+    padding: 40px 64px 24px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .artboard-title {
+    font-weight: 800; font-size: 28px; letter-spacing: -0.02em; line-height: 1.1;
+    color: #050B1F;
+  }
+  .artboard-sub {
+    font-size: 14px; color: #6B7191; margin-top: 6px;
+  }
+  .artboard-meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #6B7191; text-align: right; letter-spacing: 0.06em;
+  }
+  .artboard-meta strong { color: #0B1020; }
+
+  .canvas {
+    padding: 0 64px 80px;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  .canvas-inner {
+    display: inline-flex; gap: 32px; align-items: flex-start;
+    padding: 24px 0;
+  }
+
+  /* scrollbar styling */
+  .canvas::-webkit-scrollbar { height: 10px; }
+  .canvas::-webkit-scrollbar-track { background: transparent; }
+  .canvas::-webkit-scrollbar-thumb { background: #D4D8E6; border-radius: 999px; }
+
+  /* hint */
+  .hint {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(11, 16, 32, 0.92); color: #fff;
+    padding: 10px 16px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 30px -10px rgba(11,16,32,.4);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 1; transition: opacity .4s;
+  }
+  .hint.hide { opacity: 0; }
+  .hint kbd {
+    background: rgba(255,255,255,.15); padding: 2px 8px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  }
+
+  /* hide native scrollbar on inner mobile screens for cleanliness */
+  .canvas-inner *::-webkit-scrollbar { display: none; }
+  .canvas-inner * { scrollbar-width: none; }
+
+  /* onboarding-v2 animation helpers */
+  @keyframes omf-spin { to { transform: rotate(360deg); } }
+  .omf-spin { animation: omf-spin 0.9s linear infinite; }
+  @keyframes omf-pulse { 0% { transform: scale(.7); opacity:.7; } 70% { transform: scale(1.5); opacity:0; } 100% { opacity:0; } }
+  .omf-pulse { animation: omf-pulse 2s cubic-bezier(.2,.8,.2,1) infinite; }
+  .omf-pulse-2 { animation-delay: 1s; }
+
+  /* loan amount slider */
+  .loan-range { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; outline:none; cursor:pointer; }
+  .loan-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:999px; background:#4F46E5; border:3px solid #fff; box-shadow:0 4px 12px -2px rgba(79,70,229,.5); cursor:pointer; }
+  .loan-range::-moz-range-thumb { width:24px; height:24px; border-radius:999px; background:#4F46E5; border:3px solid #fff; box-shadow:0 4px 12px -2px rgba(79,70,229,.5); cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="artboard-header">
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+        <path d="M9.6 11.4V28.6L0 34.4V0h9.9L24 8.4 38.1 0H48v5.6L24 20 9.6 11.4z" fill="#FF6B2C"/>
+        <path d="M38.4 36.6V19.4L48 13.6V48h-9.9L24 39.6 9.9 48H0v-5.6L24 28l14.4 8.6z" fill="#2D6BFF"/>
+      </svg>
+      <div>
+        <div class="artboard-title">Money Market Fund — Mobile App</div>
+        <div class="artboard-sub">Hi-fi designs · 60 screens · 3 trading flows · 390×844 · Мони Маркет Фанд ХХК</div>
+      </div>
+    </div>
+  </div>
+  <div class="artboard-meta">
+    <div><strong>v2</strong> · 2026.05.29</div>
+    <div style="margin-top:4px;">scroll horizontally →</div>
+  </div>
+</div>
+
+<div class="canvas" id="canvas">
+  <div class="canvas-inner" id="root"></div>
+</div>
+
+<div class="hint" id="hint">
+  <span>↔ Drag to scroll · Onboarding → signing → home · Tabs & toggles work</span>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="onboarding_v2.jsx"></script>
+<script type="text/babel" src="loan_eligibility.jsx"></script>
+<script type="text/babel" src="flow_kit.jsx"></script>
+<script type="text/babel" src="primary_flow.jsx"></script>
+<script type="text/babel" src="secondary_flow.jsx"></script>
+<script type="text/babel" src="sell_flow.jsx"></script>
+<script type="text/babel" src="trading_states.jsx"></script>
+<script type="text/babel" src="bank_verify.jsx"></script>
+<script type="text/babel" src="reset_password.jsx"></script>
+<script type="text/babel" src="wallet_flows.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+function App() {
+  // Bottom-tab state: shared between screens 08/09/13/14
+  const [tab, setTab] = useState('home');
+
+  const nav = (t) => setTab(t);
+
+  // Render the 4 "tab" screens; the visible one is highlighted by the active tab.
+  // For prototype: all screens are visible side-by-side, but bottom-tab state syncs across them.
+
+  return (
+    <React.Fragment>
+      <div data-screen-label="01 Splash"><Splash/></div>
+      <div data-screen-label="02 Login / Register"><Login/></div>
+
+      {/* ── Password reset · from Login “Нууц үг мартсан?” ── */}
+      <div data-screen-label="R1 Reset · Phone"><ResetEnterPhone/></div>
+      <div data-screen-label="R2 Reset · Code"><ResetVerifyCode/></div>
+      <div data-screen-label="R3 Reset · New password"><ResetNewPassword/></div>
+      <div data-screen-label="R4 Reset · Success"><ResetSuccess/></div>
+      <div data-screen-label="03 Onboarding 1"><Onb1/></div>
+      <div data-screen-label="04 Onboarding 2"><Onb2/></div>
+      <div data-screen-label="05 Onboarding 3"><Onb3/></div>
+      <div data-screen-label="06 Onboarding 4"><Onb4/></div>
+      <div data-screen-label="07 Phone verification"><PhoneVerify/></div>
+      <div data-screen-label="08 Email verification"><EmailVerify/></div>
+      <div data-screen-label="08A Create password"><CreatePassword/></div>
+      <div data-screen-label="08B Transaction PIN"><CreatePin/></div>
+      <div data-screen-label="08C Biometric setup"><BiometricSetup/></div>
+      <div data-screen-label="09 KYC · DAN/ХУР"><KycConsent/></div>
+      <div data-screen-label="10 MONPEP check"><MonpepCheck/></div>
+      <div data-screen-label="11 MONPEP failed"><MonpepFailed/></div>
+      <div data-screen-label="12 Terms of Use"><TermsOfUse/></div>
+      <div data-screen-label="13 Master Contract"><MasterContract/></div>
+      <div data-screen-label="14 Signing method"><SigningMethod/></div>
+      <div data-screen-label="15 E-signature canvas"><ESignCanvas/></div>
+      <div data-screen-label="16 E-signature success"><ESignSuccess/></div>
+      <div data-screen-label="17 G-Sign request"><GSignRequest/></div>
+      <div data-screen-label="18 G-Sign waiting"><GSignWaiting/></div>
+      <div data-screen-label="19 G-Sign success"><GSignSuccess/></div>
+      <div data-screen-label="20 G-Sign tutorial"><GSignTutorial/></div>
+
+      {/* ── Bank account verification · final KYC step (after contract signing) ── */}
+      <div data-screen-label="B1 Bank account verify"><BankVerify/></div>
+      <div data-screen-label="B2 IBAN lookup · search"><IbanLookupSheet/></div>
+      <div data-screen-label="B2b IBAN lookup · result"><IbanLookupResult/></div>
+      <div data-screen-label="B3 Bank checking"><BankChecking/></div>
+      <div data-screen-label="B4 Bank verified"><BankVerified/></div>
+      <div data-screen-label="B5 KYC complete"><KycComplete/></div>
+      <div data-screen-label="21 Home · G-Sign (full access)"><Home activeTab={tab} onNav={nav} signMethod="gsign" label="21 — Home · G-Sign (бүх эрх)"/></div>
+      <div data-screen-label="21A Home · Empty багц"><Home activeTab={tab} onNav={nav} signMethod="gsign" portfolio="empty" label="21A — Home · Миний багц (хоосон)"/></div>
+      <div data-screen-label="22 Home · E-sign (Trust locked)"><Home activeTab={tab} onNav={nav} signMethod="esign" label="22 — Home · Цахим (Итгэлцэл түгжээтэй)"/></div>
+      <div data-screen-label="23 Home · Locked Trust sheet"><Home activeTab={tab} onNav={nav} signMethod="esign" showLockSheet={true} label="23 — Home · G-Sign шаардлага"/></div>
+      <div data-screen-label="24 Trading"><Trading activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="25 Category"><Category/></div>
+
+      {/* ── FLOW 1 · Анхдагч зах (primary buy) ── */}
+      <div data-screen-label="P1.1 Primary detail"><PrimaryDetail/></div>
+      <div data-screen-label="P1.2 Primary buy setup"><PrimaryBuySetup/></div>
+      <div data-screen-label="P1.3 Primary review + OTP"><PrimaryBuyReview/></div>
+      <div data-screen-label="P1.4 Primary success"><PrimaryBuySuccess/></div>
+
+      {/* ── FLOW 2 · Хоёрдогч зах (secondary buy) ── */}
+      <div data-screen-label="S2.1 Secondary listing detail"><SecondaryDetail/></div>
+      <div data-screen-label="S2.2 Secondary buy setup"><SecondaryBuySetup/></div>
+      <div data-screen-label="S2.3 Secondary review + OTP"><SecondaryBuyReview/></div>
+      <div data-screen-label="S2.4 Secondary success"><SecondaryBuySuccess/></div>
+
+      {/* ── FLOW 3 · Хоёрдогч зах зээлд зарах (sell listing) ── */}
+      <div data-screen-label="L3.1 Owned product detail"><OwnedDetail/></div>
+      <div data-screen-label="L3.2 Sell setup"><SellSetup/></div>
+      <div data-screen-label="L3.3 Sell review + OTP"><SellReview/></div>
+      <div data-screen-label="L3.4 Sell listing success"><SellSuccess/></div>
+
+      {/* ── Edge case / state screens ── */}
+      <div data-screen-label="E1 Insufficient balance"><StateInsufficient/></div>
+      <div data-screen-label="E2 Sold out"><StateSoldOut/></div>
+      <div data-screen-label="E3 Listing unavailable"><StateUnavailable/></div>
+      <div data-screen-label="E4 Info changed"><StatePriceChanged/></div>
+      <div data-screen-label="E5 OTP error"><StateOtpError/></div>
+      <div data-screen-label="E6 Network error"><StateNetworkError/></div>
+
+      <div data-screen-label="28 Wallet"><Wallet activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="28A Wallet · empty"><Wallet activeTab={tab} onNav={nav} view="empty"/></div>
+      <div data-screen-label="28B Wallet · many products"><Wallet activeTab={tab} onNav={nav} view="many"/></div>
+
+      {/* ── Wallet · Орлого (add money) ── */}
+      <div data-screen-label="W1 Add money · amount"><AddMoneyAmount/></div>
+      <div data-screen-label="W2 Add money · QPay"><AddMoneyQPay/></div>
+      <div data-screen-label="W2b Add money · transfer"><AddMoneyBank/></div>
+      <div data-screen-label="W3 Add money · success"><AddMoneySuccess/></div>
+
+      {/* ── Wallet · Зарлага (withdraw) ── */}
+      <div data-screen-label="W4 Withdraw · amount"><WithdrawAmount/></div>
+      <div data-screen-label="W5 Withdraw · review + PIN"><WithdrawReview/></div>
+      <div data-screen-label="W6 Withdraw · success"><WithdrawSuccess/></div>
+      <div data-screen-label="W7 Withdraw · insufficient"><WithdrawInsufficient/></div>
+      <div data-screen-label="29 News"><News activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="30 Loan"><Loan activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="31 Home (loan coming soon)"><Home activeTab={tab} onNav={nav} loanState="coming-soon" label="31 — Home · Зээл тун удахгүй"/></div>
+      <div data-screen-label="32 Home (loan promo)"><Home activeTab={tab} onNav={nav} loanState="check-eligibility" label="32 — Home · Зээл"/></div>
+      <div data-screen-label="32A Home (loan request pending)"><Home activeTab={tab} onNav={nav} loanState="request-pending" label="32A — Home · Хүсэлт хянагдаж байна"/></div>
+      <div data-screen-label="32B Home (loan request result)"><Home activeTab={tab} onNav={nav} loanState="request-result" label="32B — Home · Зээл зөвшөөрөгдлөө"/></div>
+      <div data-screen-label="33 Loan check · Entry"><LoanCheckEntry/></div>
+      <div data-screen-label="35 QPay Payment"><QPayPayment/></div>
+      <div data-screen-label="37 Payment · Confirmed"><PayConfirmed/></div>
+      <div data-screen-label="38 Payment · Failed"><PayFailed/></div>
+      <div data-screen-label="41 Result · Accepted"><LoanAccepted/></div>
+      <div data-screen-label="41A Result · Partly accepted"><LoanPartial/></div>
+      <div data-screen-label="43 Loan disbursed"><LoanSubmitted/></div>
+      <div data-screen-label="44 Declined"><LoanDeclined/></div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+// Drag-to-scroll on the canvas
+(function() {
+  const c = document.getElementById('canvas');
+  let down = false, startX = 0, scrollLeft = 0;
+  c.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button') || e.target.closest('[onclick]') || e.target.closest('[data-nodrag]')) return;
+    down = true; startX = e.pageX - c.offsetLeft; scrollLeft = c.scrollLeft;
+    c.style.cursor = 'grabbing'; c.style.userSelect = 'none';
+  });
+  window.addEventListener('mouseup', () => { down = false; c.style.cursor = ''; c.style.userSelect = ''; });
+  window.addEventListener('mousemove', (e) => {
+    if (!down) return;
+    e.preventDefault();
+    c.scrollLeft = scrollLeft - (e.pageX - c.offsetLeft - startX);
+  });
+  // Hide hint after a moment
+  setTimeout(() => document.getElementById('hint').classList.add('hide'), 5000);
+})();
+</script>
+</body>
+</html>

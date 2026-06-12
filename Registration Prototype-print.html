@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MMF — Бүртгэл &amp; нэвтрэлт · PDF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #FFFFFF; color: #0B1020; }
+  body { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+
+  .page {
+    width: 1122px; height: 760px; margin: 0 auto;
+    display: flex; align-items: center; gap: 72px;
+    padding: 40px 80px;
+    break-inside: avoid; page-break-inside: avoid;
+    break-after: page; page-break-after: always;
+    position: relative;
+  }
+  .page:last-child { break-after: auto; page-break-after: auto; }
+
+  /* left — the real phone screen at native size, scaled to fit */
+  .stage { flex: 0 0 auto; width: 351px; height: 760px; display: flex; align-items: center; }
+  .phone-wrap {
+    width: 351px; height: 760px; overflow: hidden; border-radius: 42px;
+    box-shadow: 0 30px 60px -25px rgba(15,20,55,.22), 0 8px 20px -10px rgba(15,20,55,.10);
+    border: 1px solid #EFF1F8;
+  }
+  .phone { width: 390px; height: 844px; transform: scale(0.9); transform-origin: top left; }
+  .phone > div > :first-child { display: none !important; }
+  .phone > div > :last-child { box-shadow: none !important; border: none !important; }
+
+  /* right — minimal title + description */
+  .copy { flex: 1; min-width: 0; max-width: 460px; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+  .num { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: #4F46E5; }
+  .sect { font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: #9099B5; }
+  .rule { flex: 1; height: 1px; background: #E7E9F2; }
+  .title { font-size: 38px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.08; color: #050B1F; }
+  .desc { font-size: 16px; line-height: 1.6; color: #6B7191; margin-top: 18px; font-weight: 500; }
+  .brand { display: flex; align-items: center; gap: 9px; margin-top: 40px; }
+  .brand span { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; color: #9099B5; }
+
+  *::-webkit-scrollbar { width: 0; height: 0; }
+  * { scrollbar-width: none; }
+
+  @keyframes omf-spin { to { transform: rotate(360deg); } }
+  .omf-spin { animation: omf-spin 0.9s linear infinite; }
+  @keyframes omf-pulse { 0% { transform: scale(.7); opacity:.7; } 70% { transform: scale(1.5); opacity:0; } 100% { opacity:0; } }
+  .omf-pulse { animation: omf-pulse 2s cubic-bezier(.2,.8,.2,1) infinite; }
+  .omf-pulse-2 { animation-delay: 1s; }
+
+  @media print {
+    @page { size: landscape; margin: 0; }
+    html, body { background: #FFFFFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { width: 100%; height: 100vh; margin: 0; }
+    /* Chrome rasterizes colored box-shadows inside the scaled phone as hard
+       rectangles in PDF — drop inner shadows and the decorative pulse rings. */
+    .phone * { box-shadow: none !important; }
+    .phone .omf-pulse, .phone .omf-pulse-2 { display: none !important; }
+    *, *::before, *::after {
+      animation-delay: -99s !important; animation-duration: .001s !important;
+      animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+      animation-play-state: running !important; transition-duration: 0s !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="onboarding_v2.jsx"></script>
+<script type="text/babel" src="flow_kit.jsx"></script>
+<script type="text/babel" src="bank_verify.jsx"></script>
+<script type="text/babel" src="reset_password.jsx"></script>
+<script type="text/babel" src="registration_proto.jsx"></script>
+
+<script type="text/babel">
+  // Minimal Mongolian fintech copy per screen
+  const COPY = {
+    splash:       { t: 'Тавтай морил',            d: 'Мөнгөний захын хөрөнгө оруулалтын платформд нэвтрэх эхлэл.' },
+    login:        { t: 'Нэвтрэх',                  d: 'Утас, нууц үг эсвэл биометрээр дансандаа нэвтэрнэ.' },
+    onb1:         { t: 'Нэг дороос хөрөнгө оруулалт', d: 'Мөнгөний захын бүтээгдэхүүнийг нэг платформоос харьцуулна.' },
+    onb2:         { t: 'Дөрвөн төрлийн бүтээгдэхүүн', d: 'Сертификат, итгэлцэл, нэхэмжлэх, арилжааны бичиг.' },
+    onb3:         { t: 'Зээлийн боломж',           d: 'Түнш ББСБ-уудын зээлийг апп дотроос шууд хүснэ.' },
+    onb4:         { t: 'Найдвартай, ил тод',       d: 'ДАН-аар баталгаажсан, төрийн системтэй холбогдсон.' },
+    phone:        { t: 'Утас баталгаажуулах',      d: 'Бүртгэлтэй дугаар луу илгээсэн кодоор баталгаажуулна.' },
+    email:        { t: 'И-мэйл баталгаажуулах',    d: 'И-мэйл хаягийн эзэмшлийг кодоор нотолно.' },
+    password:     { t: 'Нууц үг үүсгэх',           d: 'Дансандаа нэвтрэх найдвартай нууц үг тохируулна.' },
+    pin:          { t: 'Гүйлгээний PIN',           d: 'Санхүүгийн үйлдэл баталгаажуулах 6 оронтой PIN.' },
+    biometric:    { t: 'Биометр тохиргоо',         d: 'Face ID эсвэл хурууны хээгээр хурдан баталгаажуулна.' },
+    kyc:          { t: 'ДАН зөвшөөрөл',            d: 'ДАН системээс таних мэдээллийг татаж баталгаажуулна.' },
+    monpep:       { t: 'MONPEP шалгалт',           d: 'Олон улсын хориг болон PEP бүртгэлтэй автомат тулгалт.' },
+    monpepFailed: { t: 'Шалгалт амжилтгүй',        d: 'Шалгуурт нийцээгүй тул бүртгэл үргэлжлэх боломжгүй.' },
+    terms:        { t: 'Үйлчилгээний нөхцөл',      d: 'Эрх, үүрэг, эрсдэлийн нөхцөлийг хүлээн зөвшөөрнө.' },
+    contract:     { t: 'Мастер гэрээ',             d: 'Платформтой байгуулах ерөнхий гэрээтэй танилцана.' },
+    signing:      { t: 'Гарын үсгийн арга',        d: 'G-Sign эсвэл цахим гарын үсгээс сонгож гэрээг баталгаажуулна.' },
+    esignCanvas:  { t: 'Цахим гарын үсэг',         d: 'Дэлгэц дээр гарын үсгээ зурж гэрээг баталгаажуулна.' },
+    esignSuccess: { t: 'Гэрээ баталгаажлаа',       d: 'Үндсэн бүтээгдэхүүн нээгдэв; итгэмжлэл түгжээтэй.' },
+    gsignRequest: { t: 'G-Sign хүсэлт',            d: 'Регистр, утсаар G-Sign апп руу баталгаажуулах хүсэлт.' },
+    gsignWaiting: { t: 'Хүлээж байна',             d: 'G-Sign апп дээр хүсэлтийг зөвшөөрснөөр үргэлжилнэ.' },
+    gsignSuccess: { t: 'G-Sign амжилттай',         d: 'Платформын бүх бүтээгдэхүүн, үйлчилгээ нээгдэв.' },
+    gsignTutorial:{ t: 'G-Sign заавар',            d: 'Апп суулгаж баталгаажуулах товч алхмууд.' },
+    bankVerify:   { t: 'Данс баталгаажуулах',      d: 'Өөрийн нэр дээрх банкны дансаа холбоно.' },
+    ibanSheet:    { t: 'IBAN лавлах',              d: 'Банк, данс сонгож IBAN дугаарыг тодорхойлно.' },
+    ibanResult:   { t: 'IBAN үр дүн',              d: 'Тодорхойлсон IBAN дугаарыг хуулж ашиглана.' },
+    bankChecking: { t: 'Данс шалгаж байна',        d: 'Банкны дансны мэдээллийг баталгаажуулж байна.' },
+    bankVerified: { t: 'Данс баталгаажлаа',        d: 'Зарлага гаргах данс амжилттай холбогдов.' },
+    kycComplete:  { t: 'Бүртгэл дууслаа',          d: 'Бүх алхам баталгаажиж, данс ашиглахад бэлэн.' },
+    home:         { t: 'Нүүр хуудас',              d: 'Багц, үлдэгдэл, бүтээгдэхүүн нэг дэлгэцэнд.' },
+    reset1:       { t: 'Нууц үг сэргээх',          d: 'Бүртгэлтэй дугаараа оруулж код хүсэх.' },
+    reset2:       { t: 'Кодоо оруулах',            d: 'Дугаар луу илгээсэн баталгаажуулах кодыг оруулна.' },
+    reset3:       { t: 'Шинэ нууц үг',             d: 'Хуучнаас ялгаатай шинэ нууц үг үүсгэнэ.' },
+    reset4:       { t: 'Нууц үг шинэчлэгдлээ',     d: 'Шинэ нууц үгээрээ дансандаа дахин нэвтэрнэ.' },
+  };
+
+  const Mark = () => (
+    <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+      <path d="M9.6 11.4V28.6L0 34.4V0h9.9L24 8.4 38.1 0H48v5.6L24 20 9.6 11.4z" fill="#FF6B2C"/>
+      <path d="M38.4 36.6V19.4L48 13.6V48h-9.9L24 39.6 9.9 48H0v-5.6L24 28l14.4 8.6z" fill="#2D6BFF"/>
+    </svg>
+  );
+
+  function PdfApp() {
+    return (
+      <React.Fragment>
+        {RP_FLOW.map((s, idx) => {
+          const c = COPY[s.id] || { t: s.name, d: '' };
+          return (
+            <div className="page" key={s.id}>
+              <div className="stage">
+                <div className="phone-wrap"><div className="phone">{s.el}</div></div>
+              </div>
+              <div className="copy">
+                <div className="eyebrow">
+                  <span className="num">{String(idx + 1).padStart(2, '0')} / {RP_FLOW.length}</span>
+                  <span className="sect">{s.sect}</span>
+                  <span className="rule"></span>
+                </div>
+                <div className="title">{c.t}</div>
+                <div className="desc">{c.d}</div>
+                <div className="brand"><Mark/><span>МОНИ МАРКЕТ ФАНД · Бүртгэл &amp; нэвтрэлт</span></div>
+              </div>
+            </div>
+          );
+        })}
+      </React.Fragment>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<PdfApp/>);
+
+  (function () {
+    const fire = () => setTimeout(() => window.print(), 800);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fire);
+    else window.addEventListener('load', fire);
+  })();
+</script>
+</body>
+</html>

@@ -34,6 +34,34 @@ This system was derived from the **mobile app design** (`Money Market Fund - Mob
 | `assets/logo-mark.svg` | Logo glyph only (no wordmark) — for compact uses |
 | `preview/*.html` | Design-system preview cards (Type, Colors, Spacing, Components, Brand) |
 | `ui_kits/mobile/*` | Mobile UI kit — re-usable React/JSX components + sample screens |
+| `landing/*.html` | Public marketing site — landing, About Us, Benchmark (see below) |
+
+---
+
+## Landing site
+
+Client-facing marketing pages, published via GitHub Pages at **https://temodeart.github.io/mmf/**
+(the repo-root `index.html` redirects to `landing/`).
+
+| File | Page |
+|---|---|
+| `landing/13 Landing - App First.html` | Main landing page — app-first hero, repo section, FAQ |
+| `landing/About Us.html` | Бидний тухай |
+| `landing/Benchmark.html` | Бенчмарк |
+
+These are self-contained bundler exports — all CSS, JS, and imagery are inlined. The only
+external dependency is Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`).
+
+**Known gaps:**
+
+- The three pages **cross-link by exact filename** (including spaces). Do not rename them
+  without updating the `href`s inside each file.
+- The nav "Нэвтрэх" / "Бүртгүүлэх" buttons point at `../web-app/05 Login.html` and
+  `../web-app/09 Registration.html`. That `web-app/` directory was **not** part of the export,
+  so those links currently 404. Drop the two files into a top-level `web-app/` directory to fix.
+- `landing/About Us.html` is **19.5 MB** — it inlines six uncompressed PNG/JPEG images
+  (largest ~6.4 MB, 1417px wide) as base64. This should be optimised before any real
+  marketing push; base64 also costs ~33% over the raw bytes.
 
 ---
 

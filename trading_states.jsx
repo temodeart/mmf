@@ -16,7 +16,7 @@ const StateInsufficient = () => (
       { l:'Одоогийн үлдэгдэл', v:'635.89 ₮' },
       { l:'Дутагдаж буй дүн', v:'102,724.94 ₮', big: true, tone: C.red },
     ]}
-    primaryCta="Мөнгө нэмэх"
+    primaryCta="Хэтэвч цэнэглэх"
     secondaryCta="Буцах"
   />
 );

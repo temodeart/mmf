@@ -10,7 +10,6 @@ const SecondaryDetail = () => (
     <FlowHeader
       title="CAPIT 1450 CD 240227"
       subtitle="Хоёрдогч зах зээлийн санал"
-      badge={<Badge tone="active">Зарах санал</Badge>}
     />
     <div style={{ flex: 1, overflow:'auto', padding: '0 24px 16px' }}>
       {/* hero — actual yield is the headline for secondary */}
@@ -135,6 +134,17 @@ const SecondaryBuyReview = () => (
       </div>
     </ReviewScaffold>
   </Frame>
+);
+
+// ---------- 2.3b — Secondary buy · PIN confirm (own step) ----------
+const SecondaryBuyPin = () => (
+  <PinConfirm
+    label="S2.3b — Secondary · PIN"
+    subtitle="Хоёрдогч зах зээлээс худалдан авалтыг баталгаажуулна уу."
+    amount="103,360.83 ₮"
+    amountLabel="Төлбөр тооцоо хийгдэх дүн"
+    ctaLabel="Худалдан авах"
+  />
 );
 
 // ---------- 2.4 — Secondary buy success ----------

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Миний самбар — New Style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#F4F6FA;
+    --surface:#FFFFFF;
+    --navy:#050B1F;
+    --indigo:#4F46E5;
+    --indigo-soft:#EEF0FE;
+    --blue:#2D6BFF;
+    --blue-soft:#E7EEFF;
+    --orange:#FF6B2C;
+    --orange-soft:#FFEDE2;
+    --green:#0E9F6E;
+    --green-soft:#E3F5EE;
+    --amber:#B7791F;
+    --amber-soft:#FFF3D6;
+    --ink:#0B1020;
+    --text:#2A3052;
+    --muted:#6B7191;
+    --muted2:#9099B5;
+    --line:#E7E9F2;
+    --line2:#EFF1F8;
+    --radius:24px;
+    --shadow:0 12px 28px -18px rgba(15,20,55,.45);
+    --shadow-sm:0 2px 8px -4px rgba(15,20,55,.10);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Manrope',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height:100vh;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .num{ font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
+  .mono{ font-family:'JetBrains Mono',monospace; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  /* ---- shell ---- */
+  .shell{ display:flex; min-height:100vh; }
+
+  /* ---- sidebar ---- */
+  .sidebar{
+    width:268px; flex-shrink:0;
+    background:rgba(255,255,255,.72);
+    backdrop-filter:blur(14px);
+    border-right:1px solid var(--line);
+    display:flex; flex-direction:column;
+    padding:26px 18px;
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; padding:0 8px 4px; }
+  .brand .mark{ width:42px; height:42px; flex-shrink:0; }
+  .brand .wm{ font-weight:800; font-size:17px; line-height:1.05; letter-spacing:-0.02em; color:var(--ink); }
+  .brand .wm span{ color:var(--muted2); font-weight:600; }
+
+  .nav-label{ font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--muted2); padding:26px 12px 10px; text-transform:uppercase; }
+  .nav{ display:flex; flex-direction:column; gap:4px; }
+  .nav-item{
+    display:flex; align-items:center; gap:13px;
+    padding:12px 14px; border-radius:14px;
+    font-size:14.5px; font-weight:600; color:var(--text);
+    text-decoration:none; border:1px solid transparent;
+    transition:background .15s,color .15s;
+  }
+  .nav-item svg{ flex-shrink:0; }
+  .nav-item .chev{ margin-left:auto; opacity:.5; }
+  .nav-item:hover{ background:var(--line2); }
+  .nav-item.active{
+    background:var(--indigo-soft); color:var(--indigo);
+    border-color:#DDDAFB;
+  }
+  .nav-item.active svg [stroke]{ stroke:var(--indigo); }
+  .sidebar-foot{ margin-top:auto; padding:14px 12px 2px; }
+  .sidebar-foot .ver{ font-size:11px; color:var(--muted2); font-weight:600; }
+
+  /* ---- main ---- */
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .topbar{
+    height:72px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 36px; border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.55); backdrop-filter:blur(10px);
+    position:sticky; top:0; z-index:20;
+  }
+  .topbar .hb{ width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; }
+  .topbar-right{ display:flex; align-items:center; gap:18px; }
+  .icon-btn{ width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; }
+  .user{ display:flex; align-items:center; gap:11px; padding:6px 14px 6px 6px; border-radius:999px; border:1px solid var(--line); background:#fff; }
+  .user .av{ width:34px; height:34px; border-radius:999px; background:linear-gradient(135deg,var(--blue),var(--indigo)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+  .user .em{ font-size:13px; font-weight:600; color:var(--text); }
+
+  .content{ padding:34px 36px 48px; max-width:1480px; width:100%; }
+  .page-head{ display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:24px; }
+  .page-title{ font-size:30px; font-weight:800; letter-spacing:-0.03em; color:var(--navy); margin:0; }
+  .page-date{ display:flex; align-items:center; gap:8px; margin-top:9px; font-size:13px; font-weight:600; color:var(--muted); }
+
+  /* ---- grids ---- */
+  .stat-row{ display:grid; grid-template-columns:1.15fr 1fr 1fr; gap:20px; margin-bottom:20px; }
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 372px; gap:20px; align-items:start; }
+  .col-l{ display:flex; flex-direction:column; gap:20px; }
+  .col-r{ display:flex; flex-direction:column; gap:20px; }
+
+  .card{
+    background:var(--surface); border-radius:var(--radius);
+    border:1px solid var(--line2); box-shadow:var(--shadow-sm);
+  }
+  .card-pad{ padding:22px 24px; }
+  .card-title{ font-size:15px; font-weight:800; letter-spacing:-0.01em; color:var(--ink); }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+
+  /* ---- stat cards ---- */
+  .stat{ padding:22px 24px; position:relative; overflow:hidden; }
+  .stat .lab{ font-size:13px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:9px; }
+  .stat .chip{ width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .stat .val{ font-size:32px; font-weight:800; letter-spacing:-0.025em; margin-top:16px; }
+  .stat .val .t{ color:var(--muted2); font-weight:700; margin-right:2px; }
+  .stat .delta{ margin-top:8px; font-size:12.5px; font-weight:700; }
+
+  /* hero stat (Нийт багц) */
+  .stat.hero{
+    color:#fff;
+    background:linear-gradient(135deg,var(--navy) 0%, var(--indigo) 135%);
+    border:none;
+  }
+  .stat.hero .glow{ position:absolute; right:-50px; top:-50px; width:190px; height:190px; border-radius:50%; background:radial-gradient(circle, rgba(255,107,44,.45), transparent 70%); }
+  .stat.hero .lab{ color:rgba(255,255,255,.72); }
+  .stat.hero .chip{ background:rgba(255,255,255,.14); }
+  .stat.hero .val .t{ color:rgba(255,255,255,.6); }
+
+  /* ---- chart ---- */
+  .chart-wrap{ position:relative; height:280px; margin-top:6px; }
+  .chart-wrap svg{ width:100%; height:100%; display:block; overflow:visible; }
+  .legend{ display:flex; gap:18px; flex-wrap:wrap; }
+  .legend .li{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--text); }
+  .legend .sw{ width:10px; height:10px; border-radius:3px; }
+
+  /* ---- portfolio donut ---- */
+  .donut-row{ display:flex; align-items:center; gap:34px; }
+  .donut-legend{ flex:1; display:flex; flex-direction:column; gap:2px; }
+  .donut-legend .row{ display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--line2); }
+  .donut-legend .row:last-child{ border-bottom:none; }
+  .donut-legend .k{ display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--text); }
+  .donut-legend .v{ font-size:15px; font-weight:800; color:var(--ink); }
+
+  /* ---- accounts ---- */
+  .acct{ display:flex; align-items:center; gap:12px; padding:15px 0; border-bottom:1px solid var(--line2); }
+  .acct:last-child{ border-bottom:none; }
+  .acct .ic{ width:38px; height:38px; border-radius:11px; background:var(--indigo-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .acct .nm{ flex:1; font-size:14px; font-weight:700; color:var(--ink); }
+  .acct .ct{ font-size:13px; font-weight:700; color:var(--muted); }
+  .acct .ar{ opacity:.4; }
+
+  /* ---- news ---- */
+  .news{ padding:18px 0; border-bottom:1px solid var(--line2); }
+  .news:first-of-type{ padding-top:4px; }
+  .news:last-child{ border-bottom:none; padding-bottom:2px; }
+  .news .ti{ font-size:14px; font-weight:800; color:var(--ink); line-height:1.35; letter-spacing:-0.01em; }
+  .news .bo{ font-size:12.5px; color:var(--muted); line-height:1.5; margin-top:6px; }
+  .news .dt{ font-size:11px; font-weight:600; color:var(--muted2); margin-top:9px; }
+
+  /* ---- tabs + table ---- */
+  .tabs{ display:flex; gap:8px; }
+  .tab{ padding:9px 18px; border-radius:999px; font-size:13.5px; font-weight:700; color:var(--muted); background:transparent; border:1px solid transparent; }
+  .tab.active{ background:var(--indigo-soft); color:var(--indigo); border-color:#DDDAFB; }
+  .tab:hover:not(.active){ background:var(--line2); }
+
+  table{ width:100%; border-collapse:collapse; }
+  thead th{
+    text-align:left; font-size:11.5px; font-weight:700; letter-spacing:.05em;
+    color:var(--muted); text-transform:uppercase; padding:16px 18px;
+    background:#FAFBFE; border-top:1px solid var(--line2); border-bottom:1px solid var(--line2);
+  }
+  thead th:first-child{ border-top-left-radius:14px; border-bottom-left-radius:14px; padding-left:22px; }
+  thead th:last-child{ border-top-right-radius:14px; border-bottom-right-radius:14px; }
+  .empty-row td{ padding:0; }
+  .empty{ text-align:center; padding:54px 24px; }
+  .empty .ill{ width:74px; height:74px; border-radius:22px; background:var(--indigo-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+  .empty .h{ font-size:16px; font-weight:800; color:var(--ink); }
+  .empty .p{ font-size:13px; color:var(--muted); margin-top:6px; }
+
+  .table-foot{ display:flex; align-items:center; justify-content:space-between; padding:16px 6px 2px; }
+  .pager{ display:flex; gap:8px; }
+  .pager button{ width:36px; height:36px; border-radius:10px; border:1px solid var(--line); background:#fff; color:var(--muted); display:flex; align-items:center; justify-content:center; }
+  .pager button:disabled{ opacity:.45; }
+  .per{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:600; color:var(--muted); border:1px solid var(--line); border-radius:10px; padding:8px 12px; background:#fff; }
+
+  /* ---- footer ---- */
+  .foot{ display:flex; align-items:center; justify-content:space-between; padding:22px 36px 30px; border-top:1px solid var(--line); margin-top:8px; }
+  .foot .c{ font-size:13px; color:var(--muted); }
+  .foot .c b{ color:var(--text); font-weight:700; }
+  .foot .l{ font-size:13px; color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+
+  @media (max-width:1180px){
+    .layout{ grid-template-columns:1fr; }
+    .stat-row{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 48 48" fill="none">
+        <path d="M9.6 11.4V28.6L0 34.4V0h9.9L24 8.4 38.1 0H48v5.6L24 20 9.6 11.4z" fill="#FF6B2C"/>
+        <path d="M38.4 36.6V19.4L48 13.6V48h-9.9L24 39.6 9.9 48H0v-5.6L24 28l14.4 8.6z" fill="#2D6BFF"/>
+      </svg>
+      <div class="wm">Money Market<br/><span>Fund</span></div>
+    </div>
+
+    <div class="nav-label">ХУУР</div>
+    <nav class="nav">
+      <a class="nav-item active" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.6" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.6" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.6" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.6" stroke="currentColor" stroke-width="1.8"/></svg>
+        Миний самбар
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M8.5 7.5h5.5a2.5 2.5 0 010 5H9a2.5 2.5 0 000 5h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Арилжаа
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M16 14.5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Хэтэвч
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Мэдээ мэдээлэл
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="ver mono">v2 · 2026.05.28</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- topbar -->
+    <header class="topbar">
+      <button class="hb" aria-label="menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="#2A3052" stroke-width="1.9" stroke-linecap="round"/></svg>
+      </button>
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#2A3052" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" stroke="#2A3052" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <div class="user">
+          <div class="av">T</div>
+          <div class="em mono">temuujin.batb@gmail.com</div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- content -->
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Миний самбар</h1>
+          <div class="page-date">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2.5" stroke="#6B7191" stroke-width="1.8"/><path d="M3 9h18M8 3v4M16 3v4" stroke="#6B7191" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="mono">2026-05-28, 03:04 PM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- stat row -->
+      <section class="stat-row">
+        <div class="card stat hero">
+          <div class="glow"></div>
+          <div class="lab"><span class="chip"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 8.5l9-5 9 5v7l-9 5-9-5v-7z" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/><path d="M3 8.5l9 5 9-5M12 13.5V21" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"/></svg></span>Нийт багц</div>
+          <div class="val num"><span class="t">₮</span>0</div>
+          <div class="delta" style="color:rgba(255,255,255,.78)">Багц бүрдээгүй байна</div>
+        </div>
+        <div class="card stat">
+          <div class="lab"><span class="chip" style="background:var(--green-soft)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 14l5-5 4 4 7-7M16 3h5v5" stroke="#0E9F6E" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Сүүлийн 24 цагийн өгөөж</div>
+          <div class="val num" style="color:var(--ink)"><span class="t">₮</span>0</div>
+          <div class="delta" style="color:var(--muted)">Өнгөрсөн өдрөөс</div>
+        </div>
+        <div class="card stat">
+          <div class="lab"><span class="chip" style="background:var(--orange-soft)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#FF6B2C" stroke-width="1.8" stroke-linecap="round"/></svg></span>Нийт өгөөж</div>
+          <div class="val num" style="color:var(--ink)"><span class="t">₮</span>0</div>
+          <div class="delta" style="color:var(--muted)">Нийт хуримтлагдсан</div>
+        </div>
+      </section>
+
+      <!-- two-column layout -->
+      <div class="layout">
+
+        <!-- LEFT -->
+        <div class="col-l">
+
+          <!-- repayment schedule chart -->
+          <section class="card card-pad">
+            <div class="card-head">
+              <div class="card-title">Эргэн төлөгдөх хуваарь</div>
+              <div class="legend"><div class="li"><span class="sw" style="background:var(--indigo)"></span>Эргэн төлөлт</div></div>
+            </div>
+            <div class="chart-wrap">
+              <svg viewBox="0 0 760 280" preserveAspectRatio="none" id="schedChart"></svg>
+            </div>
+          </section>
+
+          <!-- portfolio donut -->
+          <section class="card card-pad">
+            <div class="card-head"><div class="card-title">Миний багц</div></div>
+            <div class="donut-row">
+              <svg width="190" height="190" viewBox="0 0 120 120" style="flex-shrink:0">
+                <circle r="48" cx="60" cy="60" fill="none" stroke="#F0F2F8" stroke-width="15"/>
+                <circle r="48" cx="60" cy="60" fill="none" stroke="var(--orange)" stroke-width="15"
+                        stroke-dasharray="301.6 0" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+                <text x="60" y="56" text-anchor="middle" font-family="Manrope" font-size="9" font-weight="700" fill="#9099B5">Нийт</text>
+                <text x="60" y="73" text-anchor="middle" font-family="Manrope" font-size="15" font-weight="800" fill="#0B1020">200,000</text>
+              </svg>
+              <div class="donut-legend">
+                <div class="row">
+                  <div class="k"><span style="width:11px;height:11px;border-radius:4px;background:var(--indigo)"></span>Өгөөж / Алдагдал</div>
+                  <div class="v num">0.00₮</div>
+                </div>
+                <div class="row">
+                  <div class="k"><span style="width:11px;height:11px;border-radius:4px;background:var(--orange)"></span>Мөнгөн хөрөнгө</div>
+                  <div class="v num">200,000.00₮</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- orders table -->
+          <section class="card card-pad">
+            <div class="tabs" style="margin-bottom:18px">
+              <button class="tab active">Миний захиалгууд</button>
+              <button class="tab">Идэвхитэй</button>
+              <button class="tab">Цуцлагдсан</button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Банк | Банк бус</th><th>Огноо</th><th>Төрөл</th><th>Тоо ширхэг</th><th>Нэгж үнэ</th><th>ХҮҮ %</th><th>Төлөв</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="empty-row"><td colspan="7">
+                  <div class="empty">
+                    <div class="ill">
+                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><rect x="4" y="7" width="16" height="13" rx="2.5" stroke="#4F46E5" stroke-width="1.8"/><path d="M4 11h16M9 4h6" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    </div>
+                    <div class="h">Захиалга алга</div>
+                    <div class="p">Таны хийсэн захиалгууд энд харагдана.</div>
+                  </div>
+                </td></tr>
+              </tbody>
+            </table>
+            <div class="table-foot">
+              <div class="pager">
+                <button disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                <button disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              </div>
+              <div class="per">10 / хуудас <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-r">
+
+          <!-- accounts -->
+          <section class="card card-pad">
+            <div class="card-head"><div class="card-title">ДАНС</div></div>
+            <div class="acct">
+              <div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2.5" stroke="#4F46E5" stroke-width="1.8"/><path d="M4 9h16M8 14h4" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+              <div class="nm">Хадгаламжийн сертификат</div><div class="ct num">0</div>
+              <svg class="ar" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="acct">
+              <div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v5c0 4.5-3 7.5-8 9-5-1.5-8-4.5-8-9V7l8-4z" stroke="#4F46E5" stroke-width="1.8" stroke-linejoin="round"/></svg></div>
+              <div class="nm">Итгэлцэл</div><div class="ct num">0</div>
+              <svg class="ar" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="acct">
+              <div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M6 3h9l3 3v15H6z" stroke="#4F46E5" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 11h6M9 15h6" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+              <div class="nm">Нэхэмжлэх</div><div class="ct num">0</div>
+              <svg class="ar" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="acct">
+              <div class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 16l5-5 4 4 7-7M16 5h5v5" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              <div class="nm">Арилжааны бичиг</div><div class="ct num">0</div>
+              <svg class="ar" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </section>
+
+          <!-- news -->
+          <section class="card card-pad">
+            <div class="card-head"><div class="card-title">Мэдээ мэдээлэл</div><a class="foot l" href="#" style="font-size:12.5px">Бүгд</a></div>
+            <div class="news">
+              <div class="ti">Хөтөлномгон ББСБ ХХК анхдагч арилжаагаа зарлалаа.</div>
+              <div class="bo">Хөтөлномгон ББСБ ХХК өндөр үр шим бүхий Итгэлцлийн анхдагч арилжаагаа зарлалаа.</div>
+              <div class="dt mono">Үүсгэсэн: 2025-04-08 15:56:18</div>
+            </div>
+            <div class="news">
+              <div class="ti">Дарь Финанс ББСБ ХХК Итгэлцлийн анхдагч арилжаагаа зарлалаа</div>
+              <div class="bo">Дарь Финанс ББСБ ХХК өндөр үр шим бүхий Итгэлцлийн анхдагч арилжаагаа зарлалаа.</div>
+              <div class="dt mono">Үүсгэсэн: 2025-03-07 15:00:41</div>
+            </div>
+            <div class="news">
+              <div class="ti">Микро Кредит ББСБ ХХК -ийн MICRO итгэлцэл дахин зарлагдлаа</div>
+              <div class="bo">Микро Кредит ББСБ ХХК -ийн MICRO итгэлцлийн анхдагч арилжаа дахин зарлагдлаа.</div>
+              <div class="dt mono">Үүсгэсэн: 2025-01-21 16:37:29</div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+    </main>
+
+    <!-- footer -->
+    <footer class="foot">
+      <div class="c">Copyright © 2026 <b>Money Market Fund</b> All rights reserved.</div>
+      <a class="l" href="#">Үйлчилгээний нөхцөл</a>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+  // Repayment schedule — empty/flat baseline chart (matches Page 13 "no data" state)
+  (function(){
+    const svg = document.getElementById('schedChart');
+    const W=760,H=280, padL=44,padR=12,padT=14,padB=34;
+    const months=['2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12','2027-01','2027-02','2027-03','2027-04'];
+    const yMax=5;
+    const plotW=W-padL-padR, plotH=H-padT-padB;
+    let h='';
+    // y gridlines + labels
+    for(let i=0;i<=yMax;i++){
+      const y=padT+plotH-(i/yMax)*plotH;
+      h+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#EFF1F8" stroke-width="1"/>`;
+      h+=`<text x="${padL-12}" y="${y+4}" text-anchor="end" font-family="JetBrains Mono" font-size="11" fill="#9099B5">${i}</text>`;
+    }
+    // x labels
+    months.forEach((m,i)=>{
+      const x=padL+(i/(months.length-1))*plotW;
+      h+=`<text x="${x}" y="${H-12}" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#9099B5">${m}</text>`;
+    });
+    // flat baseline (no repayments yet)
+    const y0=padT+plotH;
+    h+=`<line x1="${padL}" y1="${y0}" x2="${W-padR}" y2="${y0}" stroke="#4F46E5" stroke-width="2.5" stroke-linecap="round"/>`;
+    months.forEach((m,i)=>{
+      const x=padL+(i/(months.length-1))*plotW;
+      h+=`<circle cx="${x}" cy="${y0}" r="3.5" fill="#fff" stroke="#4F46E5" stroke-width="2"/>`;
+    });
+    svg.innerHTML=h;
+  })();
+</script>
+</body>
+</html>

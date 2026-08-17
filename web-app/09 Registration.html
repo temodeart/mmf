@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Бүртгэл — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../reg_shell.jsx"></script>
+<script type="text/babel" src="../reg_step1_3.jsx"></script>
+<script type="text/babel" src="../reg_step4_5.jsx"></script>
+<script type="text/babel" src="../reg_step6_8.jsx"></script>
+<script type="text/babel" src="../reg_step9.jsx"></script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 560px at 12% -8%, #EEF0FE 0%, transparent 56%),
+      radial-gradient(900px 480px at 100% 108%, #FFEDE2 0%, transparent 58%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+  @keyframes reg-spin { to { transform: rotate(360deg); } }
+  .reg-spin { animation: reg-spin 1s linear infinite; }
+  @keyframes reg-pulse { 0% { transform: scale(.85); opacity: .8; } 100% { transform: scale(1.5); opacity: 0; } }
+  .reg-pulse { animation: reg-pulse 1.8s ease-out infinite; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+/* ═══════════════════════════════════════════════════════════════════════════
+   R8 — REGISTRATION + KYC #1 · WEB · FILL PASS
+   Ported from mobile onboarding_v2.jsx + bank_verify.jsx. ДАН-based flow:
+   consent + MONPEP automatic check. Deliberately NO ID-photo upload, NO
+   selfie, NO manual address form.
+
+   File split (loaded before this inline script):
+     reg_shell.jsx     — STEPS, StepRail, StepCard, StepFooter, CodeBoxes, logos
+     reg_step1_3.jsx   — Step1 phone+OTP · Step2 email+OTP · Step3 password
+     reg_step4_5.jsx   — Step4 PIN create/confirm · Step5 ДАН consent + MONPEP check
+     reg_step6_8.jsx   — Step6 terms · Step7 master contract · Step8 signing method
+                         (e-signature canvas + G-Sign request/waiting)
+     reg_step9.jsx     — Step9 bank verification (form → sending → info → code →
+                         verified → KYC complete)
+
+   Design notes carried from the shell pass:
+   • Step 1 — OTP lives ONLY in phone verification here (+ password reset).
+   • Step 4 — biometric enrolment is mobile-only; skipped on web (no browser
+     equivalent), PIN create/confirm remains.
+   • Every step keeps the rail clickable, so any step can be jumped to for
+     review — this doubles as the "resume from step" behavior since state
+     resets per-step (a real build would persist to the backend per step).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const { useState } = React;
+const {
+  RegT: T, STEPS, StepRail, StepStub,
+  Step1PhoneOtp, Step2EmailOtp, Step3Password,
+  Step4Pin, Step5Kyc,
+  Step6Terms, Step7MasterContract, Step8Signing,
+  Step9BankVerify, KycComplete,
+} = window;
+
+const Registration = () => {
+  const [step, setStep] = useState(1);
+  const [done, setDone] = useState(false);
+  const go = (n) => { setDone(false); setStep(Math.min(STEPS.length, Math.max(1, n))); window.scrollTo(0,0); };
+  const next = () => go(step + 1);
+  const back = () => go(step - 1);
+
+  const renderStep = () => {
+    if (done) return <KycComplete/>;
+    switch (step) {
+      // Order: phone → email → BANK VERIFY → password → PIN → ДАН → terms → master → signing
+      case 1: return <Step1PhoneOtp onNext={next} onBack={back}/>;
+      case 2: return <Step2EmailOtp onNext={next} onBack={back}/>;
+      case 3: return <Step9BankVerify onNext={next} onBack={back}/>;
+      case 4: return <Step3Password onNext={next} onBack={back}/>;
+      case 5: return <Step4Pin onNext={next} onBack={back}/>;
+      case 6: return <Step5Kyc onNext={next} onBack={back}/>;
+      case 7: return <Step6Terms onNext={next} onBack={back}/>;
+      case 8: return <Step7MasterContract onNext={next} onBack={back}/>;
+      case 9: return <Step8Signing onNext={() => { setDone(true); window.scrollTo(0,0); }} onBack={back}/>;
+      default: return <StepStub step={STEPS[step-1]} onNext={next} onBack={back}/>;
+    }
+  };
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <StepRail current={done ? STEPS.length : step} doneThrough={done ? STEPS.length : step - 1} onPick={go}/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <div style={{ height:64, display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 32px', borderBottom:`1px solid ${T.line}` }}>
+          <a href="05 Login.html" style={{ display:'inline-flex', alignItems:'center', gap:7, color:T.muted, fontWeight:700, fontSize:13, textDecoration:'none' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke={T.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Нэвтрэх рүү буцах
+          </a>
+          <div style={{ fontSize:12.5, fontWeight:600, color:T.muted2 }}>Аль хэдийн бүртгэлтэй юу? <a href="05 Login.html" style={{ color:T.indigo, fontWeight:700, textDecoration:'none' }}>Нэвтрэх</a></div>
+        </div>
+        <main style={{ flex:1, padding:'40px 32px 56px', display:'flex', justifyContent:'center' }}>
+          {renderStep()}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Registration/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

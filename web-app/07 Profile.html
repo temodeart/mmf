@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Профайл — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../order_modal.jsx"></script>
+<script type="text/babel" src="../profile_extra.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const {
+  T, WebButton, WebUnderlineTabs, WebSidebar, WebTopbar, WebFooter,
+  WebModal, WebBadge, PinResetFlow,
+  ContractsTab, CertsTab, SettingsTab,
+} = window;
+
+/* ── F-04 · Харилцагчийн мэдээлэл — definition-list, read-only (KYC-bound) ──
+   label small muted caps on top, value below, hairline dividers.
+   No input borders/icons — these fields are intentionally not editable. */
+const KYC_ROWS = [
+  { l:'Овог нэр',            v:'Батболд Тэмүүжин' },
+  { l:'Регистрийн дугаар',   v:'УБ91051512' },
+  { l:'Утасны дугаар',       v:'955•••81' },
+  { l:'И-мэйл',              v:'temuujin.batbayar@example.mn' },
+  { l:'Төрсөн огноо',        v:'1991.05.15' },
+  { l:'Хаяг',                v:'Улаанбаатар, Хан-Уул дүүрэг, 15-р хороо' },
+];
+
+const PersonalInfoTab = () => (
+  <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+    <div style={{ padding:'18px 24px 4px' }}>
+      <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Харилцагчийн мэдээлэл</div>
+      <div style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:4 }}>КҮС баталгаажуулалтад бүртгэгдсэн мэдээлэл — засварлах боломжгүй.</div>
+    </div>
+    <div style={{ padding:'8px 24px 6px' }}>
+      {KYC_ROWS.map((r, i) => (
+        <div key={r.l} style={{ padding:'16px 0', borderTop: i ? `1px solid ${T.line2}` : 'none' }}>
+          <div style={{ fontSize:11, fontWeight:700, color:T.muted, letterSpacing:'.07em', textTransform:'uppercase' }}>{r.l}</div>
+          <div className="num" style={{ fontSize:15, fontWeight:700, color:T.ink, marginTop:6 }}>{r.v}</div>
+        </div>
+      ))}
+    </div>
+    {/* footer — no Save button anywhere on this tab; changes route through support */}
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, flexWrap:'wrap', padding:'18px 24px', borderTop:`1px solid ${T.line2}`, background:T.field }}>
+      <div style={{ fontSize:13, fontWeight:600, color:T.muted, lineHeight:1.5 }}>Мэдээллээ шинэчлэхийн тулд дэмжлэгийн багтай холбогдоно уу →</div>
+      <a href="15 Terms.html#contact" style={{ textDecoration:'none' }}><WebButton variant="ghost" size="sm">Холбоо барих</WebButton></a>
+    </div>
+  </div>
+);
+
+/* ── F-22 · Нууц үг солих — sticky action bar, show/hide toggles,
+   inline validation BELOW each field (never placeholder-as-error). ── */
+const EyeIcon = ({ off }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    {off
+      ? <><path d="M3 3l18 18" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round"/><path d="M10.6 5.2A10.6 10.6 0 0112 5c5.5 0 9.5 4 11 7-.6 1.2-1.6 2.6-2.9 3.9M6.3 6.9C4.3 8.3 2.9 10.2 2 12c1.5 3 5.5 7 10 7 1.3 0 2.5-.3 3.7-.8" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M9.9 10a3 3 0 004.2 4.2" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round"/></>
+      : <><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="3" stroke={T.muted} strokeWidth="1.8"/></>}
+  </svg>
+);
+
+const PasswordField = ({ id, label, hint, value, onChange, error }) => {
+  const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      <label htmlFor={id} style={{ display:'flex', justifyContent:'space-between', fontSize:12.5, fontWeight:700, color:T.text, marginBottom:8 }}>
+        <span>{label}</span>
+        {hint && <span style={{ color:T.muted, fontWeight:600 }}>{hint}</span>}
+      </label>
+      <div style={{
+        height:52, borderRadius:14, display:'flex', alignItems:'center', padding:'0 8px 0 16px', gap:10,
+        background: focused ? T.surface : T.field,
+        border: `1.5px solid ${error ? T.neg : focused ? T.indigo : T.line}`,
+        boxShadow: focused && !error ? `0 0 0 4px ${T.indigoSoft}` : 'none',
+        transition:'border-color .15s, box-shadow .15s',
+      }}>
+        <input id={id} type={show ? 'text' : 'password'} value={value} onChange={onChange}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          aria-invalid={!!error} aria-describedby={error ? id + '-err' : undefined}
+          autoComplete="new-password"
+          style={{ flex:1, minWidth:0, border:'none', background:'transparent', outline:'none', fontSize:15, fontWeight:500, color:T.ink, letterSpacing: show ? 'normal' : '0.12em' }}/>
+        <button type="button" onClick={() => setShow(s => !s)} aria-label={show ? 'Нууц үг нуух' : 'Нууц үг харуулах'}
+          style={{ width:36, height:36, borderRadius:10, border:'none', background:'transparent', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', flexShrink:0, color:T.muted, minHeight:0 }}>
+          <EyeIcon off={show}/>
+        </button>
+      </div>
+      {error && <div id={id + '-err'} role="alert" style={{ fontSize:12, color:T.neg, fontWeight:600, marginTop:7, display:'flex', alignItems:'center', gap:6 }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0 }}><circle cx="12" cy="12" r="9" stroke={T.neg} strokeWidth="2"/><path d="M12 8v5M12 16h.01" stroke={T.neg} strokeWidth="2" strokeLinecap="round"/></svg>
+        {error}
+      </div>}
+    </div>
+  );
+};
+
+const CURRENT_PASSWORD = 'Passw0rd!'; // demo-only stand-in for the account's real password
+
+const PasswordTab = () => {
+  const [cur, setCur] = useState('');
+  const [next, setNext] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [errs, setErrs] = useState({});
+  const [saved, setSaved] = useState(false);
+
+  const validate = () => {
+    const e = {};
+    if (!cur) e.cur = 'Одоогийн нууц үгээ оруулна уу.';
+    else if (cur !== CURRENT_PASSWORD) e.cur = 'Одоогийн нууц үг буруу байна.';
+    if (!next) e.next = 'Шинэ нууц үгээ оруулна уу.';
+    else if (next.length < 8) e.next = 'Нууц үг хамгийн багадаа 8 тэмдэгт байх ёстой.';
+    else if (!/[0-9]/.test(next)) e.next = 'Нууц үгэнд дор хаяж 1 тоо орсон байх ёстой.';
+    if (!confirm) e.confirm = 'Шинэ нууц үгээ дахин оруулна уу.';
+    else if (next && confirm !== next) e.confirm = 'Нууц үг таарахгүй байна.';
+    setErrs(e);
+    if (Object.keys(e).length === 0) { setSaved(true); setTimeout(() => setSaved(false), 3000); setCur(''); setNext(''); setConfirm(''); }
+  };
+
+  return (
+    <div style={{
+      background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden',
+      display:'flex', flexDirection:'column',
+      maxHeight:'min(620px, calc(100vh - 260px))',
+    }}>
+      <div style={{ padding:'18px 24px 4px', flexShrink:0 }}>
+        <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Нууц үг солих</div>
+        <div style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:4 }}>Аюулгүй байдлын үүднээс одоогийн нууц үгээ баталгаажуулна уу.</div>
+      </div>
+
+      <div style={{ flex:1, overflow:'auto', padding:'20px 24px', display:'flex', flexDirection:'column', gap:20 }}>
+        <PasswordField id="cur-pw" label="Одоогийн нууц үг" value={cur} error={errs.cur}
+          onChange={e => { setCur(e.target.value); if (errs.cur) setErrs(x => ({ ...x, cur: undefined })); }}/>
+        <PasswordField id="new-pw" label="Шинэ нууц үг" hint="Дор хаяж 8 тэмдэгт, 1 тоо" value={next} error={errs.next}
+          onChange={e => { setNext(e.target.value); if (errs.next) setErrs(x => ({ ...x, next: undefined })); }}/>
+        <PasswordField id="confirm-pw" label="Шинэ нууц үг давтах" value={confirm} error={errs.confirm}
+          onChange={e => { setConfirm(e.target.value); if (errs.confirm) setErrs(x => ({ ...x, confirm: undefined })); }}/>
+
+        {saved && (
+          <div style={{ display:'flex', alignItems:'center', gap:8, padding:'11px 14px', borderRadius:12, background:T.posSoft, color:T.pos, fontSize:12.5, fontWeight:700 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke={T.pos} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Нууц үг амжилттай шинэчлэгдлээ.
+          </div>
+        )}
+      </div>
+
+      {/* action bar — sticks to the bottom of the form card; stays visible at 900px viewport height */}
+      <div style={{ display:'flex', justifyContent:'flex-end', gap:10, padding:'16px 24px', borderTop:`1px solid ${T.line2}`, background:T.surface, flexShrink:0 }}>
+        <WebButton variant="ghost" onClick={() => { setCur(''); setNext(''); setConfirm(''); setErrs({}); }}>Цуцлах</WebButton>
+        <WebButton variant="primary" onClick={validate}>Нууц үг солих</WebButton>
+      </div>
+    </div>
+  );
+};
+
+/* ── F-24 · Аюулгүй байдал — гүйлгээний PIN статус + сэргээх (OTP→шинэ PIN) ── */
+const SecurityTab = ({ lastUpdated, onChangePin }) => (
+  <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+    <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+      <div style={{ padding:'18px 24px 4px' }}>
+        <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Гүйлгээний PIN</div>
+        <div style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:4 }}>Захиалга, зарлага баталгаажуулахад ашиглагдах 4 оронтой код.</div>
+      </div>
+      <div style={{ padding:'16px 24px 20px' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:14, padding:'16px', borderRadius:16, background:T.field, border:`1px solid ${T.line2}` }}>
+          <div style={{ width:44, height:44, borderRadius:12, background:T.indigoSoft, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10.5" width="15" height="10" rx="3" stroke={T.indigo} strokeWidth="2"/><path d="M8 10.5V8a4 4 0 018 0v2.5" stroke={T.indigo} strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="15.5" r="1.6" fill={T.indigo}/></svg>
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:9 }}>
+              <span style={{ fontSize:14, fontWeight:800, color:T.ink }}>Гүйлгээний PIN код</span>
+              <WebBadge tone="new">Тохируулсан</WebBadge>
+            </div>
+            <div className="num" style={{ fontSize:12.5, fontWeight:600, color:T.muted, marginTop:4 }}>•••• · Сүүлд шинэчилсэн {lastUpdated}</div>
+          </div>
+          <WebButton variant="ghost" size="sm" onClick={onChangePin}>ПИН код солих</WebButton>
+        </div>
+
+        {/* handoff note — 3 failed attempts lock transactions server-side until reset */}
+        <div style={{ marginTop:16, display:'flex', gap:11, padding:'13px 15px', borderRadius:13, background:T.warnSurface, border:`1px solid ${T.warnBorder}`, alignItems:'flex-start' }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0, marginTop:1 }}><path d="M12 3l9 16H3l9-16z" stroke={T.warn} strokeWidth="1.8" strokeLinejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke={T.warn} strokeWidth="1.9" strokeLinecap="round"/></svg>
+          <p style={{ margin:0, fontSize:12, fontWeight:600, color:'#8A6516', lineHeight:1.55 }}>PIN кодыг 3 удаа буруу оруулбал гүйлгээ серверийн талд түр түгжигдэнэ. Дахин нээхийн тулд PIN кодоо сэргээнэ үү — одоогийн PIN шаардлагагүй, зөвхөн мобайл дугаар луугаа ирсэн кодоор баталгаажна.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const TABS = [
+  { key:'info', label:'Харилцагчийн мэдээлэл' },
+  { key:'password', label:'Нууц үг солих' },
+  { key:'security', label:'Аюулгүй байдал' },
+  { key:'contracts', label:'Гэрээнүүд' },
+  { key:'certs', label:'Тодорхойлолт' },
+  { key:'settings', label:'Тохиргоо' },
+];
+const _TAB_KEYS = TABS.map(t => t.key);
+
+const ProfilePage = () => {
+  const [tab, setTab] = useState('info');
+  const [pinOpen, setPinOpen] = useState(false);
+  const [pinToast, setPinToast] = useState(false);
+  const [pinUpdated, setPinUpdated] = useState('2026.05.02 · 14:20');
+
+  /* deep-link: order modal locked state routes here with ?pin=reset;
+     any other Profile tab (e.g. from a notification) via ?tab=<key>. */
+  useEffect(() => {
+    if (typeof location === 'undefined') return;
+    if (/(?:\?|&)pin=reset\b/.test(location.search)) { setTab('security'); setPinOpen(true); return; }
+    const m = /(?:\?|&)tab=([^&]+)/.exec(location.search);
+    if (m && _TAB_KEYS.includes(m[1])) setTab(m[1]);
+  }, []);
+
+  const onPinSuccess = () => {
+    setPinUpdated(window.formatDateTime(new Date()));
+    setPinToast(true); setTimeout(() => setPinToast(false), 3600);
+  };
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebar activePath="/profile"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Профайл" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+          <div style={{ maxWidth:760, margin:'0 auto' }}>
+            <div style={{ marginBottom:20 }}>
+              <WebUnderlineTabs tabs={TABS} value={tab} onChange={setTab}/>
+            </div>
+            {tab === 'info' && <PersonalInfoTab/>}
+            {tab === 'password' && <PasswordTab/>}
+            {tab === 'security' && <SecurityTab lastUpdated={pinUpdated} onChangePin={() => setPinOpen(true)}/>}
+            {tab === 'contracts' && <ContractsTab/>}
+            {tab === 'certs' && <CertsTab email={KYC_ROWS.find(r => r.l==='И-мэйл').v}/>}
+            {tab === 'settings' && <SettingsTab onLogout={() => { window.location.href = '05 Login.html'; }}/>}
+          </div>
+        </main>
+        <WebFooter/>
+      </div>
+
+      {pinOpen && (
+        <WebModal open onClose={() => setPinOpen(false)} title="Гүйлгээний PIN сэргээх">
+          <PinResetFlow phoneHint="+976 •••• 4127" doneLabel="Дуусгах"
+            onSuccess={onPinSuccess} onExit={() => setPinOpen(false)}/>
+        </WebModal>
+      )}
+
+      {pinToast && (
+        <div style={{ position:'fixed', top:24, left:'50%', transform:'translateX(-50%)', zIndex:80, display:'flex', alignItems:'center', gap:10, padding:'12px 18px', borderRadius:14, background:T.ink, color:'#fff', boxShadow:'0 16px 40px -12px rgba(0,0,0,.4)', fontSize:13.5, fontWeight:700 }}>
+          <span style={{ width:22, height:22, borderRadius:99, background:T.pos, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
+          Гүйлгээний PIN шинэчлэгдлээ
+        </div>
+      )}
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<ProfilePage/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

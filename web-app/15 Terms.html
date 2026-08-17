@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<script src="../portal-scope.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Үйлчилгээний нөхцөл — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  a { color: var(--indigo); }
+  a:hover { color: var(--navy); }
+
+  .tp-bar {
+    position: sticky; top: 0; z-index: 30;
+    height: 72px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 36px; background: rgba(255,255,255,.72);
+    backdrop-filter: blur(12px); border-bottom: 1px solid var(--line);
+  }
+  .tp-bar .left { display: flex; align-items: center; gap: 18px; }
+  .tp-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 42px; padding: 0 16px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface);
+    font-family: inherit; font-size: 13px; font-weight: 700; color: var(--text);
+    cursor: pointer; text-decoration: none;
+  }
+  .tp-back:hover { border-color: var(--ink); color: var(--ink); }
+  .tp-bar img { height: 28px; display: block; }
+
+  .tp-layout {
+    max-width: 1080px; margin: 0 auto;
+    display: grid; grid-template-columns: 230px minmax(0,1fr);
+    gap: 56px; padding: 48px 36px 80px;
+    align-items: start;
+  }
+  .tp-rail { position: sticky; top: 104px; display: flex; flex-direction: column; gap: 2px; }
+  .tp-rail .cap {
+    font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted-2); padding: 0 12px 10px;
+  }
+  .tp-rail a {
+    padding: 10px 12px; border-radius: 12px;
+    font-size: 13.5px; font-weight: 600; color: var(--text); text-decoration: none;
+  }
+  .tp-rail a:hover { background: var(--indigo-soft); color: var(--indigo); }
+
+  .tp-doc h1 { font-size: 34px; letter-spacing: -0.03em; }
+  .tp-doc .stamp {
+    font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+    color: var(--muted-2); margin-top: 12px;
+  }
+  .tp-sec { margin-top: 44px; scroll-margin-top: 100px; }
+  .tp-sec > h2 {
+    font-size: 21px; letter-spacing: -0.02em;
+    padding-bottom: 14px; border-bottom: 1px solid var(--line);
+  }
+  .tp-clause { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 16px; margin-top: 24px; }
+  .tp-clause .n {
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--indigo);
+    padding-top: 2px;
+  }
+  .tp-clause h3 { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); margin: 0; }
+  .tp-clause p { font-size: 14px; line-height: 1.7; color: var(--text); margin-top: 8px; }
+
+  .tp-note {
+    display: flex; gap: 11px; align-items: flex-start;
+    margin-top: 28px; padding: 14px 16px; border-radius: 13px;
+    background: var(--surface-warning); border: 1px solid var(--border-warning);
+    font-size: 12.5px; font-weight: 600; color: #8A6516; line-height: 1.55;
+  }
+  .tp-note svg { flex-shrink: 0; margin-top: 1px; }
+
+  .tp-contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 24px; }
+  .tp-ccard {
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 16px;
+    padding: 18px 20px; display: flex; gap: 14px; align-items: flex-start;
+  }
+  .tp-ccard .ic {
+    width: 40px; height: 40px; border-radius: 12px; background: var(--indigo-soft);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .tp-ccard .k { font-size: 11.5px; font-weight: 600; color: var(--muted); }
+  .tp-ccard .v { font-size: 15px; font-weight: 800; color: var(--ink); margin-top: 4px; letter-spacing: -0.01em; }
+  .tp-ccard .v a { color: var(--ink); text-decoration: none; }
+  .tp-ccard .v a:hover { color: var(--indigo); }
+  .tp-ccard .s { font-size: 12px; font-weight: 600; color: var(--muted); margin-top: 3px; }
+
+  .tp-foot {
+    max-width: 1080px; margin: 0 auto; padding: 20px 36px 40px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    font-size: 12px; font-weight: 600; color: var(--muted);
+  }
+  .tp-foot .mono { font-family: var(--font-mono); font-size: 11.5px; color: var(--muted-2); }
+
+  @media (max-width: 860px) {
+    .tp-layout { grid-template-columns: 1fr; gap: 8px; padding: 32px 22px 60px; }
+    .tp-rail { position: static; flex-direction: row; flex-wrap: wrap; }
+    .tp-rail .cap { display: none; }
+    .tp-contact-grid { grid-template-columns: 1fr; }
+    .tp-bar { padding: 0 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="tp-bar">
+  <div class="left">
+    <a class="tp-back" href="04 Dashboard.html" onclick="if(history.length>1){history.back();return false;}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      Буцах
+    </a>
+    <img src="../assets/logo-black.svg" alt="Money Market Fund"/>
+  </div>
+  <a class="tp-back" href="15 Terms.html#contact" style="border:none;background:var(--indigo-soft);color:var(--indigo)">Холбоо барих</a>
+</header>
+
+<div class="tp-layout">
+  <nav class="tp-rail" aria-label="Хуудасны агуулга">
+    <span class="cap">Агуулга</span>
+    <a href="#terms">Үйлчилгээний нөхцөл</a>
+    <a href="#privacy">Нууцлалын бодлого</a>
+    <a href="#contact">Холбоо барих</a>
+  </nav>
+
+  <article class="tp-doc">
+    <h1>Үйлчилгээний нөхцөл ба нууцлал</h1>
+    <div class="stamp">Сүүлд шинэчилсэн: 2026.06.01 · Хувилбар 2.1</div>
+
+    <!-- ── Terms ── -->
+    <section class="tp-sec" id="terms" data-screen-label="Үйлчилгээний нөхцөл">
+      <h2>Үйлчилгээний нөхцөл</h2>
+      <div class="tp-clause">
+        <span class="n">1.1</span>
+        <div>
+          <h3>Үйлчилгээний тухай</h3>
+          <p>Мони Маркет Фанд ХХК нь СЗХ-оос олгосон тусгай зөвшөөрлийн үндсэн дээр богино хугацааны санхүүгийн хэрэгслийн арилжааны платформ ажиллуулна. Платформоор дамжуулан хадгаламжийн сертификат, итгэлцэл, нэхэмжлэх, арилжааны бичгийн арилжаа болон түнш ББСБ-ийн зээлийн бүтээгдэхүүнд хандах боломжтой.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">1.2</span>
+        <div>
+          <h3>Данс нээх, баталгаажуулалт</h3>
+          <p>Данс нээхэд иргэний бүртгэлийн мэдээлэл ДАН системээр баталгаажина. Хэрэглэгч өөрийн нэр дээрх банкны дансыг холбож баталгаажуулсны дараа орлого, зарлагын гүйлгээ хийх эрх нээгдэнэ.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">1.3</span>
+        <div>
+          <h3>Эрсдэлийн мэдэгдэл</h3>
+          <p>Санхүүгийн хэрэгслийн өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно. Платформ нь өгөөжийн түвшинг баталгаажуулахгүй бөгөөд хөрөнгө оруулалтын шийдвэрийг хэрэглэгч өөрөө хариуцна.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">1.4</span>
+        <div>
+          <h3>Шимтгэл, хураамж</h3>
+          <p>Арилжааны шимтгэл гүйлгээний дүнгийн 0.1% байна. Зээлийн бүтээгдэхүүнд ЗМС лавлагааны төлбөр ₮ 4,000 нэг удаа төлөгдөнө. Хэтэвч цэнэглэлт болон татан авалт шимтгэлгүй.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">1.5</span>
+        <div>
+          <h3>Гэрээ, цахим гарын үсэг</h3>
+          <p>Захиалга бүрд цахим гэрээ үүсч, хэрэглэгчийн ПИН код эсвэл Г-Sign гарын үсгээр баталгаажина. Баталгаажсан гэрээнүүд хэрэглэгчийн профайлд архивлагдана.</p>
+        </div>
+      </div>
+      <div class="tp-note">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3l9-16z" stroke="#B7791F" stroke-width="1.8" stroke-linejoin="round"></path><path d="M12 10v4M12 16.5v.5" stroke="#B7791F" stroke-width="1.9" stroke-linecap="round"></path></svg>
+        <span>Өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно.</span>
+      </div>
+    </section>
+
+    <!-- ── Privacy ── -->
+    <section class="tp-sec" id="privacy" data-screen-label="Нууцлалын бодлого">
+      <h2>Нууцлалын бодлого</h2>
+      <div class="tp-clause">
+        <span class="n">2.1</span>
+        <div>
+          <h3>Цуглуулах мэдээлэл</h3>
+          <p>Бүртгэлийн явцад овог нэр, регистрийн дугаар, утасны дугаар, имэйл хаяг, банкны дансны мэдээллийг цуглуулна. Зээлийн үйлчилгээнд хэрэглэгчийн зөвшөөрлөөр ЗМС-ийн лавлагаа татагдана.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">2.2</span>
+        <div>
+          <h3>Мэдээллийн хамгаалалт</h3>
+          <p>Хувийн мэдээлэл шифрлэгдсэн сувгаар дамжиж, Монгол Улсын нутаг дэвсгэр дэх серверт хадгалагдана. Нэвтрэлт хоёр шатлалт баталгаажуулалтаар хамгаалагдана.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">2.3</span>
+        <div>
+          <h3>Гуравдагч талтай хуваалцах</h3>
+          <p>Хэрэглэгчийн мэдээллийг зөвхөн хуулиар үүрэг болгосон тохиолдолд СЗХ, Монголбанк болон хууль хяналтын байгууллагад, эсвэл зээлийн үйлчилгээний хүрээнд түнш ББСБ-д хэрэглэгчийн зөвшөөрөлтэйгөөр дамжуулна.</p>
+        </div>
+      </div>
+      <div class="tp-clause">
+        <span class="n">2.4</span>
+        <div>
+          <h3>Мэдээлэл устгах хүсэлт</h3>
+          <p>Хэрэглэгч дансаа хаах болон хувийн мэдээллээ устгуулах хүсэлтийг дэмжлэгийн багт гаргаж болно. Хуулиар хадгалах үүрэгтэй мэдээлэл хуулийн хугацаанд архивлагдана.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Contact ── -->
+    <section class="tp-sec" id="contact" data-screen-label="Холбоо барих">
+      <h2>Холбоо барих</h2>
+      <div class="tp-contact-grid">
+        <div class="tp-ccard">
+          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z" stroke="#4F46E5" stroke-width="1.8" stroke-linejoin="round"></path></svg></span>
+          <div><div class="k">Утас</div><div class="v"><a href="tel:+97675551188">7555-1188</a></div><div class="s">Ажлын өдрүүдэд 09:00–18:00</div></div>
+        </div>
+        <div class="tp-ccard">
+          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#4F46E5" stroke-width="1.8"></rect><path d="M3 7l9 6 9-6" stroke="#4F46E5" stroke-width="1.8" stroke-linejoin="round"></path></svg></span>
+          <div><div class="k">Имэйл</div><div class="v"><a href="mailto:info@mmf.mn">info@mmf.mn</a></div><div class="s">Хариу 1 ажлын өдөрт багтаана</div></div>
+        </div>
+        <div class="tp-ccard">
+          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" stroke="#4F46E5" stroke-width="1.8" stroke-linejoin="round"></path><circle cx="12" cy="10" r="2.5" stroke="#4F46E5" stroke-width="1.8"></circle></svg></span>
+          <div><div class="k">Хаяг</div><div class="v">Улаанбаатар, Сүхбаатар дүүрэг</div><div class="s">1-р хороо, Их сургуулийн гудамж</div></div>
+        </div>
+        <div class="tp-ccard">
+          <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="#4F46E5" stroke-width="1.8"></circle><path d="M12 7.5V12l3 2" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round"></path></svg></span>
+          <div><div class="k">Дэмжлэгийн цаг</div><div class="v">09:00 – 18:00</div><div class="s">Даваа – Баасан</div></div>
+        </div>
+      </div>
+    </section>
+  </article>
+</div>
+
+<footer class="tp-foot">
+  <span>© 2026 Мони Маркет Фанд ХХК</span>
+  <span class="mono">СЗХ тусгай зөвшөөрлийн № 0000/000</span>
+</footer>
+
+<script src="../portal-return.js"></script>
+</body>
+</html>

@@ -23,45 +23,32 @@ This system was derived from the **mobile app design** (`Money Market Fund - Mob
 
 ---
 
-## Index
+## Index / manifest
 
-| File | What's in it |
+| Path | What's in it |
 |---|---|
 | `README.md` | This file. Brand context, content fundamentals, visual foundations, iconography |
-| `colors_and_type.css` | All CSS custom properties (colors, type scales, spacing, radii, shadows) plus semantic element rules |
 | `SKILL.md` | Agent-skill entrypoint for prompts like "design something on Money Market Fund brand" |
-| `assets/logo-black.svg`, `assets/logo-white.svg` | Official logo files |
-| `assets/logo-mark.svg` | Logo glyph only (no wordmark) — for compact uses |
-| `preview/*.html` | Design-system preview cards (Type, Colors, Spacing, Components, Brand) |
-| `ui_kits/mobile/*` | Mobile UI kit — re-usable React/JSX components + sample screens |
-| `landing/*.html` | Public marketing site — landing, About Us, Benchmark (see below) |
+| **`styles.css`** | **Global CSS entry — link ONLY this.** `@import`s every token + font-face + base rule |
+| `tokens/` | `fonts.css` · `colors.css` · `typography.css` · `spacing.css` · `effects.css` · `base.css` |
+| `colors_and_type.css` | Legacy single-file mirror of all tokens + base rules; still linked by the existing `web-app/*` and `mobile-app/*` previews. Identical values to `tokens/`. |
+| `foundations.js` | Number/date formatters (`formatMNT`, `formatPct`, `formatDelta`, `formatDate`, `formatRelative`) — the only way numbers/dates should render |
+| `components/<group>/` | Reusable React primitives (`.jsx` + `.d.ts` + `.prompt.md` + a card). Groups: primitives, feedback, data, trade, navigation, overlay |
+| `guidelines/*.card.html` | Foundation specimen cards (Colors, Type, Spacing, Brand) |
+| `ui_kits/web/` | Web app kit — Dashboard + Trade (primary market) |
+| `ui_kits/mobile/` | Mobile app kit — full interactive click-through prototype |
+| `assets/logo-black.svg`, `logo-white.svg`, `logo-mark.svg` | Official logo files (black wordmark / white wordmark / glyph-only) |
+| `exports/` | Prior custom bundle snapshot (manifest, components, tokens) — reference only |
 
----
+### Components (21, grouped)
+- **primitives** — Button · Badge · Dot · TextInput · Sparkline
+- **feedback** — EmptyState · ErrorState · Skeleton · Disclaimer
+- **data** — StatCard · DataTable · Pagination
+- **trade** — SegmentedControl · FilterChips · OTPInput · InstrumentCard · OrderTicket
+- **navigation** — Sidebar · Topbar · PageHeader
+- **overlay** — Modal
 
-## Landing site
-
-Client-facing marketing pages, published via GitHub Pages at **https://temodeart.github.io/mmf/**
-(the repo-root `index.html` redirects to `landing/`).
-
-| File | Page |
-|---|---|
-| `landing/13 Landing - App First.html` | Main landing page — app-first hero, repo section, FAQ |
-| `landing/About Us.html` | Бидний тухай |
-| `landing/Benchmark.html` | Бенчмарк |
-
-These are self-contained bundler exports — all CSS, JS, and imagery are inlined. The only
-external dependency is Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`).
-
-**Known gaps:**
-
-- The three pages **cross-link by exact filename** (including spaces). Do not rename them
-  without updating the `href`s inside each file.
-- The nav "Нэвтрэх" / "Бүртгүүлэх" buttons point at `../web-app/05 Login.html` and
-  `../web-app/09 Registration.html`. That `web-app/` directory was **not** part of the export,
-  so those links currently 404. Drop the two files into a top-level `web-app/` directory to fix.
-- `landing/About Us.html` is **19.5 MB** — it inlines six uncompressed PNG/JPEG images
-  (largest ~6.4 MB, 1417px wide) as base64. This should be optimised before any real
-  marketing push; base64 also costs ~33% over the raw bytes.
+These are the **web** product's component kit (see `uploads/01-Component-Kit.md` for the source inventory). The mobile app's screen-level atoms live inside the root JSX files (`screens.jsx`, `*_flow.jsx`) and are presented via the mobile UI kit rather than re-extracted as library components — see Caveats.
 
 ---
 
@@ -102,9 +89,13 @@ Render in amber surface (`--surface-warning` `#FFFBF2` with `#FFE9C4` border) wi
 
 ### Numbers & currency
 - Use `₮` symbol before the number with a space: `₮ 48,250,000`. Commas as thousands separator.
-- Percentages: `19.5%` (no space), `19.5 % /жил` (spaced when followed by a unit phrase).
+- Percentages: `19.5%` (no space). **Annual rate (F-16):** `14.5% жилийн` — percent glued to a mono figure, then the unit word; **no `/Жил/` slash wrapping**. Use `formatRate()`.
 - Always set `font-variant-numeric: tabular-nums` on financial figures so columns align.
 - Tickers and account numbers are UPPERCASE / numeric: `MSTRT 2400 IT 171126`, `№ 200001281`.
+
+### Dates (F-13)
+- Timestamps render `YYYY.MM.DD, HH:mm` in 24-hour everywhere: `2026.05.15, 14:05`. **No ISO + AM/PM mixing.** Use `formatDateTime()`.
+- Calendar-only dates (e.g. maturity) stay `YYYY.MM.DD` via `formatDate()`. Relative strings (`3 өдрийн өмнө`) via `formatRelative()` where a surface calls for freshness.
 
 ---
 
@@ -196,7 +187,9 @@ Three hero-card recipes recur across the system:
 
 ## Caveats
 
-- **`Manrope` is loaded from Google Fonts** in the demo. If the brand guidelines specify a different family, swap the `--font-ui` CSS var. Manrope was chosen for Cyrillic coverage + modern fintech feel; no font files were supplied.
-- **DSFoundation.pdf was not exhaustively parsed** — visual rules were derived from the mobile-app design + supplied screenshots. If the PDF contains conflicting tokens, the PDF wins; please flag discrepancies.
+- **`Manrope` and `JetBrains Mono` are loaded from Google Fonts** (`tokens/fonts.css`). No binary font files were supplied by the client — if brand-owned files arrive, replace the `@import` with local `@font-face`. **Please confirm Manrope is the intended UI family, or send the real font files.**
+- **Component library covers the web kit** (21 components from `uploads/01-Component-Kit.md`). The mobile app's atoms are still embedded in the root screen JSX and surfaced through the mobile UI kit; if you want them extracted into `components/**` too, say so and I'll do a mobile pass.
+- **Component specimen cards render via the window-global twins** (`comp_atoms.jsx` / `comp_kit.jsx`) so they preview reliably; the `components/**/*.jsx` files are the compiler's `export function` library. The two are kept in sync by hand — edit both if you change a component's behavior.
+- **DSFoundation.pdf was not exhaustively parsed** — rules were derived from the mobile app + web briefs + screenshots. If the PDF conflicts, the PDF wins; flag discrepancies.
 - **Issuer/partner logos are letter-mark placeholders.** Replace with real ББСБ logos when supplied.
 - **No dark mode** — every screen is white-first per the original brief.

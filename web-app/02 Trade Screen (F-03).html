@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Арилжаа — F-03 template · Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../trade_f03.jsx"></script>
+<style>
+  body { margin:0; background:#EEF0F6; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:#DADEEA; border-radius:99px; border:3px solid transparent; background-clip:content-box; }
+  input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+  input[type=number] { -moz-appearance:textfield; }
+
+  .doc { max-width:1400px; margin:0 auto; padding:40px 32px 90px; }
+  .doc-eyebrow { font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--indigo); }
+  .doc-title { font-size:34px; font-weight:800; letter-spacing:-.03em; color:var(--ink); margin:10px 0 6px; }
+  .doc-sub { font-size:14px; font-weight:500; color:var(--muted); margin:0 0 8px; max-width:680px; line-height:1.6; }
+
+  .board { margin-top:40px; }
+  .board-head { display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap; }
+  .board-id { font-family:var(--font-mono); font-size:11px; font-weight:700; color:#fff; background:var(--indigo); padding:3px 9px; border-radius:7px; letter-spacing:.02em; }
+  .board-t { font-size:17px; font-weight:800; color:var(--ink); letter-spacing:-.01em; }
+  .board-d { font-size:12.5px; font-weight:500; color:var(--muted); margin:0 0 16px; line-height:1.5; max-width:760px; }
+  .board-d code { font-family:var(--font-mono); font-size:11px; background:#E3E6F0; color:var(--ink-2); padding:1px 5px; border-radius:5px; }
+
+  .frame { border-radius:18px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--e-2); background:var(--bg); }
+  .frame--shell { height:760px; position:relative; }
+  .frame--pad { padding:26px; background:
+      radial-gradient(900px 460px at 15% -10%, #EEF0FE 0%, transparent 60%),
+      radial-gradient(760px 420px at 100% 110%, #FFEDE2 0%, transparent 62%), var(--bg); }
+  .narrow-wrap { max-width:900px; }
+  .narrow-tag { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:700; color:var(--muted); font-family:var(--font-mono); margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <div class="doc-eyebrow">MMF Web App · Арилжаа</div>
+  <h1 class="doc-title">Trade template — F-03 + audit fixes</h1>
+  <p class="doc-sub">One template for all four verticals (СД · Итгэлцэл · Нэхэмжлэх · Арилжааны бичиг). The secondary table gets the three F-03 options; the primary cards get F-05/06/07/15/16. The OrderTicket right rail is structurally unchanged.</p>
+
+  <div id="boards"></div>
+</div>
+
+<script type="text/babel">
+const { useState } = React;
+const { T, WebSidebar, WebTopbar, WebFooter, WebPageHeader, WebSegmentedControl, WebFilterChips, WebOrderTicket, WebDisclaimer } = window;
+const { TF, PrimaryCard, EmptyPrimary, SecondaryTable } = window;
+const { PRIMARY, SECONDARY } = TF;
+const BALANCE = 2450000;
+
+const FILTER_OPTS = TF.VERTICALS.map(v => ({ value:v.key, label:v.label, color:v.key==='all'?null:v.color }));
+
+/* ── Board 1 — full trade template, primary market populated ── */
+function BoardShell() {
+  const [filter, setFilter] = useState('all');
+  const [selId, setSel]     = useState('capit');
+  const [qty, setQty]       = useState(3);
+  const list = PRIMARY.filter(p => filter==='all' || p.type===filter);
+  const sel  = PRIMARY.find(p => p.id===selId);
+  return (
+    <div style={{ display:'flex', height:'100%' }}>
+      <div style={{ height:'100%', overflow:'hidden', flexShrink:0 }}><WebSidebar activePath="/trade/primary"/></div>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column', height:'100%' }}>
+        <WebTopbar title="Арилжаа" notifCount={2}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, minHeight:0, overflow:'auto', padding:'24px 30px', outline:'none' }}>
+          <WebPageHeader title="Анхдагч зах зээл" subtitle="ББСБ болон банкуудын шинээр зарласан бүтээгдэхүүн"
+            right={<WebSegmentedControl value="primary" onChange={()=>{}} options={[{value:'primary',label:'Анхдагч',count:PRIMARY.length},{value:'secondary',label:'Хоёрдогч',count:SECONDARY.length}]}/>}/>
+          <div style={{ marginBottom:18 }}><WebFilterChips value={filter} onChange={setFilter} options={FILTER_OPTS}/></div>
+          {/* F-01 · R0 fluid grid: minmax(0,1fr) + fixed ticket rail, min-width:0 → no double scrollbars */}
+          <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 384px', gap:22, alignItems:'start' }}>
+            <div style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:16 }}>
+                {list.map(p => <PrimaryCard key={p.id} data={p} onBuy={()=>{ setSel(p.id); setQty(1); }}/>)}
+              </div>
+              <WebDisclaimer>Өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно. Энэ нь баталгаат өгөөж биш болохыг анхаарна уу.</WebDisclaimer>
+            </div>
+            <div style={{ minWidth:0, position:'sticky', top:0 }}>
+              <WebOrderTicket buyOnly side="buy" instrument={sel} qty={qty} onQtyChange={setQty} balance={BALANCE} onSubmit={()=>{}}/>
+            </div>
+          </div>
+        </main>
+        <WebFooter/>
+      </div>
+    </div>
+  );
+}
+
+/* ── Board 2 — empty primary market (F-05), vertical = Арилжааны бичиг ── */
+function BoardEmpty() {
+  const [filter, setFilter] = useState('cp');
+  return (
+    <div>
+      <WebPageHeader title="Анхдагч зах зээл" subtitle="ББСБ болон банкуудын шинээр зарласан бүтээгдэхүүн"
+        right={<WebSegmentedControl value="primary" onChange={()=>{}} options={[{value:'primary',label:'Анхдагч',count:PRIMARY.length},{value:'secondary',label:'Хоёрдогч',count:SECONDARY.length}]}/>}/>
+      <div style={{ marginBottom:18 }}><WebFilterChips value={filter} onChange={setFilter} options={FILTER_OPTS}/></div>
+      <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 384px', gap:22, alignItems:'start' }}>
+        <div style={{ minWidth:0 }}><EmptyPrimary vertical={filter==='all'?'cp':filter}/></div>
+        <div style={{ minWidth:0 }}><WebOrderTicket buyOnly side="buy" instrument={null} qty={0} onQtyChange={()=>{}} balance={BALANCE} onSubmit={()=>{}}/></div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Board 3 — secondary table, column-toggle menu open (F-03 A + B) ── */
+function BoardTable() {
+  const [filter, setFilter] = useState('all');
+  const rows = SECONDARY.filter(r => filter==='all' || r.type===filter);
+  return (
+    <div>
+      <WebPageHeader title="Хоёрдогч зах зээл" subtitle="Бусад хэрэглэгчдийн зарж буй бүтээгдэхүүн"
+        right={<WebSegmentedControl value="secondary" onChange={()=>{}} options={[{value:'primary',label:'Анхдагч',count:PRIMARY.length},{value:'secondary',label:'Хоёрдогч',count:SECONDARY.length}]}/>}/>
+      <div style={{ marginBottom:18 }}><WebFilterChips value={filter} onChange={setFilter} options={FILTER_OPTS}/></div>
+      <div style={{ minWidth:0, display:'flex', flexDirection:'column', gap:16 }}>
+        <SecondaryTable rows={rows} initialMenuOpen={true} onAct={()=>{}}/>
+        <WebDisclaimer>Өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно.</WebDisclaimer>
+      </div>
+    </div>
+  );
+}
+
+/* ── Board 4 — <960px card-list fallback (F-03 C) ── */
+function BoardNarrow() {
+  return (
+    <div className="narrow-wrap">
+      <div className="narrow-tag">↔ container ≈ 900px → &lt; 960px</div>
+      <SecondaryTable rows={SECONDARY} onAct={()=>{}}/>
+    </div>
+  );
+}
+
+/* ── mount boards ── */
+const BOARDS = [
+  { id:'F-03/06/15/16', t:'Бүрэн загвар — Анхдагч зах зээл (populated)', d:'Full shell: R0 sidebar/topbar/footer, fluid grid (minmax(0,1fr) + 384px ticket, min-width:0). Primary cards carry F-06 neutral issuer plates (Анлок/Кредитех no longer dark), F-16 rate as the largest number "14.5% жилийн", one green Авах token (F-15), and F-07 issuer links.', cls:'frame frame--shell', Comp:BoardShell },
+  { id:'F-05', t:'Анхдагч — хоосон вариант (Арилжааны бичиг)', d:'Products exist but are sold out at times — this state is NORMAL. Section header kept; empty state explains what Анхдагч means for this vertical, shows "Дараагийн гаргалт" and a "Мэдэгдэл авах" toggle.', cls:'frame frame--pad', Comp:BoardEmpty },
+  { id:'F-03 A+B · F-17', t:'Хоёрдогч — хүснэгт + баганын тохиргоо нээлттэй', d:'Sticky one-line mono ticker column + caption; numeric columns mono right-aligned; uniform row height; sort affordance with focus ring. Column-toggle menu (default-on vs toggleable) persists to localStorage. Search: clear ×, 300ms debounce, "Илэрц: X / Y".', cls:'frame frame--pad', Comp:BoardTable },
+  { id:'F-03 C', t:'<960px — картын fallback', d:'Below ~960px the table collapses to a card list (ticker + side/qty/days caption + price + Авах). Driven by container width (ResizeObserver), so it also works inside the fluid grid, never a double scrollbar.', cls:'frame frame--pad', Comp:BoardNarrow },
+];
+
+const root = document.getElementById('boards');
+BOARDS.forEach(b => {
+  const wrap = document.createElement('div');
+  wrap.className = 'board';
+  wrap.innerHTML = `<div class="board-head"><span class="board-id">${b.id}</span><span class="board-t">${b.t}</span></div><p class="board-d">${b.d}</p><div class="${b.cls}"></div>`;
+  root.appendChild(wrap);
+  ReactDOM.createRoot(wrap.querySelector('.frame')).render(<b.Comp/>);
+});
+</script>
+</body>
+</html>

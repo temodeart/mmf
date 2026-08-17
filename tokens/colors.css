@@ -1,0 +1,65 @@
+/* =========================================================================
+   Money Market Fund — Color tokens
+   White-first. Color signals (1) brand, (2) status, (3) hierarchy — never
+   decoration. Every color carries ONE fixed semantic. No color drift.
+   ========================================================================= */
+
+:root {
+  /* -------- BRAND -------- */
+  --logo-orange:    #FE5E00;   /* logo top-left wedge — preserved as-is */
+  --logo-blue:      #1677FF;   /* logo bottom-right wedge — preserved as-is */
+
+  --indigo:         #4F46E5;   /* PRIMARY action color */
+  --indigo-soft:    #EEF0FE;   /* primary tint surfaces, focus rings */
+  --indigo-border:  #DDDAFB;
+  --blue:           #2D6BFF;   /* brand accent — charts, secondary highlights */
+  --blue-soft:      #E7EEFF;
+  --orange:         #FF6B2C;   /* accent — progress bars, notification dot */
+  --orange-soft:    #FFEDE2;
+  --navy:           #050B1F;   /* dark accent surface */
+  --navy-2:         #0E1631;
+  --navy-3:         #1A2547;
+
+  /* -------- SEMANTIC STATUS -------- */
+  --green:          #0E9F6E;   /* new / approved / income */
+  --green-soft:     #E3F5EE;
+  --amber:          #B7791F;   /* active / warning */
+  --amber-soft:     #FFF3D6;
+  --red:            #DC2626;   /* sell / outflow / error */
+  --red-soft:       #FDECEC;
+  --info:           var(--indigo);
+  --info-soft:      var(--indigo-soft);
+  --surface-warning:#FFFBF2;
+  --border-warning: #FFE9C4;
+
+  /* -------- NEUTRAL / INK -------- */
+  --bg:             #F4F6FA;   /* page wash */
+  --surface:        #FFFFFF;   /* default card surface */
+  --ink:            #0B1020;   /* primary text */
+  --ink-2:          #1F2540;
+  --text:           #2A3052;   /* body text */
+  --muted:          #6B7191;   /* labels, secondary text */
+  --muted-2:        #9099B5;   /* placeholders, tertiary */
+  --line:           #E7E9F2;   /* card borders, dividers */
+  --line-2:         #EFF1F8;   /* internal separators */
+  --field-bg:       #FAFBFE;   /* resting input fill */
+
+  /* -------- SEMANTIC ROLE ALIASES -------- */
+  /* Buy/Sell & gain/loss semantics route through these — never ad-hoc colors */
+  --pos:             #0E9F6E;   /* авах · ашиг · баталгаажсан */
+  --pos-soft:        #E3F5EE;
+  --pos-border:      #BFE9D8;
+  --neg:             #DC2626;   /* зарах · алдагдал · алдаа */
+  --neg-soft:        #FDECEC;
+  --neg-border:      #F5C9C9;
+  --warn:            #B7791F;   /* хүлээгдэж буй · анхааруулга */
+  --warn-soft:       #FFF3D6;
+  --warn-border:     #FFE9C4;
+  --warn-surface:    #FFFBF2;
+
+  /* -------- HERO GRADIENTS -------- */
+  --hero-navy:      linear-gradient(135deg, #050B1F 0%, #4F46E5 130%);
+  --hero-pastel:    linear-gradient(160deg, #EEF0FE 0%, #E7EEFF 60%, #F4F6FA 100%);
+  --hero-promo:     linear-gradient(140deg, #FFFFFF 0%, #F4F1FF 60%, #EEF0FE 100%);
+  --bar-orange:     linear-gradient(90deg, #FF6B2C, #FF8B4F);
+}

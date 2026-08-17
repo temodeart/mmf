@@ -1,0 +1,50 @@
+<!-- @dsCard group="Components" viewport="700x460" name="Overlay" subtitle="Modal — order confirmation dialog" -->
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="../../styles.css"/>
+<script src="../../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../../comp_atoms.jsx"></script>
+<script type="text/babel" src="../../comp_kit.jsx"></script>
+<style>
+  body { margin:0; background:var(--bg); height:460px; overflow:hidden; position:relative; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { WebModal, WebButton, WebDisclaimer } = window;
+const fmt = window.formatMNT;
+function Row({k,v,strong}){
+  return (
+    <div style={{display:'flex',justifyContent:'space-between',padding:'11px 0',borderBottom:'1px solid var(--line-2)'}}>
+      <span style={{fontSize:13,fontWeight:600,color:'var(--muted)'}}>{k}</span>
+      <span style={{fontSize:strong?15:13.5,fontWeight:strong?800:700,color:'var(--ink)',fontFamily:"'JetBrains Mono',monospace",fontVariantNumeric:'tabular-nums'}}>{v}</span>
+    </div>
+  );
+}
+function Card(){
+  return (
+    <WebModal open onClose={()=>{}} logo="ХБ" logoColor="linear-gradient(135deg,#2D6BFF,#4F46E5)"
+      title="Захиалга баталгаажуулах" ticker="KHAN 1000 CD 240712"
+      footer={<WebButton variant="pos" full>Захиалга баталгаажуулах</WebButton>}>
+      <div style={{marginBottom:14}}>
+        <Row k="Үр шим" v="19.5%"/>
+        <Row k="Хугацаа" v="180 хоног"/>
+        <Row k="Тоо ширхэг" v="3"/>
+        <Row k="Шимтгэл (0.1%)" v={fmt(3000)}/>
+        <Row k="Нийт төлбөр" v={fmt(3003000)} strong/>
+      </div>
+      <WebDisclaimer>Өгөөж нь зах зээлийн нөхцөлөөс хамааран өөрчлөгдөж болно.</WebDisclaimer>
+    </WebModal>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Card/>);
+</script>
+</body>
+</html>

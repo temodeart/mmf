@@ -1,0 +1,62 @@
+<!-- @dsCard group="Components" viewport="700x520" name="Trade" subtitle="SegmentedControl · FilterChips · OTP · InstrumentCard · OrderTicket" -->
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="../../styles.css"/>
+<script src="../../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../../comp_atoms.jsx"></script>
+<script type="text/babel" src="../../comp_kit.jsx"></script>
+<style>
+  body { margin:0; background:var(--bg); padding:22px; }
+  .lbl { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .cols { display:grid; grid-template-columns:320px 1fr; gap:20px; align-items:start; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { WebSegmentedControl, WebFilterChips, WebOTPInput, WebInstrumentCard, WebOrderTicket } = window;
+const INST = { bank:'Хас банк', ticker:'KHAN 1000 CD 240712', type:'cd', rate:19.5, unit:1000000, term:180, avail:340, total:500, badge:'new' };
+function Card(){
+  const [side,setSide]=useState('buy');
+  const [f,setF]=useState('cd');
+  const [qty,setQty]=useState(3);
+  return (
+    <div>
+      <div style={{display:'flex',gap:24,flexWrap:'wrap',marginBottom:20}}>
+        <div>
+          <div className="lbl">SegmentedControl (buy/sell)</div>
+          <WebSegmentedControl semantic="buy-sell" value={side} onChange={setSide} options={[{value:'buy',label:'Авах'},{value:'sell',label:'Зарах'}]}/>
+        </div>
+        <div>
+          <div className="lbl">FilterChips</div>
+          <WebFilterChips value={f} onChange={setF} options={[{value:'all',label:'Бүгд'},{value:'cd',label:'Сертификат',color:'#2D6BFF'},{value:'trust',label:'Итгэлцэл',color:'#7C3AED'}]}/>
+        </div>
+        <div style={{flex:'1 1 200px'}}>
+          <div className="lbl">OTP</div>
+          <WebOTPInput length={6}/>
+        </div>
+      </div>
+      <div className="cols">
+        <div>
+          <div className="lbl">InstrumentCard</div>
+          <WebInstrumentCard data={INST} selected onSelect={()=>{}} onBuy={()=>{}}/>
+        </div>
+        <div>
+          <div className="lbl">OrderTicket</div>
+          <WebOrderTicket side={side} onSideChange={setSide} instrument={INST} qty={qty} onQtyChange={setQty} balance={6000000} onSubmit={()=>{}}/>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Card/>);
+</script>
+</body>
+</html>

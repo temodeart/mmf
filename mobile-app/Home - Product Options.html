@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Нүүр — 4 бүтээгдэхүүн · 3 чиглэл</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family:'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+  ::-webkit-scrollbar { display:none; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../design-canvas.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+
+// ---- tokens (mirrors screens.jsx) ----
+const C = {
+  bg:'#F4F6FA', navy:'#050B1F', indigo:'#4F46E5', indigoSoft:'#EEF0FE',
+  blue:'#2D6BFF', green:'#0E9F6E', orange:'#FF6B2C', ink:'#0B1020', text:'#2A3052',
+  muted:'#6B7191', muted2:'#9099B5', line:'#E7E9F2', line2:'#EFF1F8',
+};
+
+const PRODUCTS = [
+  { key:'cd',    t:'Хадгаламжийн сертификат', n:'12 нээлттэй', y:'11.8 – 14.5%', c1:'#2D6BFF', c2:'#4F46E5' },
+  { key:'trust', t:'Итгэлцэл',                n:'8 нээлттэй',  y:'19.5 – 23.0%', c1:'#4F46E5', c2:'#7C3AED' },
+  { key:'inv',   t:'Нэхэмжлэх',               n:'5 нээлттэй',  y:'17.0 – 21.0%', c1:'#0E9F6E', c2:'#0891B2' },
+  { key:'cp',    t:'Арилжааны бичиг',         n:'2 нээлттэй',  y:'6.5 – 8.0%',   c1:'#FF6B2C', c2:'#DC2626' },
+];
+
+// ---- simple geometric product emblems (white on gradient) ----
+const Emblem = ({ k, s = 26, c = '#fff', op = 1 }) => {
+  const sw = 2;
+  const g = {
+    cd:    <g><rect x="4" y="5" width="16" height="14" rx="2.5" stroke={c} strokeWidth={sw} fill="none"/><path d="M7 10h10M7 13.5h6" stroke={c} strokeWidth={sw} strokeLinecap="round"/><circle cx="16.5" cy="14.5" r="2" stroke={c} strokeWidth={sw} fill="none"/></g>,
+    trust: <g><circle cx="9" cy="12" r="5" stroke={c} strokeWidth={sw} fill="none"/><circle cx="15" cy="12" r="5" stroke={c} strokeWidth={sw} fill="none"/></g>,
+    inv:   <g><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke={c} strokeWidth={sw} fill="none"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4" stroke={c} strokeWidth={sw} strokeLinecap="round"/></g>,
+    cp:    <g><path d="M5 19V11M11 19V6M17 19v-5" stroke={c} strokeWidth="2.6" strokeLinecap="round"/><path d="M4 19h16" stroke={c} strokeWidth={sw} strokeLinecap="round"/></g>,
+  }[k];
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" style={{ opacity: op }}>{g}</svg>;
+};
+
+const SectionHead = () => (
+  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 14 }}>
+    <div style={{ fontSize: 18, fontWeight: 800, color: C.ink, letterSpacing:'-0.02em' }}>Бүтээгдэхүүн</div>
+    <span style={{ fontSize: 12.5, color: C.indigo, fontWeight: 700 }}>Бүгд →</span>
+  </div>
+);
+
+const Yield = ({ p, dark }) => (
+  <div style={{ display:'flex', alignItems:'baseline', gap: 4 }}>
+    <span style={{ fontSize: 19, fontWeight: 800, color: dark ? '#fff' : p.c1, letterSpacing:'-0.02em', fontVariantNumeric:'tabular-nums' }}>{p.y}</span>
+    <span style={{ fontSize: 10.5, fontWeight: 700, color: dark ? 'rgba(255,255,255,.7)' : C.muted2 }}>/жил</span>
+  </div>
+);
+
+// ===== Option 1 — PORTRAIT hero carousel =====
+const PortraitCard = ({ p }) => (
+  <div style={{
+    width: 168, flexShrink: 0, borderRadius: 22, overflow:'hidden',
+    background:'#fff', border:`1px solid ${C.line2}`, boxShadow:'0 12px 30px -18px rgba(15,20,55,.35)',
+    display:'flex', flexDirection:'column',
+  }}>
+    <div style={{ height: 116, background:`linear-gradient(150deg, ${p.c1}, ${p.c2})`, position:'relative', padding: 14, display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
+      <div style={{ position:'absolute', right:-18, top:-18, width: 70, height: 70, borderRadius:'50%', background:'rgba(255,255,255,.12)' }}/>
+      <div style={{ width: 42, height: 42, borderRadius: 12, background:'rgba(255,255,255,.16)', border:'1px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center', position:'relative' }}>
+        <Emblem k={p.key} s={24}/>
+      </div>
+      <span style={{ position:'relative', alignSelf:'flex-start', fontSize: 10, fontWeight: 800, color:'#fff', background:'rgba(255,255,255,.18)', padding:'3px 9px', borderRadius: 999 }}>{p.n}</span>
+    </div>
+    <div style={{ padding: 14, display:'flex', flexDirection:'column', gap: 10, flex: 1 }}>
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: C.ink, lineHeight: 1.25, letterSpacing:'-0.01em' }}>{p.t}</div>
+      <div>
+        <div style={{ fontSize: 10, color: C.muted, fontWeight: 600, marginBottom: 2 }}>Жилийн өгөөж</div>
+        <Yield p={p}/>
+      </div>
+      <div style={{ marginTop:'auto', height: 38, borderRadius: 11, background: p.c1, color:'#fff', display:'flex', alignItems:'center', justifyContent:'center', gap: 6, fontSize: 12.5, fontWeight: 700 }}>
+        Авах
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+    </div>
+  </div>
+);
+const PortraitCarousel = () => (
+  <div>
+    <SectionHead/>
+    <div style={{ display:'flex', gap: 12, marginLeft:-20, marginRight:-20, paddingLeft: 20, paddingRight: 20, overflow:'hidden' }}>
+      {PRODUCTS.map(p => <PortraitCard key={p.key} p={p}/>)}
+    </div>
+  </div>
+);
+
+// ===== Option 2 — LANDSCAPE hero carousel =====
+const LandscapeCard = ({ p }) => (
+  <div style={{
+    width: 296, flexShrink: 0, borderRadius: 20, overflow:'hidden', background:'#fff',
+    border:`1px solid ${C.line2}`, boxShadow:'0 12px 30px -18px rgba(15,20,55,.35)',
+    display:'flex', alignItems:'stretch',
+  }}>
+    <div style={{ width: 92, background:`linear-gradient(150deg, ${p.c1}, ${p.c2})`, position:'relative', display:'flex', alignItems:'center', justifyContent:'center', flexShrink: 0 }}>
+      <div style={{ position:'absolute', left:-14, bottom:-14, width: 56, height: 56, borderRadius:'50%', background:'rgba(255,255,255,.14)' }}/>
+      <div style={{ position:'relative', width: 48, height: 48, borderRadius: 13, background:'rgba(255,255,255,.18)', border:'1px solid rgba(255,255,255,.28)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Emblem k={p.key} s={27}/>
+      </div>
+    </div>
+    <div style={{ flex: 1, padding: 14, display:'flex', flexDirection:'column', justifyContent:'center', gap: 6, minWidth: 0 }}>
+      <div style={{ fontSize: 14, fontWeight: 800, color: C.ink, letterSpacing:'-0.01em', lineHeight: 1.2 }}>{p.t}</div>
+      <span style={{ alignSelf:'flex-start', fontSize: 10.5, fontWeight: 700, color: p.c1, background:`${p.c1}14`, padding:'3px 9px', borderRadius: 999 }}>{p.n}</span>
+      <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginTop: 2 }}>
+        <Yield p={p}/>
+        <div style={{ width: 34, height: 34, borderRadius: 10, background: p.c1, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+const LandscapeCarousel = () => (
+  <div>
+    <SectionHead/>
+    <div style={{ display:'flex', flexDirection:'column', gap: 12 }}>
+      <div style={{ display:'flex', gap: 12, marginLeft:-20, marginRight:-20, paddingLeft: 20, paddingRight: 20, overflow:'hidden' }}>
+        {PRODUCTS.map(p => <LandscapeCard key={p.key} p={p}/>)}
+      </div>
+      <div style={{ display:'flex', gap: 6, justifyContent:'center' }}>
+        {PRODUCTS.map((p,i) => <span key={i} style={{ width: i===0?18:6, height: 6, borderRadius: 999, background: i===0 ? C.indigo : C.line }}/>)}
+      </div>
+    </div>
+  </div>
+);
+
+// ===== Option 3 — BOLD 2x2 grid (filled, high contrast) =====
+const BoldCard = ({ p }) => (
+  <div style={{
+    borderRadius: 20, overflow:'hidden', position:'relative', padding: 16, minHeight: 150,
+    background:`linear-gradient(150deg, ${p.c1}, ${p.c2})`, color:'#fff',
+    boxShadow:`0 16px 32px -18px ${p.c1}cc`, display:'flex', flexDirection:'column', justifyContent:'space-between',
+  }}>
+    <div style={{ position:'absolute', right:-22, top:-22, width: 92, height: 92, borderRadius:'50%', background:'rgba(255,255,255,.12)' }}/>
+    <div style={{ position:'absolute', right: 10, bottom:-26, width: 64, height: 64, borderRadius:'50%', border:'2px solid rgba(255,255,255,.18)' }}/>
+    <div style={{ position:'relative', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+      <div style={{ width: 44, height: 44, borderRadius: 12, background:'rgba(255,255,255,.18)', border:'1px solid rgba(255,255,255,.28)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <Emblem k={p.key} s={25}/>
+      </div>
+      <span style={{ fontSize: 10, fontWeight: 800, background:'rgba(255,255,255,.18)', padding:'3px 9px', borderRadius: 999 }}>{p.n}</span>
+    </div>
+    <div style={{ position:'relative' }}>
+      <div style={{ fontSize: 14, fontWeight: 800, lineHeight: 1.2, letterSpacing:'-0.01em', minHeight: 34 }}>{p.t}</div>
+      <div style={{ fontSize: 9.5, fontWeight: 700, color:'rgba(255,255,255,.7)', marginTop: 8 }}>ЖИЛИЙН ӨГӨӨЖ</div>
+      <Yield p={p} dark/>
+    </div>
+  </div>
+);
+const BoldGrid = () => (
+  <div>
+    <SectionHead/>
+    <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap: 12 }}>
+      {PRODUCTS.map(p => <BoldCard key={p.key} p={p}/>)}
+    </div>
+  </div>
+);
+
+const Pad = ({ children }) => <div style={{ padding:20, background:C.bg, minHeight:'100%' }}>{children}</div>;
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="prod" title="Нүүр — 4 бүтээгдэхүүнийг тодотгох" subtitle="3 чиглэл. Одоогийн хувилбар нь нам цагаан 2×2 тор — энд илүү тод болгох сонголтууд.">
+        <DCArtboard id="opt1" label="1 · Босоо (portrait) карусель" width={390} height={372}>
+          <Pad><PortraitCarousel/></Pad>
+        </DCArtboard>
+        <DCArtboard id="opt2" label="2 · Хэвтээ (landscape) карусель" width={390} height={420}>
+          <Pad><LandscapeCarousel/></Pad>
+        </DCArtboard>
+        <DCArtboard id="opt3" label="3 · Тод 2×2 тор (өнгөт + дүрс)" width={390} height={420}>
+          <Pad><BoldGrid/></Pad>
+        </DCArtboard>
+        <DCPostIt id="note" x={40} y={40}>
+          Дүрс тэмдгүүд нь энгийн геометр (тойрог / дөрвөлжин / багана) — жинхэнэ лого биш, түр зураг. Сонгосон хувилбараа хэлвэл Нүүр дэлгэцэнд шууд суулгана.
+        </DCPostIt>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

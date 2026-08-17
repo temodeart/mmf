@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>03 — Order Modal · MMF Web App</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../order_modal.jsx"></script>
+<style>
+  body { background:
+      radial-gradient(1100px 500px at 15% -6%, #EEF0FE 0%, transparent 55%),
+      radial-gradient(900px 450px at 100% 110%, #FFEDE2 0%, transparent 55%), var(--bg); }
+  .pg { max-width: 1240px; margin: 0 auto; padding: 52px 40px 100px; }
+  .ph { margin-bottom: 48px; padding-bottom: 34px; border-bottom: 2px solid var(--line); }
+  .sec { margin-bottom: 52px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; padding-bottom: 14px; margin-bottom: 24px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .sec-n { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--indigo); }
+  .sec-label { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
+  .sec-sub { font-size: 12.5px; color: var(--muted); font-weight: 500; }
+  .row { display: flex; gap: 22px; overflow-x: auto; padding-bottom: 10px; align-items: flex-start; }
+  .step-tag { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .step-tag::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--dot,var(--indigo)); }
+  /* transform-contained cage: WebModal's position:fixed resolves to THIS box */
+  .cage { position: relative; overflow: hidden; transform: translateZ(0); width: 536px; height: 648px; border-radius: 20px; border: 1px solid var(--line-2); background: #E9ECF4; flex-shrink: 0; }
+  .cage-toast { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 9px; padding: 11px 16px; border-radius: 13px; background: var(--ink); color: #fff; font-size: 13px; font-weight: 700; box-shadow: 0 16px 40px -12px rgba(0,0,0,.4); }
+  .dod { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dod-item { display: flex; gap: 10px; padding: 10px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--pos-border); align-items: flex-start; }
+  .dod-ic { width: 20px; height: 20px; border-radius: 6px; background: var(--pos); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .dod-text { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .dod-text strong { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="pg">
+  <header class="ph">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px">MMF Web App · Pass 03</div>
+    <h1 style="font-size:42px;font-weight:800;letter-spacing:-.03em;margin:0 0 12px;line-height:1.05">Order Modal</h1>
+    <p style="font-size:15px;color:var(--muted);font-weight:500;max-width:600px;margin:0;line-height:1.6">Structure unchanged — instrument header, grouped Нөхцөл / Зардал / Өгөөж rows, quantity, security step. The security step is now a <b style="color:var(--text)">4-digit transaction PIN</b> (mobile P2 parity; OTP stays in registration / reset).</p>
+  </header>
+  <div id="root"></div>
+</div>
+
+<script type="text/babel">
+const { useState } = React;
+const { T, WebButton, WebSegmentedControl, ConfirmOrderModal } = window;
+
+/* Verified math: ₮100,000 @ 14.5% жилийн · 12 сар → interest 14,500 − 10% tax 1,450 = net 13,050 → payout ₮113,050 */
+const INST = { id:'capit', bank:'Капитрон банк', type:'cd', rate:14.5, unit:100000, term:360, ticker:'CAPIT 1450 CD 270520', mat:'2027-05-20' };
+const CALC = { fee:100, total:100100, interest:14500, tax:1450, netYield:13050, payout:113050 };
+const BAL_OK = 2450000, BAL_LOW = 50000;
+
+const StepTag = ({ dot, children }) => <div className="step-tag" style={{ '--dot':dot||'var(--indigo)' }}>{children}</div>;
+
+/* live modal, contained inside a transformed cage */
+const Cage = ({ label, dot, step, side='buy', qty=1, balance=BAL_OK, toast }) => (
+  <div>
+    <StepTag dot={dot}>{label}</StepTag>
+    <div className="cage">
+      {toast && <div className="cage-toast"><span style={{ width:20, height:20, borderRadius:99, background:T.pos, display:'flex', alignItems:'center', justifyContent:'center' }}><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/></svg></span>Захиалга амжилттай баталгаажлаа</div>}
+      <ConfirmOrderModal open _forceStep={step} onClose={()=>{}} instrument={INST} qty={qty} side={side} calc={CALC} balance={balance} onTopup={()=>{}}/>
+    </div>
+  </div>
+);
+
+const Preview = () => {
+  const [open, setOpen] = useState(false);
+  const [side, setSide] = useState('buy');
+  const [scn, setScn]   = useState('normal');   // normal | insufficient | invalid
+  const qty = scn==='invalid' ? 0 : 1;
+  const balance = scn==='insufficient' ? BAL_LOW : BAL_OK;
+
+  return (
+    <div>
+      {/* ── A · Interactive ── */}
+      <section className="sec">
+        <div className="sec-head"><span className="sec-n">A</span><span className="sec-label">Interactive</span><span className="sec-sub">Review → PIN → submitting → success · type PIN 0000 to see reject</span></div>
+        <div style={{ display:'flex', gap:16, alignItems:'flex-end', flexWrap:'wrap', padding:'20px 24px', background:'#fff', borderRadius:16, border:'1px solid var(--line-2)' }}>
+          <div>
+            <div style={{ fontSize:12, color:T.muted, fontWeight:700, marginBottom:8 }}>Тал</div>
+            <WebSegmentedControl value={side} onChange={setSide} semantic="buy-sell" options={[{value:'buy',label:'Авах'},{value:'sell',label:'Зарах'}]}/>
+          </div>
+          <div>
+            <div style={{ fontSize:12, color:T.muted, fontWeight:700, marginBottom:8 }}>Сценар</div>
+            <WebSegmentedControl value={scn} onChange={setScn} options={[{value:'normal',label:'Хэвийн'},{value:'insufficient',label:'Үлдэгдэл багатай'},{value:'invalid',label:'Тоо 0'}]}/>
+          </div>
+          <div style={{ marginLeft:'auto' }}>
+            <WebButton variant={side==='buy'?'pos':'neg'} onClick={() => setOpen(true)}>Захиалгын модаль нээх</WebButton>
+          </div>
+          <ConfirmOrderModal open={open} onClose={() => setOpen(false)} instrument={INST} qty={qty} side={side} calc={CALC} balance={balance} onTopup={() => {}} onConfirmed={() => {}}/>
+        </div>
+      </section>
+
+      {/* ── B · Happy path steps ── */}
+      <section className="sec">
+        <div className="sec-head"><span className="sec-n">B</span><span className="sec-label">Урсгал — Авах</span><span className="sec-sub">Хянах → PIN → Илгээж байна → Амжилттай (toast)</span></div>
+        <div className="row">
+          <Cage label="1 — Хянах"        step="review"/>
+          <Cage label="2 — PIN код"       step="auth"/>
+          <Cage label="3 — Илгээж байна"  dot="var(--warn)" step="submitting"/>
+          <Cage label="4 — Амжилттай · toast" dot="var(--pos)" step="success" toast/>
+        </div>
+      </section>
+
+      {/* ── C · Required states ── */}
+      <section className="sec">
+        <div className="sec-head"><span className="sec-n">C</span><span className="sec-label">Шаардлагатай төлөвүүд</span><span className="sec-sub">Буруу тоо · үлдэгдэл хүрэлцэхгүй · татгалзсан шалтгаантай · PIN түгжигдсэн</span></div>
+        <div className="row">
+          <Cage label="Буруу тоо ширхэг"        dot="var(--warn)" step="review" qty={0}/>
+          <Cage label="Үлдэгдэл хүрэлцэхгүй + Хэтэвч" dot="var(--neg)" step="review" balance={BAL_LOW}/>
+          <Cage label="Татгалзсан — шалтгаантай"  dot="var(--neg)" step="error"/>
+          <Cage label="3 буруу оролдлого — түгжигдсэн" dot="var(--neg)" step="locked"/>
+        </div>
+      </section>
+
+      {/* ── D · Sell variant ── */}
+      <section className="sec">
+        <div className="sec-head"><span className="sec-n">D</span><span className="sec-label">Зарах хувилбар</span><span className="sec-sub">Өгөөжийн блок байхгүй · улаан CTA · ижил PIN алхам</span></div>
+        <div className="row">
+          <Cage label="Хянах (зарах)" dot="var(--neg)" step="review" side="sell"/>
+          <Cage label="PIN (зарах)"   dot="var(--neg)" step="auth"   side="sell"/>
+        </div>
+      </section>
+
+      {/* ── DoD ── */}
+      <section className="sec" style={{ marginBottom:0 }}>
+        <div className="sec-head"><span className="sec-n">✓</span><span className="sec-label">Definition of Done · Pass 03</span></div>
+        <div className="dod">
+          {[
+            ['Structure kept','Instrument header + Нөхцөл / Зардал / Өгөөж rows + quantity + security step — unchanged'],
+            ['PIN security step','4-digit transaction PIN (masked, auto-advance, R0 focus ring) — mobile P2 parity'],
+            ['OTP scoped out','OTP now only in registration / reset flows, not order confirm'],
+            ['R0 formats','Rate "14.5% жилийн"; maturity date "YYYY.MM.DD"; all values mono, right-aligned'],
+            ['Verified math','₮100,000 @ 14.5% · 12 сар → interest 14,500 − 10% tax 1,450 = net 13,050 → payout ₮113,050'],
+            ['Invalid qty','Review CTA disabled-with-reason when qty ≤ 0'],
+            ['Insufficient balance','Red banner with shortfall + Хэтэвч цэнэглэх link; CTA blocked'],
+            ['No double-submit','step → "submitting" set synchronously; PIN + CTA disabled during'],
+            ['Success toast','Toast on confirm, plus the success panel; auto-dismiss'],
+            ['Reject-with-reason','Error step shows a specific reason (demo: PIN 0000 → буруу код)'],
+            ['PIN attempts + lockout','3 attempts total; "Үлдсэн оролдлого: N" counter; locked state after 3 fails (mobile P2 parity)'],
+            ['Forgot PIN','Placeholder inline panel: OTP re-verify → set new PIN; full flow ships with the profile pass'],
+          ].map(([t,d]) => (
+            <div className="dod-item" key={t}><div className="dod-ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div><div className="dod-text"><strong>{t}</strong> — {d}</div></div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Preview/>);
+</script>
+</body>
+</html>

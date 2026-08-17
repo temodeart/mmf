@@ -9,7 +9,7 @@ const { useState, useRef, useEffect } = React;
 // Shared atoms pulled from screens.jsx (already loaded + exported to window)
 const { Frame, C, PillBtn, BackBar, SignupStepHeader, LogoMark, Dot, Badge, DanLogo } = window;
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 // ----- Small shared helpers for this flow -----
 
@@ -153,7 +153,7 @@ const PhoneVerify = () => {
 // ============================================================
 const EmailVerify = () => (
   <Frame label="08 — Email verification">
-    <SignupStepHeader step={2} total={TOTAL_STEPS} title="И-мэйл баталгаажуулалт" nextLabel="Нууц үг"/>
+    <SignupStepHeader step={2} total={TOTAL_STEPS} title="И-мэйл баталгаажуулалт" nextLabel="Данс баталгаажуулалт"/>
     <div style={{ flex: 1, overflow:'auto', padding: '16px 24px 24px' }}>
       <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, letterSpacing:'-0.02em', lineHeight: 1.18 }}>
         И-мэйл хаягаа<br/>баталгаажуулна уу
@@ -233,7 +233,7 @@ const CreatePassword = () => {
   const valid = allOk && pw2.length > 0 && pw === pw2;
   return (
     <Frame label="08A — Create password">
-      <SignupStepHeader step={3} total={TOTAL_STEPS} title="Нууц үг үүсгэх" nextLabel="PIN код"/>
+      <SignupStepHeader step={4} total={TOTAL_STEPS} title="Нууц үг үүсгэх" nextLabel="PIN код"/>
       <div style={{ flex: 1, overflow:'auto', padding: '16px 24px 24px' }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, letterSpacing:'-0.02em', lineHeight: 1.18 }}>Нууц үг үүсгэх</div>
         <div style={{ fontSize: 13, color: C.muted, marginTop: 10, lineHeight: 1.5 }}>
@@ -280,7 +280,7 @@ const CreatePassword = () => {
 // ============================================================
 const PinDots = ({ count, error }) => (
   <div style={{ display:'flex', gap: 16, justifyContent:'center' }}>
-    {[0,1,2,3,4,5].map(i => (
+    {[0,1,2,3].map(i => (
       <div key={i} style={{
         width: 16, height: 16, borderRadius: 999,
         background: i < count ? (error ? C.red : C.indigo) : 'transparent',
@@ -331,15 +331,15 @@ const CreatePin = () => {
 
   const onKey = (n) => {
     if (stage === 'done') return;
-    if (active.length >= 6) return;
+    if (active.length >= 4) return;
     const next = active + n;
     if (stage === 'create') {
       setPin(next);
-      if (next.length === 6) setTimeout(() => setStage('confirm'), 180);
+      if (next.length === 4) setTimeout(() => setStage('confirm'), 180);
     } else {
       setError(false);
       setConfirm(next);
-      if (next.length === 6) {
+      if (next.length === 4) {
         setTimeout(() => {
           if (next === pin) setStage('done');
           else { setError(true); setConfirm(''); }
@@ -349,13 +349,13 @@ const CreatePin = () => {
   };
   const onDel = () => setActive(active.slice(0, -1));
 
-  const title = stage === 'create' ? '6 оронтой PIN код оруулна уу'
+  const title = stage === 'create' ? '4 оронтой PIN код оруулна уу'
     : stage === 'confirm' ? 'PIN кодоо давтан оруулна уу'
     : 'PIN код амжилттай үүслээ';
 
   return (
     <Frame label="08B — Transaction PIN">
-      <SignupStepHeader step={4} total={TOTAL_STEPS} title="Гүйлгээний PIN код" nextLabel="Танин баталгаажуулалт"/>
+      <SignupStepHeader step={5} total={TOTAL_STEPS} title="Гүйлгээний PIN код" nextLabel="Танин баталгаажуулалт"/>
       <div style={{ flex: 1, overflow:'auto', padding: '14px 24px 20px', display:'flex', flexDirection:'column' }}>
         <div style={{ fontSize: 21, fontWeight: 800, color: C.ink, letterSpacing:'-0.02em', lineHeight: 1.18 }}>Гүйлгээний PIN код үүсгэх</div>
         <div style={{ fontSize: 12.5, color: C.muted, marginTop: 8, lineHeight: 1.5 }}>
@@ -384,6 +384,101 @@ const CreatePin = () => {
         <span style={{ opacity: stage === 'done' ? 1 : .6 }}>Үргэлжлүүлэх</span>
       </FooterCTA>
     </Frame>
+  );
+};
+
+// ============================================================
+// TRANSACTION PIN — reusable 4-digit entry component
+// States: idle · filling (1-4 dots) · error (shake+red) · locked · done
+// Demo: attempt 1 = wrong; attempt 2 = correct; attempt 3 = locked
+// ============================================================
+const TransactionPin = ({ onFilled }) => {
+  const [digits, setDigits] = useState('');
+  const [phase, setPhase] = useState('idle');
+  const [failCount, setFailCount] = useState(0);
+  const [shaking, setShaking] = useState(false);
+  const MAX_FAILS = 3;
+
+  const onKey = (n) => {
+    if (phase === 'locked' || phase === 'done') return;
+    if (phase === 'error') { setPhase('filling'); setDigits(n); return; }
+    if (digits.length >= 4) return;
+    const next = digits + n;
+    setDigits(next);
+    setPhase('filling');
+    if (next.length === 4) {
+      setTimeout(() => {
+        if (failCount === 0) {
+          setFailCount(1);
+          setShaking(true);
+          setPhase('error');
+          setDigits('');
+          setTimeout(() => setShaking(false), 450);
+        } else if (failCount + 1 >= MAX_FAILS) {
+          setFailCount(f => f + 1);
+          setPhase('locked');
+        } else {
+          setPhase('done');
+          onFilled && onFilled();
+        }
+      }, 180);
+    }
+  };
+
+  const onDel = () => {
+    if (phase === 'locked' || phase === 'done') return;
+    if (phase === 'error') { setPhase('idle'); setDigits(''); return; }
+    const next = digits.slice(0, -1);
+    setDigits(next);
+    setPhase(next.length > 0 ? 'filling' : 'idle');
+  };
+
+  const isError  = phase === 'error';
+  const isDone   = phase === 'done';
+  const isLocked = phase === 'locked';
+  const filledCount  = isDone ? 4 : digits.length;
+  const remAttempts  = MAX_FAILS - failCount;
+
+  if (isLocked) {
+    return (
+      <div style={{ textAlign:'center', padding:'8px 0' }}>
+        <div style={{ display:'flex', gap: 16, justifyContent:'center', marginBottom: 14 }}>
+          {[0,1,2,3].map(i => (
+            <div key={i} style={{ width:14, height:14, borderRadius:999, background:C.red, border:`2px solid ${C.red}`, transition:'all .12s' }}/>
+          ))}
+        </div>
+        <div style={{ width:52, height:52, borderRadius:16, background:C.redSoft, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 12px' }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke={C.red} strokeWidth="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke={C.red} strokeWidth="2"/></svg>
+        </div>
+        <div style={{ fontSize:14, fontWeight:800, color:C.red }}>ПИН код хаагдлаа</div>
+        <div style={{ fontSize:12, color:C.muted, marginTop:6, fontWeight:600, lineHeight:1.4 }}>30 минутаас хойш дахин оролдоно уу.</div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display:'flex', gap:16, justifyContent:'center', marginBottom:14,
+        animation: shaking ? 'omf-pin-shake .4s ease' : 'none' }}>
+        {[0,1,2,3].map(i => (
+          <div key={i} style={{
+            width:14, height:14, borderRadius:999,
+            background: i < filledCount ? (isError ? C.red : C.indigo) : 'transparent',
+            border: `2px solid ${i < filledCount ? (isError ? C.red : C.indigo) : C.line}`,
+            transition: 'all .12s',
+          }}/>
+        ))}
+      </div>
+      {isError && (
+        <div style={{ fontSize:12, color:C.red, fontWeight:700, textAlign:'center', marginBottom:14 }}>
+          ПИН код буруу байна. Үлдсэн оролдлого: {remAttempts}
+        </div>
+      )}
+      {isDone && (
+        <div style={{ fontSize:12, color:C.green, fontWeight:700, textAlign:'center', marginBottom:14 }}>✓ Баталгаажлаа</div>
+      )}
+      <Keypad onKey={onKey} onDel={onDel}/>
+    </div>
   );
 };
 
@@ -444,7 +539,7 @@ const KycConsent = () => {
   ];
   return (
     <Frame label="09 — KYC · ДАН">
-      <SignupStepHeader step={5} total={TOTAL_STEPS} title="Танин баталгаажуулалт" nextLabel="Үйлчилгээний нөхцөл"/>
+      <SignupStepHeader step={6} total={TOTAL_STEPS} title="Танин баталгаажуулалт" nextLabel="Үйлчилгээний нөхцөл"/>
       <div style={{ flex: 1, overflow:'auto', padding: '18px 24px 24px' }}>
         {/* ДАН brand panel */}
         <div style={{
@@ -628,7 +723,7 @@ const TermsOfUse = () => {
   ];
   return (
     <Frame label="12 — Terms of Use">
-      <SignupStepHeader step={6} total={TOTAL_STEPS} title="Үйлчилгээний нөхцөл" nextLabel="Мастер гэрээ"/>
+      <SignupStepHeader step={7} total={TOTAL_STEPS} title="Үйлчилгээний нөхцөл" nextLabel="Мастер гэрээ"/>
       <div style={{ flex: 1, overflow:'auto', padding: '16px 24px 24px' }}>
         <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, letterSpacing:'-0.02em', lineHeight: 1.18 }}>
           Үйлчилгээний нөхцөл
@@ -665,7 +760,7 @@ const TermsOfUse = () => {
 // ============================================================
 const MasterContract = () => (
   <Frame label="13 — Master Contract">
-    <SignupStepHeader step={7} total={TOTAL_STEPS} title="Мастер гэрээ" nextLabel="Гарын үсэг"/>
+    <SignupStepHeader step={8} total={TOTAL_STEPS} title="Мастер гэрээ" nextLabel="Гарын үсэг"/>
     <div style={{ flex: 1, overflow:'auto', padding: '18px 24px 24px' }}>
       {/* contract document visual */}
       <div style={{
@@ -727,7 +822,7 @@ const MasterContract = () => (
 // ============================================================
 const SigningMethod = () => (
   <Frame label="14 — Signing method">
-    <SignupStepHeader step={8} total={TOTAL_STEPS} title="Гарын үсэг зурах"/>
+    <SignupStepHeader step={9} total={TOTAL_STEPS} title="Гарын үсэг зурах"/>
     <div style={{ flex: 1, overflow:'auto', padding: '16px 24px 24px' }}>
       <div style={{ fontSize: 22, fontWeight: 800, color: C.ink, letterSpacing:'-0.02em', lineHeight: 1.18 }}>
         Гэрээгээ хэрхэн<br/>баталгаажуулах вэ?
@@ -916,7 +1011,7 @@ const ESignSuccess = () => (
           { t:'Хадгаламжийн сертификат', ok:true },
           { t:'Нэхэмжлэх', ok:true },
           { t:'Арилжааны бичиг', ok:true },
-          { t:'Итгэмжлэл', ok:false },
+          { t:'Итгэлцэл', ok:false },
         ].map((p, i) => (
           <div key={i} style={{ display:'flex', alignItems:'center', gap: 12, padding:'12px 14px', borderTop: i ? `1px solid ${C.line2}` : 'none', background: p.ok ? '#fff' : '#FAFBFE' }}>
             {p.ok
@@ -936,9 +1031,9 @@ const ESignSuccess = () => (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke={C.amber} strokeWidth="2"/><path d="M8 11V8a4 4 0 018 0v3" stroke={C.amber} strokeWidth="2"/></svg>
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13.5, fontWeight: 800, color:'#5E4413' }}>Итгэмжлэл — түгжээтэй</div>
+          <div style={{ fontSize: 13.5, fontWeight: 800, color:'#5E4413' }}>Итгэлцэл — түгжээтэй</div>
           <div style={{ fontSize: 12, color:'#7A5A1F', marginTop: 4, lineHeight: 1.5 }}>
-            Цахим гарын үсгээр Итгэмжлэл ашиглах боломжгүй. Идэвхжүүлэхийн тулд G-Sign баталгаажуулалт хийнэ үү.
+            Цахим гарын үсгээр Итгэлцэл ашиглах боломжгүй. Идэвхжүүлэхийн тулд G-Sign баталгаажуулалт хийнэ үү.
           </div>
         </div>
       </div>
@@ -949,7 +1044,7 @@ const ESignSuccess = () => (
         fontWeight: 700, fontSize: 15, cursor:'pointer', boxShadow:'0 8px 22px -8px rgba(79,70,229,.5)',
         display:'flex', alignItems:'center', justifyContent:'center', gap: 10,
       }}>
-        Данс баталгаажуулах
+        Үргэлжлүүлэх
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
       <button style={{ width:'100%', height: 48, borderRadius: 14, background:'transparent', color: C.indigo, border:'none', fontWeight: 700, fontSize: 14, cursor:'pointer' }}>
@@ -1125,7 +1220,7 @@ const GSignSuccess = () => (
         fontWeight: 700, fontSize: 15, cursor:'pointer', boxShadow:'0 8px 22px -8px rgba(79,70,229,.5)',
         display:'flex', alignItems:'center', justifyContent:'center', gap: 10,
       }}>
-        Данс баталгаажуулах
+        Үргэлжлүүлэх
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
       </button>
     </div>
@@ -1204,6 +1299,7 @@ const GSignTutorial = () => {
 // EXPORT NEW SCREENS TO WINDOW
 // ============================================================
 Object.assign(window, {
+  PinDots, Keypad, TransactionPin,
   PhoneVerify, EmailVerify, CreatePassword, CreatePin, BiometricSetup, KycConsent, MonpepCheck, MonpepFailed,
   TermsOfUse, MasterContract, SigningMethod,
   ESignCanvas, ESignSuccess, GSignRequest, GSignWaiting, GSignSuccess, GSignTutorial,

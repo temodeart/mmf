@@ -1,0 +1,19 @@
+<!-- @dsCard group="Brand" viewport="700x220" name="Logo" subtitle="Orange + blue mark · light / dark / mark-only lockups" -->
+<!DOCTYPE html>
+<html lang="mn"><head><meta charset="UTF-8"/><link rel="stylesheet" href="../styles.css"/>
+<style>
+  body{margin:0;background:var(--surface);padding:24px;}
+  .row{display:grid;grid-template-columns:1.4fr 1.4fr 1fr;gap:16px;}
+  .tile{border-radius:16px;border:1px solid var(--line-2);height:120px;display:flex;align-items:center;justify-content:center;padding:20px;}
+  .dark{background:var(--navy);border:none;}
+  .cap{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);margin-top:10px;text-align:center;}
+  img{height:34px;width:auto;}
+  .mark{height:44px;}
+</style></head>
+<body>
+<div class="row">
+  <div><div class="tile"><img src="../assets/logo-black.svg" alt="Money Market Fund"/></div><div class="cap">logo-black.svg · light bg</div></div>
+  <div><div class="tile dark"><img src="../assets/logo-white.svg" alt="Money Market Fund"/></div><div class="cap">logo-white.svg · dark bg</div></div>
+  <div><div class="tile"><img class="mark" src="../assets/logo-mark.svg" alt="MMF mark"/></div><div class="cap">logo-mark.svg</div></div>
+</div>
+</body></html>

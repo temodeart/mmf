@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>01 — Component Kit · MMF Web App</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<style>
+  body { background: radial-gradient(1100px 500px at 15% -6%, #EEF0FE 0%, transparent 55%), radial-gradient(900px 450px at 100% 110%, #FFEDE2 0%, transparent 55%), var(--bg); }
+  .pg { max-width: 1160px; margin: 0 auto; padding: 52px 40px 100px; }
+  .ph { margin-bottom: 56px; padding-bottom: 40px; border-bottom: 2px solid var(--line); }
+  .sec { margin-bottom: 60px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; padding-bottom: 14px; margin-bottom: 26px; border-bottom: 1px solid var(--line); }
+  .sec-n { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--indigo); flex-shrink: 0; }
+  .sec-label { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
+  .sec-sub { font-size: 12.5px; color: var(--muted); font-weight: 500; margin-left: 2px; }
+  .row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+  .col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .col3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .card-demo { background: #fff; border: 1px solid var(--line-2); border-radius: 16px; padding: 20px; }
+  .demo-label { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .dod { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dod-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--pos-border); }
+  .dod-ic { width: 20px; height: 20px; border-radius: 6px; background: var(--pos); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .dod-text { font-size: 12.5px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .dod-text strong { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="pg">
+  <header class="ph">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--indigo);margin-bottom:12px">MMF Web App · Pass 01</div>
+    <h1 style="font-size:42px;font-weight:800;letter-spacing:-.03em;margin:0 0 12px;line-height:1.05">Component Kit</h1>
+    <p style="font-size:15px;color:var(--muted);font-weight:500;max-width:540px;margin:0;line-height:1.6">20 token-driven components — every documented variant and state. Subsequent passes assemble screens from these atoms only.</p>
+  </header>
+  <div id="root"></div>
+</div>
+
+<script type="text/babel">
+const { useState } = React;
+const {
+  T, WebDot, WebBadge, WebButton, WebTextInput, WebSparkline,
+  WebEmptyState, WebErrorState, WebSkeletonBlock,
+  WebStatCard, WebPagination, WebDataTable, WebInstrumentCard,
+  WebSegmentedControl, WebFilterChips, WebOrderTicket, WebOTPInput,
+  WebSidebar, WebTopbar, WebPageHeader, WebModal, WebDisclaimer,
+} = window;
+
+/* ── sample data ── */
+const INSTRUMENTS = [
+  { id:'dari',  bank:'Дарь Финанс ББСБ',    type:'trust', rate:23.0, unit:100000,  term:272, ticker:'DARI 2300 IT 270227', avail:840,  total:1000, badge:'new' },
+  { id:'hotol', bank:'Хөтөлномгон ББСБ',    type:'trust', rate:22.0, unit:100000,  term:365, ticker:'HOTL 2200 IT 270618', avail:1200, total:2000, badge:'new' },
+  { id:'capit', bank:'Капитрон банк',         type:'cd',    rate:14.5, unit:1000000, term:240, ticker:'CAPIT 1450 CD 270218', avail:95,   total:300,  badge:'active' },
+];
+
+const TABLE_COLS = [
+  { key:'name',   label:'Гаргагч', width:'38%',
+    render: r => <div style={{ display:'flex', alignItems:'center', gap:11 }}>
+      <div style={{ width:32, height:32, borderRadius:9, background:`linear-gradient(135deg,${r.c1},${r.c2})`, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:800, fontSize:12, flexShrink:0 }}>{r.abbr}</div>
+      <div><div style={{ fontWeight:700, color:T.ink, fontSize:13.5 }}>{r.name}</div><div style={{ fontSize:10.5, color:T.muted2, fontFamily:"'JetBrains Mono',monospace" }}>{r.ticker}</div></div>
+    </div> },
+  { key:'type',   label:'Төрөл',   render: r => <span style={{ fontSize:12, fontWeight:700, color:T.text }}>{r.type}</span> },
+  { key:'rate',   label:'Үр шим',  align:'right', sortable:true, mono:true,
+    render: r => <span style={{ color:T.pos, fontWeight:800 }}>{r.rate}</span> },
+  { key:'price',  label:'Нэгж үнэ', align:'right', mono:true },
+  { key:'status', label:'Статус',
+    render: r => <WebBadge tone={r.badgeTone}>{r.statusLabel}</WebBadge> },
+];
+const TABLE_ROWS = [
+  { id:'1', name:'Дарь Финанс ББСБ',  ticker:'DARI 2300 IT 270227', abbr:'ДФ', c1:'#4F46E5',c2:'#7C3AED', type:'Итгэлцэл',  rate:'23.0%', price:'₮ 100,000', badgeTone:'new',    statusLabel:'Шинэ' },
+  { id:'2', name:'Хөтөлномгон ББСБ',  ticker:'HOTL 2200 IT 270618', abbr:'ХН', c1:'#4F46E5',c2:'#7C3AED', type:'Итгэлцэл',  rate:'22.0%', price:'₮ 100,000', badgeTone:'new',    statusLabel:'Шинэ' },
+  { id:'3', name:'Капитрон банк',       ticker:'CAPIT 1450 CD 270218',abbr:'КБ', c1:'#2D6BFF',c2:'#4F46E5', type:'ХС',        rate:'14.5%', price:'₮ 1,000,000',badgeTone:'active', statusLabel:'Идэвхтэй' },
+  { id:'4', name:'Микро Кредит ББСБ',  ticker:'MCRO 2150 IT 261220', abbr:'МК', c1:'#4F46E5',c2:'#7C3AED', type:'Итгэлцэл',  rate:'21.5%', price:'₮ 100,000', badgeTone:'active', statusLabel:'Идэвхтэй' },
+  { id:'5', name:'Тээвэр хөгжлийн банк',ticker:'TDBM 1900 IN 260921',abbr:'ТХ', c1:'#0E9F6E',c2:'#0891B2', type:'Нэхэмжлэх', rate:'19.0%', price:'₮ 500,000', badgeTone:'new',    statusLabel:'Шинэ' },
+];
+
+/* ── Gallery component ── */
+const Gallery = () => {
+  const [selInst, setSelInst] = useState(null);
+  const [qty, setQty] = useState(0);
+  const [side, setSide] = useState('buy');
+  const [tableState, setTableState] = useState('populated');
+  const [selRow, setSelRow] = useState(null);
+  const [sortBy, setSortBy] = useState('rate');
+  const [page, setPage] = useState(1);
+  const [inputVal, setInputVal] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [mktSeg, setMktSeg] = useState('primary');
+  const [chipFilter, setChipFilter] = useState('all');
+
+  const TREND_POS = [88,90,85,92,95,91,98,100,104,108,112,110,118];
+  const TREND_NEG = [118,112,110,104,100,98,91,95,92,85,90,88,82];
+
+  const SecHead = ({ n, label, sub }) => (
+    <div className="sec-head">
+      <span className="sec-n">{n}</span>
+      <span className="sec-label">{label}</span>
+      {sub && <span className="sec-sub">{sub}</span>}
+    </div>
+  );
+
+  return (
+    <div>
+      {/* ── A: Atoms ── */}
+      <section className="sec">
+        <SecHead n="A" label="Atoms" sub="Button · TextInput · Badge · Dot · Sparkline"/>
+
+        <div className="col2" style={{ marginBottom:16 }}>
+          {/* Buttons */}
+          <div className="card-demo">
+            <div className="demo-label">Button — variants + sizes</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
+                <WebButton variant="primary">Захиалга өгөх</WebButton>
+                <WebButton variant="ghost">Цуцлах</WebButton>
+                <WebButton variant="ink">Дэлгэрэнгүй</WebButton>
+              </div>
+              <div style={{ display:'flex', gap:10, flexWrap:'wrap', alignItems:'center' }}>
+                <WebButton variant="pos">Авах</WebButton>
+                <WebButton variant="neg">Зарах</WebButton>
+                <WebButton variant="primary" pill size="sm">Шинэ захиалга</WebButton>
+                <WebButton variant="ghost" size="sm">Хаах</WebButton>
+              </div>
+              <WebButton variant="primary" full disabled reason="Бүтээгдэхүүн сонгоогүй байна.">Авах захиалга өгөх</WebButton>
+            </div>
+          </div>
+
+          {/* TextInput */}
+          <div className="card-demo">
+            <div className="demo-label">TextInput — states</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <WebTextInput label="Нэвтрэх нэр" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder="И-мэйл хаяг оруулна уу"/>
+              <WebTextInput label="Нууц үг" type="password" value="password" onChange={()=>{}} placeholder="••••••••" error="Нууц үг буруу байна."/>
+              <WebTextInput label="Дансны дугаар" value="200001281" onChange={()=>{}} mono prefix="№" hint="Баталгаажсан"/>
+            </div>
+          </div>
+        </div>
+
+        {/* Badge + Dot + Sparkline */}
+        <div className="col3">
+          <div className="card-demo">
+            <div className="demo-label">Badge — 6 tones · sm + md</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                <WebBadge tone="new">Шинэ</WebBadge>
+                <WebBadge tone="active">Идэвхтэй</WebBadge>
+                <WebBadge tone="pending">Хүлээгдэж буй</WebBadge>
+              </div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                <WebBadge tone="sell">Зарах</WebBadge>
+                <WebBadge tone="buy">Авах</WebBadge>
+                <WebBadge tone="info">Мэдэгдэл</WebBadge>
+              </div>
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                <WebBadge tone="new" size="md">Шинэ (md)</WebBadge>
+                <WebBadge tone="sell" size="md">Зарах (md)</WebBadge>
+              </div>
+            </div>
+          </div>
+          <div className="card-demo">
+            <div className="demo-label">Sparkline — pos · neg · empty</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <span style={{ fontSize:12, color:T.muted, fontWeight:600 }}>Өсч буй</span>
+                <WebSparkline data={TREND_POS} color={T.pos} width={120} height={40}/>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <span style={{ fontSize:12, color:T.muted, fontWeight:600 }}>Буурч буй</span>
+                <WebSparkline data={TREND_NEG} color={T.neg} width={120} height={40}/>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <span style={{ fontSize:12, color:T.muted, fontWeight:600 }}>Датагүй</span>
+                <WebSparkline data={[]} width={120} height={40}/>
+              </div>
+            </div>
+          </div>
+          <div className="card-demo">
+            <div className="demo-label">Dot — semantic colors</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {[[T.pos,'Идэвхтэй / Шинэ'],[T.neg,'Алдаа / Зарах'],[T.warn,'Хүлээгдэж буй'],[T.indigo,'Мэдэгдэл'],[T.muted,'Хаасан']].map(([c,l]) => (
+                <div key={c} style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <WebDot color={c} size={9}/>
+                  <span style={{ fontSize:13, fontWeight:600, color:T.text }}>{l}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── B: State Patterns ── */}
+      <section className="sec">
+        <SecHead n="B" label="State Patterns" sub="EmptyState · ErrorState (3 variants) · SkeletonBlock"/>
+        <div className="col2" style={{ marginBottom:16 }}>
+          <div className="card-demo" style={{ padding:0, overflow:'hidden' }}>
+            <div className="demo-label" style={{ padding:'14px 20px 0' }}>EmptyState</div>
+            <WebEmptyState
+              icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke={T.muted} strokeWidth="1.8"/><path d="M8 12h8" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round"/></svg>}
+              title="Захиалга байхгүй байна"
+              body="Та одоогоор захиалга өгөөгүй байна. Анхдагч зах зээлээс бүтээгдэхүүн сонгоно уу."
+              action={{ label:'Захиалга өгөх', onClick:()=>{} }}
+            />
+          </div>
+          <div className="card-demo">
+            <div className="demo-label">ErrorState — neg · warn · info</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <WebErrorState variant="neg" title="Холболт тасарлаа" body="Сервертэй холбогдоход алдаа гарлаа." action={{ label:'Дахин оролдох', onClick:()=>{} }}/>
+              <WebErrorState variant="warn" title="Баталгаажуулалт хүлээгдэж байна" body="Дансаа баталгаажуулна уу."/>
+              <WebErrorState variant="info" title="Зах зээл хаалттай" body="Арилжаа 09:00–17:00 цагт нээлттэй."/>
+            </div>
+          </div>
+        </div>
+        <div className="card-demo">
+          <div className="demo-label">SkeletonBlock — 6 variants (shimmer animated)</div>
+          <div style={{ display:'flex', gap:20, flexWrap:'wrap', alignItems:'flex-start' }}>
+            {['text','title','num','avatar','card','row'].map(v => (
+              <div key={v} style={{ display:'flex', flexDirection:'column', gap:6, alignItems:'flex-start' }}>
+                <div style={{ fontSize:10.5, color:T.muted2, fontWeight:700, letterSpacing:'.06em' }}>{v}</div>
+                <WebSkeletonBlock variant={v} width={v==='avatar'?undefined:v==='card'?160:v==='row'?200:100}/>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── C: Data Display ── */}
+      <section className="sec">
+        <SecHead n="C" label="Data Display" sub="StatCard · DataTable (4 states + selection) · Pagination · InstrumentCard"/>
+        {/* Stat cards */}
+        <div className="col3" style={{ marginBottom:16 }}>
+          <WebStatCard label="Нийт актив" value={formatMNT(248500000)} delta={formatDelta(12480000)} deltaPositive trend={TREND_POS} heroValue/>
+          <WebStatCard label="Ашиглалтын хугацаа" value="14.5%" delta="+1.2%" deltaPositive={true} trend={TREND_POS}/>
+          <WebStatCard label="Нийт захиалга" value="28" trend={[]}/>
+        </div>
+        <div className="col3" style={{ marginBottom:16 }}>
+          <WebStatCard label="Дансны үлдэгдэл" loading/>
+          <WebStatCard label="Шинэ санал" value="6" delta={formatDelta(-1)} deltaPositive={false} trend={TREND_NEG}/>
+          <WebStatCard label="Хугацаа дуусах" value="3" trend={null}/>
+        </div>
+
+        {/* DataTable with state switcher */}
+        <div style={{ marginBottom:8 }}>
+          <div style={{ display:'flex', gap:8, marginBottom:14, alignItems:'center' }}>
+            <span style={{ fontSize:12, color:T.muted, fontWeight:700 }}>Статус:</span>
+            {['populated','loading','empty','error'].map(s => (
+              <button key={s} onClick={() => setTableState(s)} style={{ height:30, padding:'0 12px', borderRadius:8, border:`1px solid ${tableState===s?T.indigo:T.line}`, background:tableState===s?T.indigo:'#fff', color:tableState===s?'#fff':T.muted, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{s}</button>
+            ))}
+            <span style={{ fontSize:11.5, color:T.muted, marginLeft:8 }}>Row click → select. Header click → sort.</span>
+          </div>
+          <WebDataTable
+            title="Бүтээгдэхүүний жагсаалт"
+            columns={TABLE_COLS}
+            rows={tableState==='populated'?TABLE_ROWS:[]}
+            loading={tableState==='loading'}
+            error={tableState==='error'?{title:'Жагсаалт ачаалахад алдаа гарлаа', body:'Сервертэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.', action:{label:'Дахин оролдох',onClick:()=>{}}}:null}
+            emptyTitle="Бүтээгдэхүүн олдсонгүй"
+            emptyBody="Хайлтын нөхцлөө өөрчилж дахин оролдоно уу."
+            emptyAction={{ label:'Шүүлтүүр цэвэрлэх', onClick:()=>{} }}
+            selected={selRow}
+            onRowClick={r => setSelRow(r.id===selRow?null:r.id)}
+            sortBy={sortBy} sortDir="desc" onSort={setSortBy}
+            page={page} perPage={3} total={tableState==='populated'?TABLE_ROWS.length:0}
+            onPageChange={setPage}
+          />
+        </div>
+
+        {/* InstrumentCards */}
+        <div className="col3" style={{ marginTop:16 }}>
+          {INSTRUMENTS.map(inst => (
+            <WebInstrumentCard key={inst.id} data={inst} selected={selInst===inst.id} onSelect={()=>setSelInst(selInst===inst.id?null:inst.id)} onBuy={()=>{ setSelInst(inst.id); setSide('buy'); }}/>
+          ))}
+        </div>
+      </section>
+
+      {/* ── D: Trading ── */}
+      <section className="sec">
+        <SecHead n="D" label="Trading" sub="SegmentedControl · FilterChips · OrderTicket (interactive) · OTPInput"/>
+        <div style={{ display:'flex', gap:12, flexWrap:'wrap', marginBottom:16 }}>
+          <div className="card-demo" style={{ flex:'0 0 auto' }}>
+            <div className="demo-label">SegmentedControl — generic + buy/sell</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <WebSegmentedControl value={mktSeg} onChange={setMktSeg} options={[{value:'primary',label:'Анхдагч',count:12},{value:'secondary',label:'Хоёрдогч',count:7}]}/>
+              <WebSegmentedControl semantic="buy-sell" value={side} onChange={setSide} options={[{value:'buy',label:'Авах'},{value:'sell',label:'Зарах'}]}/>
+            </div>
+          </div>
+          <div className="card-demo" style={{ flex:1, minWidth:300 }}>
+            <div className="demo-label">FilterChips</div>
+            <WebFilterChips value={chipFilter} onChange={setChipFilter} options={[
+              {value:'all', label:'Бүгд'},
+              {value:'cd',    label:'Хадгаламжийн сертификат', color:'#2D6BFF'},
+              {value:'trust', label:'Итгэлцэл',                color:'#4F46E5'},
+              {value:'inv',   label:'Нэхэмжлэх',               color:'#0E9F6E'},
+            ]}/>
+          </div>
+        </div>
+
+        <div className="col2">
+          {/* OrderTicket */}
+          <div>
+            <div className="demo-label" style={{ marginBottom:10 }}>OrderTicket — interactive (select a card above to populate)</div>
+            <WebOrderTicket
+              side={side} onSideChange={setSide}
+              instrument={selInst ? INSTRUMENTS.find(i=>i.id===selInst) : null}
+              qty={qty} onQtyChange={setQty}
+              balance={2450000}
+              onSubmit={() => setModalOpen(true)}
+            />
+          </div>
+          <div>
+            <div className="demo-label" style={{ marginBottom:10 }}>OTPInput + Modal demo</div>
+            <div className="card-demo">
+              <div style={{ fontSize:13, fontWeight:600, color:T.muted, marginBottom:14, lineHeight:1.5 }}>Бид таны бүртгэлтэй дугаар <b style={{ color:T.text }}>+976 •••• 4127</b> руу 6 оронтой код илгээлээ.</div>
+              <WebOTPInput length={6} onComplete={code => alert('OTP: ' + code)}/>
+              <div style={{ display:'flex', justifyContent:'space-between', marginTop:10, fontSize:12, fontWeight:600, color:T.muted }}>
+                <span>Код 04:32 хүчинтэй</span>
+                <button style={{ color:T.indigo, fontWeight:700, background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:12, padding:0 }}>Дахин илгээх</button>
+              </div>
+            </div>
+            <div style={{ marginTop:16 }}>
+              <div className="demo-label" style={{ marginBottom:10 }}>WebModal</div>
+              <WebButton variant="primary" onClick={()=>setModalOpen(true)}>Захиалга баталгаажуулах →</WebButton>
+              <WebModal open={modalOpen} onClose={()=>setModalOpen(false)}
+                logo="ДФ" logoColor="linear-gradient(135deg,#4F46E5,#7C3AED)"
+                title="Дарь Финанс ББСБ" ticker="DARI 2300 IT 270227"
+                footer={<WebButton variant="pos" full onClick={()=>setModalOpen(false)}>Захиалга баталгаажуулах</WebButton>}
+              >
+                <div style={{ display:'flex', flexDirection:'column', gap:0 }}>
+                  {[['Төрөл','Авах · Итгэлцэл'],['Үр шим','23.0%'],['Хугацаа','272 хоног'],['Нэгж үнэ','₮ 100,000'],['Тоо ширхэг','5 ширхэг'],['Шимтгэл','₮ 500'],['Нийт','₮ 500,500']].map(([k,v]) => (
+                    <div key={k} style={{ display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:`1px solid ${T.line2}` }}>
+                      <span style={{ fontSize:13, color:T.muted, fontWeight:600 }}>{k}</span>
+                      <span style={{ fontSize:13.5, fontWeight:700, color:T.ink, fontFamily:"'JetBrains Mono',monospace" }}>{v}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop:16 }}><WebDisclaimer>Захиалга нь нөхцөл биелтэл хүчинтэй. Баталгаажуулсны дараа цуцлах боломжгүй.</WebDisclaimer></div>
+              </WebModal>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── E: Layout Shell ── */}
+      <section className="sec">
+        <SecHead n="E" label="Layout Shell" sub="Sidebar · Topbar · PageHeader · Disclaimer"/>
+        <div className="col2" style={{ marginBottom:16 }}>
+          <div className="card-demo" style={{ padding:0, overflow:'hidden', maxHeight:400 }}>
+            <div className="demo-label" style={{ padding:'14px 14px 0' }}>WebSidebar (active: /trade/primary)</div>
+            <div style={{ transform:'scale(.78)', transformOrigin:'top left', width:'128%', height:340 }}>
+              <WebSidebar activePath="/trade/primary"/>
+            </div>
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+            <div className="card-demo" style={{ padding:0, overflow:'hidden' }}>
+              <div className="demo-label" style={{ padding:'14px 16px 0' }}>WebTopbar</div>
+              <WebTopbar title="Арилжаа" notifCount={2}/>
+            </div>
+            <div className="card-demo">
+              <div className="demo-label">WebPageHeader</div>
+              <WebPageHeader title="Анхдагч зах зээл" subtitle="ББСБ болон банкуудын шинээр зарласан бүтээгдэхүүн"
+                right={<WebSegmentedControl value="primary" onChange={()=>{}} options={[{value:'primary',label:'Анхдагч',count:12},{value:'secondary',label:'Хоёрдогч',count:7}]}/>}
+              />
+            </div>
+            <div className="card-demo">
+              <div className="demo-label">WebDisclaimer (required on all instrument surfaces)</div>
+              <WebDisclaimer>Өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно. Энэ нь баталгаат өгөөж биш болохыг анхаарна уу.</WebDisclaimer>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── DoD ── */}
+      <section className="sec" style={{ marginBottom:0 }}>
+        <SecHead n="✓" label="Definition of Done · Pass 01"/>
+        <div className="dod">
+          {[
+            ['WebBadge', '6 tones (new/active/pending/sell/buy/info), sm + md sizes, dot auto-matches tone'],
+            ['WebButton', 'primary/ghost/ink/pos/neg variants, sm/md, pill, full; disabled+reason pattern'],
+            ['WebTextInput', 'label, hint, error, disabled, prefix, mono; focus ring via box-shadow'],
+            ['WebSparkline', 'data: number[], pos/neg color, honest empty (dashed line when no data)'],
+            ['WebEmptyState', 'icon + title + body + optional action CTA slot'],
+            ['WebErrorState', 'neg/warn/info variants; icon + title + body + action link'],
+            ['WebSkeletonBlock', '6 variants (text/title/num/avatar/card/row); uses CSS .skeleton shimmer'],
+            ['WebStatCard', 'value + delta (signed, colored) + sparkline; loading skeleton; empty trend'],
+            ['WebDataTable', 'loading/empty/error/populated states; row-click selection; sortable headers; pagination'],
+            ['WebPagination', 'compact prev/next/page buttons; ellipsis for large sets; page=1 start'],
+            ['WebInstrumentCard', 'all fields; selected ring; availability bar; buy CTA; badge'],
+            ['WebSegmentedControl', 'generic + buy-sell semantic (pos/neg active colors)'],
+            ['WebFilterChips', 'active = ink fill; color dot per type; wraps'],
+            ['WebOrderTicket', 'empty/filled/insufficient states; disabled-with-reason CTA; qty stepper + quick-select'],
+            ['WebOTPInput', '6-cell auto-advance; backspace focus-back; fires onComplete when full'],
+            ['WebSidebar', 'sticky; logo; nav + subnav expand; active path highlight; footer version'],
+            ['WebTopbar', 'sticky; notification dot; user pill with initials + name'],
+            ['WebPageHeader', 'h1 + subtitle + right slot (accepts SegmentedControl etc.)'],
+            ['WebModal', 'scrim blur; sticky header/footer; close on backdrop click; ESC via parent'],
+            ['WebDisclaimer', 'amber warn surface + border; required on every instrument surface'],
+          ].map(([title, desc]) => (
+            <div className="dod-item" key={title}>
+              <div className="dod-ic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+              <div className="dod-text"><strong>{title}</strong> — {desc}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop:20, padding:'18px 20px', background:'var(--warn-surface)', border:'1px solid var(--warn-border)', borderRadius:14 }}>
+          <ul style={{ margin:0, paddingLeft:18, display:'flex', flexDirection:'column', gap:8 }}>
+            <li style={{ fontSize:13, fontWeight:600, color:'var(--text)', lineHeight:1.55 }}><strong>WebModal ESC handling:</strong> Closes on backdrop click. Keyboard ESC requires the parent screen to wire a <code>keydown</code> listener — modal is intentionally unaware of global events.</li>
+            <li style={{ fontSize:13, fontWeight:600, color:'var(--text)', lineHeight:1.55 }}><strong>Ready for Pass 02</strong> — Trade Screen. All 20 components available on <code>window.*</code>. Say "go" to proceed.</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Gallery/>);
+</script>
+</body>
+</html>

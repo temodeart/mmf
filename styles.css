@@ -1,0 +1,12 @@
+/* =========================================================================
+   Money Market Fund — Design System · global CSS entry
+   Consumers link ONLY this file. It reaches every token + font-face + base
+   rule in the system. Keep this file a list of @import lines only.
+   ========================================================================= */
+
+@import url('tokens/fonts.css');
+@import url('tokens/colors.css');
+@import url('tokens/typography.css');
+@import url('tokens/spacing.css');
+@import url('tokens/effects.css');
+@import url('tokens/base.css');

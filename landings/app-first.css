@@ -1,0 +1,866 @@
+/* ═══════════════════════════════════════════════════════════════
+   MMF — Landing 13 · App First
+   Sections, motion, layout. Brand tokens come from colors_and_type.css
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --accent: var(--indigo);
+  --accent-soft: var(--indigo-soft);
+  --wrap: 1240px;
+  --nav-h: 76px;
+}
+
+html { scroll-behavior: smooth; }
+body.laf {
+  background: #FDFDFF;
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--navy); }
+
+::selection { background: var(--accent-soft); color: var(--accent); }
+
+.laf-wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 40px; }
+
+/* ---------- Type ---------- */
+.laf-display {
+  font-size: clamp(46px, 6.2vw, 92px);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: balance;
+}
+.laf-h2 {
+  font-size: clamp(34px, 3.8vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.04;
+  margin: 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.laf-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent);
+}
+.laf-eyebrow::before {
+  content: ''; width: 22px; height: 2px; background: var(--accent); border-radius: 2px;
+}
+.laf-sub {
+  font-size: 17px; font-weight: 500; line-height: 1.65;
+  color: var(--muted); max-width: 520px;
+}
+
+/* ---------- Buttons ---------- */
+.laf-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: 56px; padding: 0 28px; border-radius: var(--r-pill);
+  font-family: inherit; font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
+  border: none; cursor: pointer; white-space: nowrap;
+  transition: transform var(--t-medium) var(--ease-default),
+              box-shadow var(--t-medium) var(--ease-default),
+              background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+.laf-btn--primary { background: var(--accent); color: #fff; box-shadow: 0 8px 22px -8px color-mix(in oklab, var(--accent) 55%, transparent); }
+.laf-btn--primary:hover { color:#fff; transform: translateY(-2px); box-shadow: 0 14px 30px -10px color-mix(in oklab, var(--accent) 60%, transparent); }
+.laf-btn--ink { background: var(--ink); color: #fff; }
+.laf-btn--ink:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 14px 28px -12px rgba(11,16,32,.5); }
+.laf-btn--ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.laf-btn--ghost:hover { color: var(--ink); border-color: var(--ink); }
+.laf-btn--glass { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(8px); }
+.laf-btn--glass:hover { color:#fff; background: rgba(255,255,255,.14); }
+.laf-btn--white { background: #fff; color: var(--ink); box-shadow: 0 12px 28px -12px rgba(0,0,0,.5); }
+.laf-btn--white:hover { color: var(--ink); transform: translateY(-2px); }
+.laf-btn--sm { height: 42px; padding: 0 20px; font-size: 13.5px; }
+
+/* ---------- Nav ---------- */
+.laf-nav {
+  position: fixed; inset: 0 0 auto 0; z-index: 60; height: var(--nav-h);
+  display: flex; align-items: center;
+  background: rgba(253,253,255,.82);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--t-medium), background var(--t-medium);
+}
+.laf-nav.is-scrolled { border-bottom-color: var(--line-2); }
+.laf-nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; width: 100%; }
+.laf-logo img { height: 30px; display: block; }
+.laf-nav-links { display: flex; gap: 6px; }
+.laf-nav-links a {
+  padding: 9px 12px; border-radius: var(--r-pill); white-space: nowrap;
+  font-size: 14px; font-weight: 600; color: var(--text);
+  transition: background var(--t-fast), color var(--t-fast);
+}
+.laf-nav-links a:hover { background: var(--accent-soft); color: var(--accent); }
+.laf-nav-cta { display: flex; gap: 10px; align-items: center; }
+
+/* ---------- Hero ---------- */
+.laf-hero {
+  position: relative;
+  padding: calc(var(--nav-h) + 56px) 0 0;
+  min-height: 100svh;
+  display: flex; align-items: stretch;
+  overflow: hidden;
+}
+.laf-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(640px 480px at 82% 18%, rgba(79,70,229,.07), transparent 70%),
+    radial-gradient(520px 420px at 90% 85%, rgba(255,107,44,.06), transparent 70%),
+    radial-gradient(560px 460px at 8% 90%, rgba(45,107,255,.05), transparent 70%);
+}
+.laf-hero-grid {
+  position: relative; display: grid; grid-template-columns: 1.08fr .92fr;
+  gap: 40px; align-items: center; width: 100%;
+}
+.laf-hero-copy { padding: 40px 0 80px; }
+.laf-hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px 7px 8px; border-radius: var(--r-pill);
+  background: #fff; border: 1px solid var(--line);
+  font-size: 12.5px; font-weight: 700; color: var(--text);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 28px;
+}
+.laf-hero-badge .tag {
+  padding: 3px 9px; border-radius: var(--r-pill);
+  background: var(--accent); color: #fff;
+  font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+}
+.laf-hero-copy .laf-display .ln { display: block; }
+.laf-hero-copy .laf-display .hl { color: var(--accent); }
+.laf-hero-sub { margin-top: 26px; }
+.laf-hero-actions { display: flex; gap: 14px; margin-top: 38px; flex-wrap: wrap; }
+
+.laf-stores { display: flex; gap: 10px; margin-top: 22px; }
+.laf-store {
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 46px; padding: 0 18px; border-radius: 14px;
+  background: #fff; border: 1px solid var(--line);
+  color: var(--ink); transition: border-color var(--t-fast), transform var(--t-medium) var(--ease-default);
+}
+.laf-store:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-2px); }
+.laf-store > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.laf-store .k { font-size: 10px; font-weight: 600; color: var(--muted); line-height: 1.1; }
+.laf-store .v { font-size: 14px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.15; }
+.laf-store svg { flex-shrink: 0; }
+
+/* hero phone stage */
+.laf-stage {
+  position: relative; height: 100%; min-height: 680px;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.laf-hero-phone {
+  position: relative;
+  transform-origin: 50% 100%;
+  transform: translateY(0);
+  will-change: transform;
+}
+
+/* floating chips */
+.laf-chip {
+  position: absolute; z-index: 5;
+  display: flex; align-items: center; gap: 9px;
+  background: #fff; border: 1px solid var(--line-2); border-radius: 16px;
+  padding: 12px 16px; box-shadow: var(--shadow-floating);
+  font-size: 13px; font-weight: 700; color: var(--ink);
+  white-space: nowrap;
+}
+.laf-chip .lbl { display: block; font-size: 10.5px; font-weight: 600; color: var(--muted); margin-bottom: 2px; }
+.laf-chip .num { font-family: var(--font-mono); font-size: 14px; letter-spacing: -0.01em; }
+.laf-chip .up { color: var(--pos); }
+.laf-chip .ic {
+  width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.laf-chip .ic--green { background: var(--pos-soft); }
+.laf-chip .ic--indigo { background: var(--indigo-soft); }
+/* Chips hang off the phone edges — anchored to the phone box itself so they
+   clear the screen content at any scale instead of covering it.
+   ch3 sits high enough to clear the hero's centred scroll hint: the chip is
+   anchored to the phone while the hint is centred on the whole hero, so the two
+   have different horizontal origins and can only be separated vertically. */
+.laf-chip.ch1 { top: 7%; right: calc(100% - 26px); left: auto; }
+.laf-chip.ch2 { top: 45%; left: calc(100% - 26px); right: auto; }
+.laf-chip.ch3 { bottom: 34%; right: calc(100% - 26px); left: auto; }
+
+.laf-scrollhint {
+  position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--muted-2);
+}
+.laf-scrollhint i {
+  width: 1.5px; height: 34px; background: linear-gradient(var(--muted-2), transparent);
+  display: block; animation: laf-drip 2s var(--ease-default) infinite;
+}
+@keyframes laf-drip {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ---------- Ticker ---------- */
+.laf-ticker {
+  border-block: 1px solid var(--line-2);
+  background: #fff; overflow: hidden; padding: 16px 0;
+  position: relative; z-index: 2;
+}
+.laf-ticker-track {
+  display: flex; gap: 56px; width: max-content;
+  animation: laf-marquee 36s linear infinite;
+}
+.laf-ticker:hover .laf-ticker-track { animation-play-state: paused; }
+@keyframes laf-marquee { to { transform: translateX(-50%); } }
+.laf-tick {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+  color: var(--text); font-variant-numeric: tabular-nums;
+}
+.laf-tick .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+.laf-tick b { color: var(--ink); font-weight: 600; }
+.laf-tick .rate { color: var(--pos); }
+
+/* ---------- Stats ---------- */
+.laf-stats { padding: 110px 0 90px; }
+.laf-stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;
+  border-top: 1px solid var(--line-2);
+  padding-top: 48px;
+}
+.laf-stat .v {
+  font-size: clamp(38px, 4vw, 58px); font-weight: 800; letter-spacing: -0.03em;
+  color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1;
+}
+.laf-stat .v .u { font-size: .55em; font-weight: 700; color: var(--muted); margin-left: 2px; }
+.laf-stat .l { font-size: 13.5px; font-weight: 600; color: var(--muted); margin-top: 12px; line-height: 1.45; max-width: 200px; }
+
+/* ---------- Tour (scrollytelling) ---------- */
+.laf-tour { position: relative; background: var(--bg); border-block: 1px solid var(--line-2); }
+.laf-tour-head { padding: 110px 0 20px; max-width: 720px; }
+.laf-tour-head .laf-sub { margin-top: 22px; }
+.laf-tour-grid {
+  display: grid; grid-template-columns: minmax(0,1fr) 480px;
+  gap: 60px; align-items: start;
+  padding-bottom: 12vh;
+}
+.laf-tour-steps { display: flex; flex-direction: column; }
+.laf-step {
+  min-height: 88vh; display: flex; flex-direction: column; justify-content: center;
+  max-width: 480px;
+}
+.laf-step .idx {
+  font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+  color: var(--muted-2); letter-spacing: .14em;
+}
+.laf-step h3 {
+  font-size: clamp(28px, 2.6vw, 40px); font-weight: 800;
+  letter-spacing: -0.025em; line-height: 1.08; margin: 18px 0 0;
+}
+.laf-step p { font-size: 16px; line-height: 1.65; color: var(--muted); margin-top: 18px; max-width: 420px; }
+.laf-step .pts { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; }
+.laf-step .pt { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: var(--text); }
+.laf-step .pt .tick {
+  width: 24px; height: 24px; border-radius: 8px; flex-shrink: 0;
+  background: #fff; border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.laf-step { opacity: .28; transition: opacity .45s var(--ease-default); }
+.laf-step.is-active { opacity: 1; }
+
+.laf-tour-phone-col { position: relative; align-self: stretch; }
+.laf-tour-sticky {
+  position: sticky; top: calc(50vh - 336px);
+  height: 671px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+
+/* screen crossfade inside tour phone */
+.laf-scrset .scr { opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease-default), transform .5s var(--ease-default); pointer-events: none; }
+.laf-scrset .scr.is-on { opacity: 1; transform: none; }
+
+/* ---------- Invest · products × trajectory ----------
+   The four instruments and the growth curve are one section because they answer
+   one question: which of these, and what does it do to my money? Picking a card
+   redraws the curve; all four are always drawn as a ghosted fan, so the spread
+   between the best and worst choice is visible rather than asserted. The cards
+   are deliberately minimal — the chart carries the weight now, and each card
+   only has to say what it is, what it pays, and where it lands. */
+.laf-invest { padding: 130px 0 110px; }
+/* Grid, not flex: .laf-sub carries a 520px basis and won't shrink below its own
+   min-content, so under flex the heading column absorbed the entire loss and
+   broke to 4 cramped lines between 901px and ~1090px. A max-content track
+   guarantees the authored two-line break and lets the subcopy take the rest. */
+.laf-sec-head { display: grid; grid-template-columns: max-content minmax(0, 520px); justify-content: space-between; align-items: end; gap: 40px; margin-bottom: 44px; }
+.laf-sec-head .laf-sub { margin-top: 22px; }
+
+/* picker */
+.laf-pick-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.laf-pick {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start;
+  text-align: left; cursor: pointer; font-family: inherit;
+  padding: 18px 18px 16px; border-radius: 18px;
+  background: #fff; border: 1.5px solid var(--line-2);
+  transition: border-color .2s, box-shadow .22s var(--ease-default), transform .22s var(--ease-default), background .2s;
+}
+.laf-pick::after {
+  content: ''; position: absolute; left: 18px; right: 18px; top: 0; height: 3px;
+  border-radius: 0 0 3px 3px; background: var(--c1);
+  transform: scaleX(0); transform-origin: center; transition: transform .24s var(--ease-default);
+}
+.laf-pick:hover { border-color: color-mix(in oklab, var(--c1) 38%, var(--line)); transform: translateY(-3px); box-shadow: var(--e-2); }
+.laf-pick.on {
+  border-color: var(--c1); background: color-mix(in oklab, var(--c1) 4%, #fff);
+  box-shadow: 0 14px 34px -20px color-mix(in oklab, var(--c1) 80%, transparent);
+}
+.laf-pick.on::after { transform: scaleX(1); }
+.laf-pick:focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; }
+.laf-pick .glyph {
+  width: 38px; height: 38px; border-radius: 11px;
+  /* raw brand greens/oranges sit at ~2.8:1 on their own tinted fill — below the
+     3:1 minimum for meaningful non-text marks, so darken toward ink */
+  color: color-mix(in oklab, var(--c1) 74%, #0B1020);
+  background: color-mix(in oklab, var(--c1) 9%, #fff);
+  border: 1px solid color-mix(in oklab, var(--c1) 18%, var(--line-2));
+  display: flex; align-items: center; justify-content: center;
+}
+.laf-pick .open {
+  position: absolute; top: 18px; right: 16px;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 700; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.laf-pick .open i {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--pos); flex-shrink: 0;
+  box-shadow: 0 0 0 2.5px color-mix(in oklab, var(--pos) 18%, transparent);
+  animation: laf-live 2.4s var(--ease-default) infinite;
+}
+@keyframes laf-live { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
+/* two reserved lines so the four cards stay a single row of equals */
+.laf-pick .nm { font-size: 14.5px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; line-height: 1.3; margin-top: 14px; min-height: 2.6em; }
+/* 17px/800 is normal text for WCAG (bold needs ≥18.66px), so the rate must
+   clear 4.5:1 — the raw --c1 greens and oranges are 2.8–3.4:1 on the card. */
+.laf-pick .rt { font-size: 17px; font-weight: 800; color: color-mix(in oklab, var(--c1) 68%, #0B1020); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; margin-top: 4px; }
+.laf-pick .tm { font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 5px; line-height: 1.45; }
+.laf-pick .out {
+  display: flex; flex-direction: column; gap: 2px; width: 100%;
+  margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line-2);
+}
+.laf-pick .out b { font-size: 16px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.laf-pick .out i { font-size: 10.5px; font-weight: 600; color: var(--muted); font-style: normal; }
+
+/* plot card — light, so the section reads as one page rather than a black box */
+.laf-plot-card {
+  margin-top: 20px; padding: 40px 40px 32px; border-radius: 28px;
+  background: #fff; border: 1px solid var(--line-2); box-shadow: var(--e-2);
+  --selc: #4F46E5;
+  /* A pale groove with a 3:1 edge, rather than a dark fill: darkening the track
+     itself to reach 3:1 against white dropped the filled/unfilled distinction
+     to ~1.2:1, which is the one thing the track exists to show. */
+  --track: var(--line-2);
+  --track-edge: color-mix(in oklab, var(--muted-2) 82%, #fff);
+  /* The chart keeps each instrument's raw brand colour for identity; the control
+     uses a darkened variant, because the lighter brand oranges/greens sit under
+     3:1 against the pale groove and the fill is a state indicator. */
+  --selc-ui: color-mix(in oklab, var(--selc) 82%, #0B1020);
+}
+
+/* outcome */
+.laf-grow-figure { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.laf-grow-out .k { font-size: 12.5px; font-weight: 600; color: var(--muted); letter-spacing: .01em; }
+.laf-grow-out .k b { font-weight: 800; color: var(--ink); }
+.laf-grow-out .v {
+  font-size: clamp(40px, 5vw, 66px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.02;
+  font-variant-numeric: tabular-nums; margin-top: 6px; color: var(--ink);
+}
+.laf-grow-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.laf-grow-delta {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: 999px;
+  background: color-mix(in oklab, var(--pos) 9%, #fff); border: 1px solid color-mix(in oklab, var(--pos) 26%, transparent);
+  font-size: 13px; font-weight: 600; color: color-mix(in oklab, var(--pos) 70%, #06231A);
+}
+.laf-grow-delta b { font-weight: 800; color: color-mix(in oklab, var(--pos) 62%, #06231A); font-variant-numeric: tabular-nums; }
+.laf-grow-delta.earn { background: var(--line-2); border-color: var(--line); color: var(--text); }
+.laf-grow-delta.earn b { color: var(--ink); }
+/* an instrument can pay LESS than a bank deposit — commercial paper does. The
+   chip flips tone and the arrow flips direction rather than dressing it up. */
+.laf-grow-delta.neg { background: color-mix(in oklab, var(--warn) 10%, #fff); border-color: color-mix(in oklab, var(--warn) 30%, transparent); color: #7A5410; }
+.laf-grow-delta.neg b { color: #7A5410; }
+.laf-grow-delta.neg svg { transform: rotate(180deg); }
+
+.laf-grow-legend { display: flex; flex-direction: column; gap: 8px; }
+.laf-grow-legend span { display: inline-flex; align-items: center; gap: 9px; font-size: 12.5px; font-weight: 600; color: var(--muted); flex-wrap: wrap; }
+.laf-grow-legend b { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.laf-grow-legend i { width: 22px; height: 3px; border-radius: 99px; flex-shrink: 0; }
+.laf-grow-legend i.sel { background: var(--c1, #4F46E5); }
+.laf-grow-legend i.ghost { background: color-mix(in oklab, var(--muted-2) 45%, transparent); }
+.laf-grow-legend i.bank { background: repeating-linear-gradient(90deg, #A8AFC6 0 5px, transparent 5px 10px); }
+/* The rebased non-zero axis is disclosed here rather than over the plot: an
+   absolutely-positioned in-plot label could only ever sit on top of the series,
+   and it covered the origin of all five where they converge at the baseline. */
+.laf-grow-legend i.base { background: repeating-linear-gradient(90deg, var(--muted-2) 0 2px, transparent 2px 6px); }
+
+/* trajectory */
+.laf-grow-chart { display: flex; gap: 14px; margin-top: 26px; }
+.laf-grow-chart .yax {
+  display: flex; flex-direction: column; justify-content: space-between; height: 250px;
+  font-size: 10.5px; font-weight: 600; color: var(--muted);
+  text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.laf-grow-chart .yax .b { color: var(--ink); font-weight: 800; }
+.laf-grow-chart .plot { flex: 1; min-width: 0; position: relative; }
+.laf-grow-chart svg { display: block; width: 100%; height: 250px; overflow: visible; }
+.laf-grow-chart .xax {
+  display: flex; justify-content: space-between; margin-top: 12px;
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+[data-grow-line] { transition: stroke .25s var(--ease-default); }
+.laf-plot-card.is-drawing [data-grow-line] { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); animation: laf-draw 1.5s var(--ease-default) forwards; }
+.laf-plot-card.is-drawing [data-grow-gap], .laf-plot-card.is-drawing [data-grow-bank], .laf-plot-card.is-drawing [data-grow-dots], .laf-plot-card.is-drawing [data-grow-fan] { animation: laf-fadein .9s var(--ease-default) .5s both; }
+@keyframes laf-draw { to { stroke-dashoffset: 0 } }
+@keyframes laf-fadein { from { opacity: 0 } to { opacity: 1 } }
+.laf-grow-dot { fill: #fff; stroke-width: 2.5; }
+.laf-grow-halo { opacity: .26; animation: laf-halo 2.6s var(--ease-default) infinite; transform-origin: center; }
+@keyframes laf-halo { 0%, 100% { opacity: .3; r: 7 } 50% { opacity: .08; r: 13 } }
+.laf-grow-vline { stroke: var(--line-2); stroke-width: 1; }
+.laf-grow-base { stroke: var(--muted-2); stroke-width: 1.5; stroke-dasharray: 2 4; }
+
+/* controls — authoring your own number is what creates the wanting */
+.laf-grow-controls {
+  display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 32px; align-items: end;
+  margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--line-2);
+}
+.laf-grow-controls label {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  font-size: 12.5px; font-weight: 600; color: var(--muted);
+}
+.laf-grow-controls label b { font-size: 19px; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.laf-grow-controls input[type="range"] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 26px;
+  /* margin set on all sides: the UA default of 2px left/right on range inputs
+     overflows the grid column it fills at narrow widths. */
+  margin: 10px 0 0; background: transparent; cursor: pointer;
+}
+.laf-grow-controls input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--selc-ui) var(--fill, 9%), var(--track) var(--fill, 9%));
+  box-shadow: inset 0 0 0 1px var(--track-edge);
+}
+.laf-grow-controls input[type="range"]::-moz-range-track { height: 6px; border-radius: 99px; background: var(--track); box-shadow: inset 0 0 0 1px var(--track-edge); }
+.laf-grow-controls input[type="range"]::-moz-range-progress { height: 6px; border-radius: 99px; background: var(--selc-ui); }
+.laf-grow-controls input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; margin-top: -8px; border-radius: 50%;
+  background: #fff; border: 4px solid var(--selc-ui); box-shadow: 0 4px 14px -6px rgba(11,16,32,.4);
+  transition: transform .16s var(--ease-default), border-color .25s;
+}
+.laf-grow-controls input[type="range"]::-moz-range-thumb {
+  width: 22px; height: 22px; border-radius: 50%; border: 4px solid var(--selc-ui);
+  background: #fff; box-shadow: 0 4px 14px -6px rgba(11,16,32,.4);
+}
+.laf-grow-controls input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.12); }
+.laf-grow-controls input[type="range"]:focus-visible { outline: 2px solid var(--selc-ui); outline-offset: 6px; border-radius: 99px; }
+.laf-grow-controls .ticks {
+  display: flex; justify-content: space-between; margin-top: 4px;
+  font-size: 10.5px; font-weight: 600; color: var(--muted);
+}
+.laf-grow-controls .terms { display: flex; gap: 8px; }
+.laf-grow-controls .terms button {
+  height: 44px; padding: 0 18px; border-radius: 14px; cursor: pointer;
+  background: #fff; border: 1.5px solid var(--line-2);
+  color: var(--text); font-family: inherit; font-size: 13.5px; font-weight: 700;
+  white-space: nowrap; transition: background .18s, border-color .18s, color .18s;
+}
+.laf-grow-controls .terms button:hover { border-color: var(--line); color: var(--ink); }
+.laf-grow-controls .terms button.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.laf-grow-note { font-size: 11.5px; line-height: 1.6; color: var(--muted); margin-top: 22px; max-width: 860px; }
+
+/* ---------- Loan ---------- */
+.laf-loan { padding: 40px 0 130px; }
+.laf-loan-panel {
+  position: relative; overflow: hidden;
+  border-radius: 32px; color: #fff;
+  background: linear-gradient(140deg, #050B1F 0%, #0E1631 52%, #2B2A85 135%);
+  padding: clamp(48px, 6vw, 88px);
+}
+.laf-loan-panel::before {
+  content: ''; position: absolute; right: -120px; top: -140px;
+  width: 480px; height: 480px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(45,107,255,.38), transparent 68%);
+}
+.laf-loan-panel::after {
+  content: ''; position: absolute; right: 140px; bottom: -160px;
+  width: 380px; height: 380px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,44,.30), transparent 68%);
+}
+.laf-loan-inner { position: relative; z-index: 2; display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(40px, 5vw, 90px); }
+.laf-loan .laf-eyebrow { color: #9DB4FF; }
+.laf-loan .laf-eyebrow::before { background: #9DB4FF; }
+.laf-loan h2 { color: #fff; margin-top: 20px; }
+.laf-loan .lead { font-size: 16.5px; line-height: 1.65; color: rgba(255,255,255,.72); margin-top: 22px; max-width: 480px; }
+.laf-loan-cta { display: flex; gap: 14px; margin-top: 40px; flex-wrap: wrap; }
+.laf-loan .fine { font-size: 12px; color: rgba(255,255,255,.62); margin-top: 18px; }
+
+.laf-loan-rate { display: flex; align-items: baseline; gap: 14px; }
+.laf-loan-rate .big {
+  font-size: clamp(80px, 8.5vw, 128px); font-weight: 800;
+  letter-spacing: -0.045em; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(115deg, #fff 30%, #9DB4FF);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.laf-loan-rate .unit { font-size: 15px; font-weight: 700; color: rgba(255,255,255,.65); line-height: 1.4; }
+
+.laf-loan-terms {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 34px;
+}
+.laf-term {
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px; padding: 16px 18px;
+  backdrop-filter: blur(8px);
+}
+.laf-term .k { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.55); }
+.laf-term .v { font-size: 18px; font-weight: 800; letter-spacing: -0.015em; margin-top: 5px; font-variant-numeric: tabular-nums; }
+
+.laf-loan-steps { display: flex; flex-direction: column; gap: 0; margin-top: 8px; }
+.laf-lstep {
+  display: grid; grid-template-columns: 52px 1fr; gap: 20px;
+  padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.laf-lstep:last-child { border-bottom: none; }
+.laf-lstep .n {
+  width: 52px; height: 52px; border-radius: 16px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 600; color: #9DB4FF;
+}
+.laf-lstep h4 { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; color: #fff; }
+.laf-lstep p { font-size: 13.5px; line-height: 1.6; color: rgba(255,255,255,.62); margin-top: 6px; }
+.laf-lstep .meta-pill {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 10px;
+  padding: 5px 12px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: rgba(255,255,255,.7);
+}
+.laf-lstep .meta-pill .d { width: 5px; height: 5px; border-radius: 50%; background: var(--orange); }
+
+/* ---------- Partners ---------- */
+.laf-partners { padding: 0 0 120px; }
+.laf-partners .cap {
+  text-align: center; font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--muted-2); margin-bottom: 40px;
+}
+.laf-logos { overflow: hidden; position: relative; }
+.laf-logos::before, .laf-logos::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 2; pointer-events: none;
+}
+.laf-logos::before { left: 0; background: linear-gradient(90deg, #FDFDFF, transparent); }
+.laf-logos::after { right: 0; background: linear-gradient(270deg, #FDFDFF, transparent); }
+.laf-logos-track {
+  display: flex; align-items: center; gap: 72px; width: max-content;
+  animation: laf-marquee 40s linear infinite;
+}
+.laf-logos-track img { height: 30px; opacity: .55; filter: grayscale(1); transition: opacity .25s, filter .25s; }
+.laf-logos-track img:hover { opacity: 1; filter: none; }
+
+/* ---------- FAQ ---------- */
+.laf-faq { padding: 0 0 130px; }
+.laf-faq-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 70px; align-items: start; }
+.laf-faq-list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.laf-q { border-bottom: 1px solid var(--line); }
+.laf-q button {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 24px 4px; background: none; border: none; cursor: pointer;
+  font-family: inherit; font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+  color: var(--ink); text-align: left;
+}
+.laf-q .pm {
+  width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  border: 1.5px solid var(--line); display: flex; align-items: center; justify-content: center;
+  transition: background .25s, border-color .25s, transform .35s var(--ease-default);
+}
+.laf-q .pm svg { display: block; }
+.laf-q .pm .v { transition: opacity .2s; }
+.laf-q.is-open .pm { background: var(--ink); border-color: var(--ink); transform: rotate(180deg); }
+.laf-q.is-open .pm .v { opacity: 0; }
+.laf-q.is-open .pm path { stroke: #fff; }
+.laf-q .a {
+  display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s var(--ease-default);
+}
+.laf-q.is-open .a { grid-template-rows: 1fr; }
+.laf-q .a > div { overflow: hidden; }
+.laf-q .a p { font-size: 15px; line-height: 1.7; color: var(--muted); padding: 0 56px 26px 4px; max-width: 620px; }
+
+/* ---------- Final CTA ---------- */
+.laf-cta { padding: 0 0 40px; }
+.laf-cta-panel {
+  position: relative; overflow: hidden; text-align: center;
+  background: var(--bg); border: 1px solid var(--line-2); border-radius: 32px;
+  padding: clamp(70px, 8vw, 120px) 40px;
+}
+.laf-cta-panel::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(420px 320px at 18% 0%, rgba(79,70,229,.08), transparent 70%),
+    radial-gradient(420px 320px at 85% 100%, rgba(255,107,44,.07), transparent 70%);
+}
+.laf-cta-panel > * { position: relative; }
+.laf-cta-panel .mark { height: 52px; margin: 0 auto 32px; display: block; width: auto; }
+.laf-cta-panel .motto {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+  letter-spacing: .26em; text-transform: uppercase; color: var(--muted-2);
+  margin-top: 26px;
+}
+/* The store links are 46px in the hero where they sit only next to each other;
+   here they share a row with a 56px pill button, so match its height and shape. */
+.laf-cta-actions { display: flex; gap: 14px; justify-content: center; align-items: center; margin-top: 42px; flex-wrap: wrap; }
+.laf-cta-actions .laf-store { height: 56px; padding: 0 24px; border-radius: var(--r-pill); }
+.laf-cta-actions .laf-btn { height: 56px; }
+
+/* ---------- Footer ---------- */
+.laf-footer { border-top: 1px solid var(--line-2); padding: 64px 0 48px; background: #fff; }
+.laf-footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 40px; }
+.laf-footer .flogo img { height: 26px; }
+.laf-footer .fdesc { font-size: 13px; line-height: 1.65; color: var(--muted); margin-top: 18px; max-width: 300px; }
+.laf-footer h5 {
+  font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--muted-2); margin: 0 0 18px;
+}
+.laf-footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.laf-footer ul a { font-size: 14px; font-weight: 600; color: var(--text); }
+.laf-footer ul a:hover { color: var(--accent); }
+.laf-fcontact li { display: grid; grid-template-columns: 15px 1fr; gap: 11px; align-items: start; font-size: 13.5px; font-weight: 500; line-height: 1.55; color: var(--muted); }
+.laf-fcontact svg { color: var(--muted-2); margin-top: 3px; }
+.laf-footer-base {
+  display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap;
+  border-top: 1px solid var(--line-2); margin-top: 56px; padding-top: 28px;
+  font-size: 12.5px; color: var(--muted); font-weight: 500;
+}
+.laf-footer-base .reg { display: flex; align-items: center; gap: 8px; }
+.laf-footer-base .reg .d { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+
+/* ---------- Reveal motion ---------- */
+[data-reveal] { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease-default), transform .8s var(--ease-default); transition-delay: var(--rd, 0s); }
+[data-reveal].is-in { opacity: 1; transform: none; }
+/* Fail-safe (set by the script if reveals never land): show everything with no
+   transition, so content is never stuck invisible. */
+html.laf-reveal-off [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+html[data-motion="off"] [data-reveal] { opacity: 1; transform: none; transition: none; }
+html[data-motion="off"] .laf-ticker-track,
+html[data-motion="off"] .laf-logos-track,
+html[data-motion="off"] .laf-scrollhint i { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .laf-ticker-track, .laf-logos-track, .laf-scrollhint i { animation: none; }
+  .laf-prod .fill { transform: scaleX(1); transition: none; }
+  .laf-prod .open i { animation: none; }
+  .laf-scrset .scr, .laf-step, .laf-pick, .laf-btn { transition: none; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .laf-pick-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Below this width the stage is too narrow for the right-hand chip to fit. */
+  .laf-chip.ch2 { display: none; }
+  .laf-tour-grid { grid-template-columns: minmax(0,1fr) 400px; gap: 32px; }
+  .laf-loan-inner { grid-template-columns: 1fr; }
+  .laf-hero-grid { grid-template-columns: 1fr .8fr; }
+}
+@media (max-width: 1020px) {
+  .laf-nav-links { display: none; }
+}
+@media (max-width: 900px) {
+  /* The plot card's controls grid goes single-column here: the term-chip row's
+     min-content width would otherwise starve the slider column to 0px.
+     Making .terms a grid removes that floor so it can shrink with the card. */
+  .laf-grow-controls { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  /* minmax(0,…) not 1fr: a bare 1fr is minmax(auto,1fr), so the buttons'
+     min-content width would floor the track and push the card wider. */
+  .laf-grow-controls .terms { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .laf-grow-controls .terms button { padding: 0 10px; min-width: 0; }
+  .laf-grow-figure { gap: 22px; }
+  .laf-plot-card { padding: 32px 26px 26px; }
+  .laf-hero { min-height: 0; }
+  .laf-hero-grid { grid-template-columns: 1fr; }
+  .laf-stage { min-height: 0; margin-top: 20px; justify-content: center; }
+  .laf-chip.ch3 { right: calc(100% - 40px); }
+  .laf-scrollhint { display: none; }
+  .laf-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 40px 24px; }
+  .laf-tour-grid { grid-template-columns: 1fr; }
+  .laf-tour-phone-col { display: none; }
+  .laf-step { min-height: 0; padding: 44px 0; opacity: 1; }
+  .laf-faq-grid { grid-template-columns: 1fr; gap: 40px; }
+  .laf-footer-grid { grid-template-columns: 1fr 1fr; }
+  .laf-sec-head { grid-template-columns: minmax(0, 1fr); justify-items: start; }
+}
+@media (max-width: 620px) {
+  .laf-wrap { padding: 0 22px; }
+  .laf-plot-card { padding: 24px 18px 22px; border-radius: 22px; }
+  /* the clamp floor (40px) is wider than a 250px column at 12 digits */
+  .laf-grow-out .v { font-size: clamp(26px, 8.2vw, 40px); }
+  .laf-grow-out .k { font-size: 12px; }
+  .laf-grow-chart { gap: 9px; }
+  .laf-grow-chart .xax { font-size: 9.5px; }
+  .laf-grow-chart .yax { font-size: 9.5px; }
+  .laf-grow-controls .terms button { font-size: 12.5px; height: 42px; }
+  .laf-pick { padding: 14px 14px 13px; }
+  .laf-pick .nm { font-size: 13.5px; min-height: 0; }
+  .laf-pick .open { position: static; margin-top: 10px; }
+  .laf-pick .glyph { width: 34px; height: 34px; }
+  .laf-hero-actions .laf-btn { width: 100%; }
+  .laf-chip { display: none; }
+  .laf-loan-terms { grid-template-columns: 1fr 1fr; }
+  .laf-footer-grid { grid-template-columns: 1fr; }
+}
+
+/* ---------- ISO / trust strip (hero) ---------- */
+.laf-iso{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;margin-top:30px;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.laf-iso .i{display:inline-flex;align-items:center;gap:7px}
+.laf-iso .i svg{opacity:.65}
+.laf-iso .sep{width:1px;height:11px;background:var(--line);display:inline-block}
+
+/* ---------- Repo ---------- */
+.laf-repo{padding:0 0 130px}
+.laf-repo .lead{font-size:16.5px;line-height:1.7;color:var(--muted);max-width:640px;margin-top:22px}
+.laf-repo-bench{display:inline-flex;align-items:center;gap:12px;margin-top:26px;padding:12px 18px 12px 16px;border:1.5px solid var(--line);border-radius:var(--r-pill);font-size:13.5px;font-weight:700;color:var(--ink);transition:border-color var(--t-fast),background var(--t-fast)}
+.laf-repo-bench:hover{color:var(--ink);border-color:var(--ink);background:var(--accent-soft)}
+.laf-repo-bench .m{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+/* cycle strip — the definition, drawn */
+.laf-repo-flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:0;margin-top:52px;background:#fff;border:1px solid var(--line);border-radius:26px;overflow:hidden}
+.laf-rf{display:flex;gap:16px;padding:26px 28px;align-items:flex-start}
+.laf-rf .n{flex-shrink:0;width:34px;height:34px;border-radius:11px;background:var(--accent-soft);color:var(--accent);font-family:var(--font-mono);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.laf-rf b{display:block;font-size:15.5px;font-weight:800;letter-spacing:-.015em;color:var(--ink);line-height:1.35}
+.laf-rf span.s{display:block;margin-top:6px;font-size:13px;line-height:1.55;color:var(--muted)}
+.laf-rf-sep{display:flex;align-items:center;justify-content:center;padding:0 4px;color:var(--muted-2);border-inline:1px solid var(--line-2)}
+
+/* role cards */
+.laf-repo-req{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:26px;align-items:start}
+.laf-rcard{background:#fff;border:1px solid var(--line);border-radius:26px;overflow:hidden;--rc:var(--accent);--rcs:var(--accent-soft)}
+.laf-rcard--b{--rc:var(--navy);--rcs:color-mix(in oklab, var(--navy) 8%, #fff)}
+.laf-rcard-top{display:flex;align-items:center;gap:14px;padding:26px 30px;background:var(--rcs);border-bottom:1px solid color-mix(in oklab, var(--rc) 14%, var(--line-2))}
+.laf-rcard-top .ic{flex-shrink:0;width:42px;height:42px;border-radius:13px;background:#fff;border:1px solid color-mix(in oklab, var(--rc) 18%, var(--line-2));display:flex;align-items:center;justify-content:center;color:var(--rc)}
+.laf-rcard h3{font-size:18px;font-weight:800;letter-spacing:-.015em;color:var(--ink);line-height:1.3}
+.laf-rcard .cnt{display:block;margin-top:4px;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--rc)}
+.laf-rlist{display:flex;flex-direction:column;margin:0;padding:6px 30px 22px;counter-reset:rq}
+.laf-rlist li{list-style:none;counter-increment:rq;display:grid;grid-template-columns:26px 1fr;gap:14px;padding:15px 0;border-top:1px solid var(--line-2);font-size:14px;line-height:1.62;color:var(--text)}
+.laf-rlist li:first-child{border-top:none}
+.laf-rlist li::before{content:counter(rq,decimal-leading-zero);font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--rc);opacity:.75;padding-top:3px;letter-spacing:.04em}
+
+/* document accordions */
+.laf-repo-docs{margin-top:26px;background:#fff;border:1px solid var(--line);border-radius:26px;padding:0 30px}
+.laf-repo-docs .laf-q button{font-size:17px}
+.laf-repo-docs .laf-q .a ol{margin:0;padding:0 0 30px;counter-reset:d;columns:2;column-gap:40px;max-width:none}
+.laf-repo-docs .laf-q .a li{list-style:none;counter-increment:d;display:grid;grid-template-columns:26px 1fr;gap:12px;font-size:14px;line-height:1.6;color:var(--muted);break-inside:avoid;padding:9px 0}
+.laf-repo-docs .laf-q .a li::before{content:counter(d,decimal-leading-zero);font-family:var(--font-mono);font-size:11.5px;font-weight:600;color:var(--accent);padding-top:3px}
+
+@media (max-width:1000px){
+  .laf-repo-flow{grid-template-columns:1fr}
+  .laf-rf-sep{border-inline:none;border-top:1px solid var(--line-2);padding:14px 0}
+  .laf-rf-sep svg{transform:rotate(90deg)}
+  .laf-repo-docs .laf-q .a ol{columns:1}
+}
+
+/* ---------- About (landing band) ---------- */
+.laf-about{padding:0 0 130px}
+.laf-about-inner{display:grid;grid-template-columns:.85fr 1.15fr;gap:70px;align-items:start;border-top:1px solid var(--line);padding-top:64px}
+.laf-about p{font-size:16.5px;line-height:1.72;color:var(--muted);max-width:600px}
+.laf-about p + p{margin-top:18px}
+.laf-about .laf-btn{margin-top:32px}
+.laf-about-facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.laf-about-facts span{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid var(--line);border-radius:var(--r-pill);font-family:var(--font-mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;color:var(--text)}
+
+/* ---------- Sub pages ---------- */
+.laf-page{padding:calc(var(--nav-h) + 84px) 0 40px}
+.laf-page-head{max-width:760px}
+.laf-page-head .laf-h2{margin-top:20px}
+.laf-page-head .laf-sub{margin-top:24px;max-width:640px}
+.laf-prose{max-width:1000px;margin-top:64px;display:flex;flex-direction:column}
+.laf-prose-row{display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px 48px;padding:38px 0;border-top:1px solid var(--line-2)}
+.laf-prose-row:first-child{border-top:none;padding-top:0}
+.laf-prose-lbl{display:flex;flex-direction:column;gap:10px}
+.laf-prose-lbl .n{font-family:var(--font-mono);font-size:11.5px;font-weight:600;letter-spacing:.14em;color:var(--accent)}
+.laf-prose-body{max-width:640px}
+.laf-prose-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 28px}
+.laf-prose-stats>div{display:flex;flex-direction:column;gap:6px}
+.laf-prose-stats b{font-size:30px;font-weight:800;letter-spacing:-.035em;color:var(--ink);line-height:1}
+.laf-prose-stats span{font-size:14px;line-height:1.5;font-weight:500;color:var(--muted)}
+.laf-contact{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 28px}
+.laf-contact>div{display:flex;flex-direction:column;gap:5px}
+.laf-contact .k{font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.laf-contact .v{font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--ink);text-decoration:none}
+a.laf-contact .v:hover,.laf-contact a.v:hover{color:var(--accent)}
+.laf-prose h3{font-size:21px;font-weight:800;letter-spacing:-.02em;color:var(--ink);margin-bottom:14px}
+.laf-prose p{font-size:16.5px;line-height:1.72;color:var(--muted)}
+.laf-prose p + p{margin-top:14px}
+.laf-prose ul{margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.laf-prose li{list-style:none;display:grid;grid-template-columns:18px 1fr;gap:12px;font-size:15.5px;line-height:1.65;color:var(--text)}
+.laf-prose li::before{content:'';width:7px;height:7px;border-radius:2px;background:var(--accent);opacity:.35;margin-top:7px}
+.laf-embed{margin-top:48px;border:1px solid var(--line);border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 24px 60px -40px rgba(11,16,32,.35)}
+.laf-embed-bar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 22px;border-bottom:1px solid var(--line-2);font-family:var(--font-mono);font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.laf-embed-bar a{color:var(--accent)}
+.laf-embed .fr{position:relative;aspect-ratio:16/9;background:#F4F5FA}
+.laf-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.laf-page-note{margin-top:20px;font-size:13px;line-height:1.6;color:var(--muted);max-width:640px}
+@media (max-width:900px){.laf-repo-req{grid-template-columns:1fr}.laf-about-inner{grid-template-columns:1fr;gap:34px}}
+
+/* ---------- Team (About page) ---------- */
+.laf-team{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px 22px;margin-top:40px}
+.laf-member{margin:0;min-width:0}
+.laf-member .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.laf-member .ph{position:relative;aspect-ratio:4/5;border-radius:20px;overflow:hidden;background:#F4F5FA;border:1px solid var(--line)}
+.laf-member figcaption{display:flex;flex-direction:column;gap:4px;margin-top:16px}
+.laf-member .nm{font-size:16px;font-weight:800;letter-spacing:-.015em;color:var(--ink)}
+.laf-member .rl{font-family:var(--font-mono);font-size:11.5px;font-weight:600;letter-spacing:.06em;color:var(--muted)}
+@media (max-width:900px){.laf-team{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* ---------- Mobile tuning (new sections + sub pages) ---------- */
+@media (max-width:620px){
+  .laf-repo{padding-bottom:88px}
+  .laf-repo-req{gap:16px;margin-top:34px}
+  .laf-rcard{padding:24px 22px 8px;border-radius:22px}
+  .laf-rcard h3{font-size:16.5px}
+  .laf-rlist li{font-size:13.5px;padding:13px 0}
+  .laf-repo-bench{width:100%;margin-top:22px;padding:12px 16px;gap:10px;font-size:12.5px}
+  .laf-repo-docs .laf-q button{font-size:15.5px;padding:20px 4px}
+  .laf-repo-docs .laf-q .a ol{padding:0 6px 24px 2px;gap:10px}
+  .laf-repo-docs .laf-q .a li{font-size:13.5px;grid-template-columns:22px 1fr;gap:10px}
+  .laf-q .a p{padding:0 6px 24px 4px}
+  .laf-iso{gap:7px 12px;font-size:10px;margin-top:24px}
+  .laf-about{padding-bottom:88px}
+  .laf-about-inner{padding-top:44px;gap:26px}
+  .laf-about p{font-size:15.5px}
+  .laf-about .laf-btn{width:100%;margin-top:26px}
+  .laf-about-facts span{font-size:10.5px;padding:8px 12px}
+  .laf-page{padding-top:calc(var(--nav-h) + 48px)}
+  .laf-prose{margin-top:44px}
+  .laf-prose-row{grid-template-columns:minmax(0,1fr);gap:16px;padding:30px 0}
+  .laf-prose-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px}
+  .laf-prose-stats b{font-size:24px}
+  .laf-prose-stats span{font-size:13px}
+  .laf-contact{grid-template-columns:minmax(0,1fr);gap:16px}
+  .laf-contact .v{font-size:15px}
+  .laf-prose h3{font-size:19px}
+  .laf-prose p{font-size:15.5px}
+  .laf-prose li{font-size:14.5px}
+  .laf-embed{margin-top:34px;border-radius:20px}
+  .laf-embed-bar{padding:13px 16px;font-size:10.5px;gap:12px}
+  .laf-team{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 14px;margin-top:30px}
+  .laf-member .ph{border-radius:16px}
+  .laf-member figcaption{margin-top:12px}
+  .laf-member .nm{font-size:14.5px}
+  .laf-member .rl{font-size:10.5px}
+}

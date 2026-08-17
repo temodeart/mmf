@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Нэвтрэх — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<style>
+  body { margin: 0; }
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* F-10: below 1024px the brand panel hides and the form becomes a centered card */
+  @media (max-width: 1024px) {
+    .login-brand { display: none !important; }
+    .login-shell { background: var(--bg); }
+    .login-main { padding: 56px 20px !important; }
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 36px 28px;
+      box-shadow: 0 24px 64px -28px rgba(11,16,32,.18);
+    }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { T, WebButton, WebOTPInput, WebErrorState } = window;
+
+/* F-09 dev note: language preference persists to localStorage('mmf_lang') so the
+   choice survives reload. EN copy itself is phase-2 — do NOT wire translated
+   strings yet; the toggle only records intent + shows a heads-up note. */
+const LangToggle = () => {
+  const [lang, setLang] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('mmf_lang')) || 'mn');
+  const [note, setNote] = useState(false);
+  const pick = (l) => {
+    setLang(l);
+    try { localStorage.setItem('mmf_lang', l); } catch (e) {}
+    if (l === 'en') { setNote(true); setTimeout(() => setNote(false), 3400); }
+  };
+  return (
+    <div style={{ position:'relative' }}>
+      <div style={{ display:'flex', background:T.line2, borderRadius:999, padding:3, gap:2 }}>
+        {['mn','en'].map(l => (
+          <button key={l} type="button" onClick={() => pick(l)} style={{
+            padding:'6px 13px', borderRadius:999, border:'none', cursor:'pointer', fontFamily:'inherit',
+            fontSize:12, fontWeight:800, letterSpacing:'.02em',
+            background: lang===l ? T.surface : 'transparent',
+            color: lang===l ? T.ink : T.muted,
+            boxShadow: lang===l ? '0 1px 3px rgba(15,23,42,.12)' : 'none',
+          }}>{l.toUpperCase()}</button>
+        ))}
+      </div>
+      {note && (
+        <div style={{ position:'absolute', top:'calc(100% + 8px)', right:0, width:224, background:T.ink, color:'#fff', fontSize:11.5, fontWeight:600, lineHeight:1.5, padding:'10px 12px', borderRadius:10, zIndex:5, boxShadow:'0 12px 28px -10px rgba(0,0,0,.35)' }}>
+          Англи хэл удахгүй нэмэгдэнэ. Одоогоор зөвхөн сонголт хадгалагдана.
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── Password field w/ show/hide ──── */
+const PwInput = ({ label, hint, value, onChange, error, disabled }) => {
+  const [show,    setShow]    = useState(false);
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      <div style={{ fontSize:12.5, fontWeight:700, color:T.text, marginBottom:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+        <span>{label}</span>
+        {hint}
+      </div>
+      <div style={{
+        height:52, borderRadius:14, display:'flex', alignItems:'center', padding:'0 14px 0 16px', gap:8,
+        background: focused ? T.surface : T.field,
+        border: `1.5px solid ${error ? T.neg : focused ? T.indigo : T.line}`,
+        boxShadow: focused && !error ? `0 0 0 4px ${T.indigoSoft}` : 'none',
+        opacity: disabled ? .5 : 1, transition:'border-color .15s, box-shadow .15s',
+      }}>
+        <input
+          type={show ? 'text' : 'password'} value={value} onChange={onChange} disabled={disabled}
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          style={{ flex:1, border:'none', background:'transparent', outline:'none', fontSize:15, fontWeight:500, color:T.ink, fontFamily:'inherit' }}
+        />
+        <button onClick={() => setShow(s => !s)} type="button" style={{ border:'none', background:'none', cursor:'pointer', color:T.muted, padding:4, display:'flex', alignItems:'center', flexShrink:0 }}>
+          {show
+            ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12s3.6-7 9-7 9 7 9 7-3.6 7-9 7-9-7-9-7z" stroke="currentColor" strokeWidth="1.8" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" fill="none"/><line x1="3" y1="3" x2="21" y2="21" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+            : <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 12s3.6-7 9-7 9 7 9 7-3.6 7-9 7-9-7-9-7z" stroke="currentColor" strokeWidth="1.8" fill="none"/><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" fill="none"/></svg>
+          }
+        </button>
+      </div>
+      {error && <div style={{ fontSize:12, color:T.neg, fontWeight:600, marginTop:6 }}>{error}</div>}
+    </div>
+  );
+};
+
+/* ── Email field ── */
+const EmailInput = ({ value, onChange, error, disabled }) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <div>
+      <div style={{ fontSize:12.5, fontWeight:700, color:T.text, marginBottom:8 }}>И-мэйл хаяг</div>
+      <div style={{
+        height:52, borderRadius:14, display:'flex', alignItems:'center', padding:'0 16px',
+        background: focused ? T.surface : T.field,
+        border: `1.5px solid ${error ? T.neg : focused ? T.indigo : T.line}`,
+        boxShadow: focused && !error ? `0 0 0 4px ${T.indigoSoft}` : 'none',
+        opacity: disabled ? .5 : 1, transition:'border-color .15s, box-shadow .15s',
+      }}>
+        <input
+          type="email" value={value} onChange={onChange} disabled={disabled}
+          placeholder="tserendorj@example.mn"
+          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+          style={{ flex:1, border:'none', background:'transparent', outline:'none', fontSize:15, fontWeight:500, color:T.ink, fontFamily:'inherit' }}
+        />
+      </div>
+      {error && <div style={{ fontSize:12, color:T.neg, fontWeight:600, marginTop:6 }}>{error}</div>}
+    </div>
+  );
+};
+
+/* ── Left brand panel (F-10: tightened — short value line + 3 compact trust points) ── */
+const BrandPanel = () => (
+  <aside className="login-brand" style={{ width:'40%', flexShrink:0, background:'linear-gradient(145deg, #050B1F 0%, #1A2547 55%, #4F46E5 100%)', display:'flex', flexDirection:'column', padding:'44px 48px', position:'relative', overflow:'hidden', minHeight:'100vh' }}>
+    {/* Decorative orbs */}
+    <div style={{ position:'absolute', bottom:-100, right:-80, width:380, height:380, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,107,44,.3) 0%, transparent 68%)', pointerEvents:'none' }}/>
+    <div style={{ position:'absolute', top:120, left:-60, width:280, height:280, borderRadius:'50%', background:'radial-gradient(circle, rgba(79,70,229,.3) 0%, transparent 68%)', pointerEvents:'none' }}/>
+
+    {/* Logo */}
+    <div style={{ display:'flex', alignItems:'center', gap:14, position:'relative' }}>
+      <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+        <path d="M9.6 11.4V28.6L0 34.4V0h9.9L24 8.4 38.1 0H48v5.6L24 20 9.6 11.4z" fill="#FF6B2C"/>
+        <path d="M38.4 36.6V19.4L48 13.6V48h-9.9L24 39.6 9.9 48H0v-5.6L24 28l14.4 8.6z" fill="#2D6BFF"/>
+      </svg>
+      <div style={{ color:'#fff', fontWeight:800, fontSize:17, lineHeight:1.1, letterSpacing:'-0.01em' }}>
+        Money Market<br/><span style={{ color:'rgba(255,255,255,.45)', fontWeight:600 }}>Fund</span>
+      </div>
+    </div>
+
+    {/* Tight value line — one line, no paragraph */}
+    <div style={{ marginTop:'auto', marginBottom:32, position:'relative' }}>
+      <div style={{ fontSize:27, fontWeight:800, color:'#fff', letterSpacing:'-0.02em', lineHeight:1.3 }}>
+        Мөнгө хэзээ ч унтдаггүй.
+      </div>
+    </div>
+
+    {/* Trust points (СЗХ mention first) */}
+    <div style={{ display:'flex', flexDirection:'column', gap:14, position:'relative', paddingBottom:8 }}>
+      {[
+        ['СЗХ-д бүртгэлтэй',   'Санхүүгийн зохицуулах хорооны хяналтан дор үйл ажиллагаа явуулдаг'],
+        ['256-bit шифрлэлт',    'Таны мэдээлэл TLS 1.3 болон AES шифрлэлтээр хамгаалагдсан'],
+        ['Бодит цагийн арилжаа','Зах зээлийн мэдээлэл шууд, саатлагүй шинэчлэгддэг'],
+      ].map(([title, desc]) => (
+        <div key={title} style={{ display:'flex', alignItems:'flex-start', gap:12 }}>
+          <div style={{ width:22, height:22, borderRadius:99, background:'rgba(255,255,255,.18)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginTop:2 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+          <div>
+            <div style={{ fontSize:13.5, fontWeight:700, color:'#fff', lineHeight:1.3 }}>{title}</div>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,.5)', marginTop:3, lineHeight:1.5 }}>{desc}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </aside>
+);
+
+/* ── Login screen ── */
+const Login = () => {
+  /* step: idle | loading | error | otp | otp_loading | otp_error | success */
+  const [step,      setStep]      = useState('idle');
+  const [email,     setEmail]     = useState('');
+  const [pw,        setPw]        = useState('');
+  const [emailErr,  setEmailErr]  = useState('');
+  const [pwErr,     setPwErr]     = useState('');
+  const [formErr,   setFormErr]   = useState('');
+  const [otpDone,   setOtpDone]   = useState(false);
+  const [otpKey,    setOtpKey]    = useState(0);
+
+  const validateEmail = v => {
+    if (!v) return 'И-мэйл хаяг оруулна уу.';
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return 'И-мэйл хаягийн формат буруу байна.';
+    return '';
+  };
+  const validatePw = v => (!v ? 'Нууц үг оруулна уу.' : v.length < 6 ? 'Нууц үг хэт богино байна (≥ 6 тэмдэгт).' : '');
+
+  const submit = () => {
+    const ee = validateEmail(email), pe = validatePw(pw);
+    setEmailErr(ee); setPwErr(pe);
+    if (ee || pe) return;
+    setFormErr('');
+    setStep('loading');
+    setTimeout(() => {
+      if (pw === 'wrong' || pw === 'буруу') {
+        setFormErr('И-мэйл хаяг эсвэл нууц үг буруу байна. Дахин оролдоно уу.');
+        setStep('error');
+      } else {
+        setOtpDone(false);
+        setOtpKey(k => k + 1);
+        setStep('otp');
+      }
+    }, 950);
+  };
+
+  const confirmOtp = () => {
+    if (!otpDone) return;
+    setStep('otp_loading');
+    setTimeout(() => setStep('success'), 950);
+  };
+
+  const backToForm = () => { setStep('idle'); setFormErr(''); };
+  const resendOtp  = () => { setOtpDone(false); setOtpKey(k => k + 1); };
+
+  const isFormStep = ['idle','loading','error'].includes(step);
+  const isOtpStep  = ['otp','otp_loading','otp_error'].includes(step);
+  const [remember, setRemember] = useState(false);
+
+  return (
+    <div className="login-shell" style={{ display:'flex', minHeight:'100vh', fontFamily:"'Manrope',-apple-system,sans-serif", WebkitFontSmoothing:'antialiased' }}>
+      <BrandPanel/>
+
+      {/* Right: form panel */}
+      <main className="login-main" style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', padding:'40px', background:'#fff', position:'relative' }}>
+        <div style={{ width:'100%', maxWidth:400 }}>
+
+          {/* F-10: back-to-marketing-site link + F-09 language toggle */}
+          {step !== 'success' && (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:28 }}>
+              <a href="https://moneymarket.mn" style={{ display:'inline-flex', alignItems:'center', gap:6, color:T.muted, fontSize:13, fontWeight:600, textDecoration:'none' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                moneymarket.mn руу буцах
+              </a>
+              <LangToggle/>
+            </div>
+          )}
+
+          <div className="login-card">
+
+          {/* ── Credentials form ── */}
+          {(isFormStep) && (
+            <>
+              <div style={{ marginBottom:36 }}>
+                <div style={{ fontSize:36, fontWeight:800, color:T.ink, letterSpacing:'-0.03em', lineHeight:1.1, marginBottom:8 }}>Нэвтрэх</div>
+                <div style={{ fontSize:14, color:T.muted, fontWeight:500, lineHeight:1.6 }}>Дансандаа нэвтэрч байршуулалтаа удирдаарай.</div>
+              </div>
+
+              {step === 'error' && formErr && (
+                <div style={{ marginBottom:20 }}>
+                  <WebErrorState variant="neg" title="Нэвтрэх амжилтгүй боллоо" body={formErr} action={{ label:'Нууц үгээ сэргээх', onClick:()=>{ window.location.href='11 Reset Password.html'; } }}/>
+                </div>
+              )}
+
+              <div style={{ display:'flex', flexDirection:'column', gap:16, marginBottom:18 }}>
+                <EmailInput
+                  value={email} onChange={e => setEmail(e.target.value)}
+                  error={emailErr} disabled={step==='loading'}
+                />
+                <PwInput
+                  label="Нууц үг"
+                  hint={<a href="11 Reset Password.html" style={{ fontSize:12, color:T.indigo, fontWeight:700, textDecoration:'none' }}>Нууц үгээ мартсан?</a>}
+                  value={pw} onChange={e => setPw(e.target.value)}
+                  error={pwErr} disabled={step==='loading'}
+                />
+              </div>
+
+              <label style={{ display:'flex', alignItems:'center', gap:8, marginBottom:22, cursor:'pointer', userSelect:'none' }}>
+                <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} disabled={step==='loading'} style={{ width:16, height:16, accentColor:T.indigo, cursor:'pointer' }}/>
+                <span style={{ fontSize:13, fontWeight:600, color:T.text }}>Намайг сана</span>
+              </label>
+
+              <WebButton variant="primary" full disabled={step==='loading'} onClick={submit}>
+                {step==='loading' ? 'Нэвтрэж байна…' : 'Нэвтрэх'}
+              </WebButton>
+
+              <div style={{ marginTop:28, textAlign:'center', fontSize:13.5, color:T.muted, fontWeight:500, lineHeight:1.5 }}>
+                Бүртгэлгүй юу?{' '}
+                <a href="09 Registration.html" style={{ color:T.indigo, fontWeight:700, textDecoration:'none' }}>Бүртгүүлэх</a>
+              </div>
+
+              {/* Demo hint */}
+              <div style={{ marginTop:32, padding:'12px 14px', background:T.line2, borderRadius:10 }}>
+                <div style={{ fontSize:11.5, fontWeight:700, color:T.muted, marginBottom:4 }}>Демо горим</div>
+                <div style={{ fontSize:11.5, color:T.muted, fontWeight:500, lineHeight:1.5 }}>
+                  Аливаа и-мэйл + нууц үгийн хослолд (≥ 6 тэмдэгт) OTP алхам руу шилжих. «<b>wrong</b>» гэж оруулбал алдааг харна.
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ── 2FA / OTP ── */}
+          {isOtpStep && (
+            <>
+              <button onClick={backToForm} style={{ display:'flex', alignItems:'center', gap:6, border:'none', background:'none', cursor:'pointer', color:T.muted, fontSize:13, fontWeight:600, padding:0, marginBottom:28, fontFamily:'inherit' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Буцах
+              </button>
+
+              <div style={{ marginBottom:32 }}>
+                <div style={{ fontSize:36, fontWeight:800, color:T.ink, letterSpacing:'-0.03em', lineHeight:1.1, marginBottom:8 }}>Баталгаажуулалт</div>
+                <div style={{ fontSize:14, color:T.muted, fontWeight:500, lineHeight:1.6 }}>
+                  Бид таны бүртгэлтэй дугаар{' '}
+                  <b style={{ color:T.text, fontWeight:700 }}>+976 •••• 4127</b>{' '}
+                  руу 6 оронтой нэвтрэх код илгээлээ.
+                </div>
+              </div>
+
+              <WebOTPInput key={otpKey} length={6} onComplete={() => setOtpDone(true)}/>
+
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:12, fontSize:12.5, fontWeight:600, color:T.muted }}>
+                <span style={{ display:'flex', alignItems:'center', gap:6 }}>
+                  <span style={{ width:8, height:8, borderRadius:99, background:otpDone?T.pos:T.line, display:'inline-block' }}/>
+                  {otpDone ? 'Код хүлээн авлаа' : 'Код 04:32 хүчинтэй'}
+                </span>
+                <button onClick={resendOtp} style={{ color:T.indigo, fontWeight:700, background:'none', border:'none', cursor:'pointer', fontFamily:'inherit', fontSize:12.5, padding:0 }}>Дахин илгээх</button>
+              </div>
+
+              {step === 'otp_error' && (
+                <div style={{ marginTop:14 }}>
+                  <WebErrorState variant="neg" title="Код буруу байна" body="Оруулсан код буруу байна. Дахин оролдоно уу."/>
+                </div>
+              )}
+
+              <div style={{ marginTop:24 }}>
+                <WebButton variant="primary" full disabled={!otpDone || step==='otp_loading'} onClick={confirmOtp}
+                  reason={!otpDone ? '6 оронтой кодоо бүрэн оруулна уу.' : undefined}>
+                  {step==='otp_loading' ? 'Шалгаж байна…' : 'Нэвтрэх'}
+                </WebButton>
+              </div>
+            </>
+          )}
+
+          {/* ── Success ── */}
+          {step === 'success' && (
+            <div style={{ textAlign:'center' }}>
+              <div style={{ width:80, height:80, borderRadius:999, background:`${T.pos}1A`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px' }}>
+                <div style={{ width:58, height:58, borderRadius:999, background:T.pos, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 12px 28px -8px ${T.pos}80` }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+              </div>
+              <div style={{ fontSize:28, fontWeight:800, color:T.ink, letterSpacing:'-0.02em', marginBottom:10 }}>Амжилттай нэвтэрлээ!</div>
+              <div style={{ fontSize:14, color:T.muted, fontWeight:500, lineHeight:1.6, marginBottom:32 }}>
+                Сайн байна уу. Та амжилттай нэвтэрлээ. Одоо самбараа харна уу.
+              </div>
+              <WebButton variant="primary" full onClick={() => window.location.href='04 Dashboard.html?state=full'}>
+                Самбар руу очих →
+              </WebButton>
+            </div>
+          )}
+
+          </div>
+
+        </div>
+
+        {/* Footer — legal entity name lives here (F-10) since the brand panel hides on narrow layouts */}
+        <div style={{ position:'absolute', bottom:24, left:0, right:0, textAlign:'center', fontSize:11.5, color:T.muted2, fontWeight:600, lineHeight:1.7 }}>
+          <div>Өгөөж нь зах зээлийн нөхцлөөс хамаарна. Хөрөнгө оруулалтын эрсдэлийг анхаарна уу.</div>
+          <div style={{ opacity:.75 }}>© 2026 Мони Маркет Фанд ХХК · СЗХ бүртгэл №ББСБ-001</div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Login/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

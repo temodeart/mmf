@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Гүйлгээний түүх — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+  .tx-row { transition: background .12s; }
+  .tx-row:hover { background: var(--field, #F7F8FC) !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+const { T, WebSidebar, WebTopbar, WebFooter, WebPageHeader, WebEmptyState, WebModal, WebButton } = window;
+
+/* ── full transaction history — mirrors mobile TransactionHistory.jsx:
+   month-grouped, filter chips (Бүгд/Орлого/Зарлага/Худалдан авалт/Зарсан),
+   non-color cue (icon+label) per row, signed mono amounts. ── */
+const TX_TYPES = [
+  { k:'all',      l:'Бүгд' },
+  { k:'deposit',  l:'Орлого' },
+  { k:'withdraw', l:'Зарлага' },
+  { k:'buy',      l:'Худалдан авалт' },
+  { k:'sell',     l:'Зарсан' },
+];
+
+const TX_DATA = [
+  { id:'t1',    type:'deposit',  t:'Орлого · Дансаар шилжүүлэх',            d:'2026-06-29', a:500000,   time:'10:24', via:'Хаан Банк 5041 28100 1281', ref:'MMF-200001281', bal:12500000 },
+  { id:'tfail', type:'withdraw', t:'Шилжүүлэг амжилтгүй',                   d:'2026-06-29', a:1000000,  time:'09:12', via:'Хаан банк •••• 4567', ref:'WDR-7710519', failed:true },
+  { id:'t2',    type:'deposit',  t:'Орлого · QPay',                        d:'2026-06-28', a:5000000,  time:'14:02', via:'QPay · Хаан Банк', ref:'QP-88421905' },
+  { id:'t3',    type:'buy',      t:'Захиалга · MSTRT 2400 IT 260711',       d:'2026-06-20', a:10000000, time:'11:36', via:'Анхдагч зах', ref:'ORD-4471120' },
+  { id:'t4',    type:'deposit',  t:'Эргэн төлөлт · CAPIT 1450 CD 270218',   d:'2026-06-18', a:1145000,  time:'09:00', via:'Хугацаа дууссан', ref:'RPY-1450029' },
+  { id:'t5',    type:'sell',     t:'Зарсан · GOLDH 2300 IT 270914',         d:'2026-06-15', a:12000000, time:'15:20', via:'Хоёрдогч зах', ref:'SEL-2300088' },
+  { id:'t6',    type:'withdraw', t:'Зарлага · Хаан банк',                   d:'2026-06-12', a:1000300,  time:'10:11', via:'Хаан банк •••• 4567', ref:'WDR-7710422', fee:300 },
+  { id:'t7',    type:'buy',      t:'Захиалга · INV 0820 11 260820',         d:'2026-06-09', a:4300000,  time:'13:45', via:'Анхдагч зах', ref:'ORD-4460918' },
+  { id:'t8',    type:'deposit',  t:'Орлого · Дансаар шилжүүлэх',            d:'2026-05-28', a:2000000,  time:'16:07', via:'Голомт банк', ref:'MMF-200001281' },
+  { id:'t9',    type:'deposit',  t:'Хүүгийн төлөлт · NEXT 7500 CP 260715',  d:'2026-05-22', a:285000,   time:'09:00', via:'Сар тутмын хүү', ref:'INT-0750221' },
+  { id:'t10',   type:'withdraw', t:'Зарлага · Хаан банк',                   d:'2026-05-12', a:500300,   time:'11:52', via:'Хаан банк •••• 4567', ref:'WDR-7690420', fee:300 },
+  { id:'t11',   type:'buy',      t:'Захиалга · CAPIT 1450 CD 270218',       d:'2026-05-04', a:9400000,  time:'10:30', via:'Анхдагч зах', ref:'ORD-4440414' },
+  { id:'t12',   type:'deposit',  t:'Орлого · QPay',                         d:'2026-04-19', a:1500000,  time:'12:18', via:'QPay · Голомт банк', ref:'QP-88104190' },
+  { id:'t13',   type:'sell',     t:'Зарсан · DMFIN 2250 IT 261204',         d:'2026-04-11', a:5200000,  time:'14:40', via:'Хоёрдогч зах', ref:'SEL-2250041' },
+  { id:'t14',   type:'buy',      t:'Захиалга · GOLDH 2300 IT 270914',       d:'2026-04-02', a:12000000, time:'09:55', via:'Анхдагч зах', ref:'ORD-4400402' },
+  { id:'t15',   type:'withdraw', t:'Зарлага · Хаан банк',                   d:'2026-03-24', a:800000,   time:'17:03', via:'Хаан банк •••• 4567', ref:'WDR-7660324', fee:300 },
+  { id:'t16',   type:'deposit',  t:'Орлого · Дансаар шилжүүлэх',            d:'2026-03-06', a:3000000,  time:'11:20', via:'Хаан Банк 5041 28100 1281', ref:'MMF-200001281' },
+];
+const TX_TYPE_LABEL = { deposit:'Орлого', withdraw:'Зарлага', buy:'Худалдан авалт', sell:'Зарсан' };
+
+const txVisual = (type) => ({
+  deposit:  { bg: T.posSoft,   fg: T.pos,   sign:'+', glyph:<path d="M12 5v14M19 12l-7 7-7-7" stroke={T.pos} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/> },
+  withdraw: { bg: T.indigoSoft,fg: T.indigo,sign:'−', glyph:<path d="M12 19V5M5 12l7-7 7 7" stroke={T.indigo} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/> },
+  buy:      { bg: T.blueSoft,  fg: T.blue,  sign:'−', glyph:<><circle cx="9" cy="20" r="1.4" fill={T.blue}/><circle cx="17" cy="20" r="1.4" fill={T.blue}/><path d="M3 4h2l2.2 11h10l1.8-8H6" stroke={T.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/></> },
+  sell:     { bg: T.warnSoft,  fg: T.warn,  sign:'+', glyph:<path d="M4 13l8-8 8 8-8 8-8-8z M12 9v4" stroke={T.warn} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/> },
+}[type]);
+
+const monthLabel = (m) => { const [y, mo] = m.split('-'); return `${y} оны ${parseInt(mo,10)}-р сар`; };
+
+const TxRow = ({ t, top, onOpen }) => {
+  const v = txVisual(t.type);
+  return (
+    <button onClick={onOpen} className="tx-row" style={{ width:'100%', textAlign:'left', border:'none', background:'transparent', cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', gap:14, padding:'14px 16px', borderTop: top ? `1px solid ${T.line2}` : 'none' }}>
+      <div style={{ width:40, height:40, borderRadius:11, background:v.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none">{v.glyph}</svg>
+      </div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div className="truncate" style={{ fontSize:13.5, fontWeight:700, color:T.ink }}>{t.t}</div>
+        <div className="num" style={{ fontSize:11.5, color:T.muted, marginTop:2 }}>{window.formatDate(t.d)}</div>
+      </div>
+      <div className="num" style={{ fontSize:14, fontWeight:800, color: t.failed ? T.muted2 : v.sign==='+' ? T.pos : T.ink, fontFamily:"'JetBrains Mono',monospace", flexShrink:0, textDecoration: t.failed ? 'line-through' : 'none' }}>{v.sign}{'\u00A0'}{window.formatMNT(t.a)}</div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0 }}><path d="M9 6l6 6-6 6" stroke={T.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    </button>
+  );
+};
+
+/* ── one transaction, opened from a row or a Гүйлгээ notification ── */
+const TxDetailModal = ({ tx, onClose }) => {
+  if (!tx) return null;
+  const v = txVisual(tx.type);
+  const inflow = v.sign === '+';
+  const bad = !!tx.failed;
+  const rows = [
+    ['Гүйлгээний төрөл', TX_TYPE_LABEL[tx.type] || 'Гүйлгээ'],
+    ['Огноо', window.formatDate(tx.d) + (tx.time ? ' · ' + tx.time : '')],
+    [inflow ? 'Хаанаас' : 'Хаашаа', tx.via || '—'],
+    ['Гүйлгээний дугаар', tx.ref || '—'],
+    ['Шимтгэл', window.formatMNT(tx.fee || 0)],
+  ];
+  if (tx.bal) rows.push(['Шинэ үлдэгдэл', window.formatMNT(tx.bal)]);
+  return (
+    <WebModal open onClose={onClose} title="Гүйлгээний дэлгэрэнгүй" ticker={tx.ref}
+      footer={<WebButton variant="ghost" full onClick={onClose}>Хаах</WebButton>}>
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', padding:'4px 0 6px' }}>
+        <div style={{ width:60, height:60, borderRadius:18, background: bad ? T.negSoft : v.bg, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          {bad
+            ? <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10M17 7L7 17" stroke={T.neg} strokeWidth="2.6" strokeLinecap="round"/></svg>
+            : <svg width="28" height="28" viewBox="0 0 24 24" fill="none">{v.glyph}</svg>}
+        </div>
+        <div style={{ fontSize:13, color:T.muted, fontWeight:600, marginTop:14 }}>{tx.t}</div>
+        <div className="num" style={{ fontSize:30, fontWeight:800, letterSpacing:'-0.03em', marginTop:6, color: bad ? T.muted2 : inflow ? T.pos : T.ink, fontFamily:"'JetBrains Mono',monospace", textDecoration: bad ? 'line-through' : 'none' }}>{v.sign}{'\u00A0'}{window.formatMNT(tx.a)}</div>
+        <div style={{ display:'inline-flex', alignItems:'center', gap:7, marginTop:12, padding:'6px 13px', borderRadius:99, background: bad ? T.negSoft : T.posSoft }}>
+          <span style={{ fontSize:12, fontWeight:800, color: bad ? T.neg : T.pos }}>{bad ? 'Цуцлагдсан' : 'Амжилттай'}</span>
+        </div>
+      </div>
+      <div style={{ marginTop:18, background:T.field, border:`1px solid ${T.line2}`, borderRadius:14, overflow:'hidden' }}>
+        {rows.map(([l, val], i) => (
+          <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12, padding:'12px 14px', borderTop: i ? `1px solid ${T.line2}` : 'none' }}>
+            <span style={{ fontSize:12.5, color:T.muted, fontWeight:600 }}>{l}</span>
+            <span className="num" style={{ fontSize:13, fontWeight:700, color:T.ink, textAlign:'right' }}>{val}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize:11.5, color:T.muted, marginTop:12, lineHeight:1.55 }}>
+        {bad ? 'Мөнгө бүрэн дүнгээр хэтэвчинд буцаагдсан. Дахин оролдож болно.' : 'Гүйлгээний дугаарыг дэмжлэгийн багтай холбогдохдоо баримт болгон хэрэглэнэ.'}
+      </div>
+    </WebModal>
+  );
+};
+
+const TxHistoryPage = () => {
+  const [filter, setFilter] = useState('all');
+  const [open, setOpen] = useState(() => {
+    const q = new URLSearchParams(location.search).get('tx');
+    return q ? (TX_DATA.find(t => t.id === q) || null) : null;
+  });
+  const filtered = filter==='all' ? TX_DATA : TX_DATA.filter(t => t.type===filter);
+
+  const groups = useMemo(() => {
+    const g = [];
+    filtered.forEach(t => {
+      const m = t.d.slice(0,7);
+      let bucket = g.find(x => x.m===m);
+      if (!bucket) { bucket = { m, items:[] }; g.push(bucket); }
+      bucket.items.push(t);
+    });
+    return g;
+  }, [filter]);
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebar activePath="/wallet"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Гүйлгээний түүх" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+          <div style={{ maxWidth:760, margin:'0 auto' }}>
+
+            <a href="06 Wallet.html" style={{ display:'inline-flex', alignItems:'center', gap:7, background:'none', border:'none', color:T.muted, fontWeight:700, fontSize:13, textDecoration:'none', padding:'6px 4px', marginBottom:10 }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke={T.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Хэтэвч рүү буцах
+            </a>
+
+            <WebPageHeader title="Гүйлгээний түүх" subtitle="Орлого, зарлага, худалдан авалт, зарсан гүйлгээний бүрэн жагсаалт"/>
+
+            <div style={{ display:'flex', gap:8, flexWrap:'wrap', marginBottom:22 }}>
+              {TX_TYPES.map(ty => {
+                const on = filter === ty.k;
+                return (
+                  <button key={ty.k} onClick={() => setFilter(ty.k)} style={{ height:38, padding:'0 16px', borderRadius:99, border:`1px solid ${on?T.ink:T.line}`, background:on?T.ink:T.surface, color:on?'#fff':T.text, fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{ty.l}</button>
+                );
+              })}
+            </div>
+
+            {filtered.length === 0 ? (
+              <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20 }}>
+                <WebEmptyState title="Энэ төрлийн гүйлгээ алга" body="Өөр шүүлтүүр сонгож үзнэ үү."/>
+              </div>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:22 }}>
+                {groups.map(g => (
+                  <div key={g.m}>
+                    <div style={{ fontSize:12, fontWeight:700, color:T.muted, marginBottom:8 }}>{monthLabel(g.m)}</div>
+                    <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:16, overflow:'hidden' }}>
+                      {g.items.map((t,i) => <TxRow key={t.id} t={t} top={i>0} onOpen={()=>setOpen(t)}/>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+          </div>
+        </main>
+        <WebFooter/>
+      </div>
+      <TxDetailModal tx={open} onClose={()=>setOpen(null)}/>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<TxHistoryPage/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

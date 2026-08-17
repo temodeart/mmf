@@ -1,0 +1,255 @@
+/* =========================================================================
+   Money Market Fund — Base element & component-baseline rules
+   Include the design system's styles.css on any HTML doc to inherit these.
+   ========================================================================= */
+
+html, body {
+  margin: 0;
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+/* SVG icons: brand default = 2px rounded stroke */
+svg.icon, .icon svg {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Display / hero numbers */
+.display, h1.display {
+  font-size: var(--t-display);
+  font-weight: var(--fw-black);
+  letter-spacing: var(--ls-display);
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+h1, .h1 { font-size: var(--t-h1); font-weight: var(--fw-black); letter-spacing: var(--ls-title); line-height: 1.1;  margin: 0; color: var(--ink); }
+h2, .h2 { font-size: var(--t-h2); font-weight: var(--fw-black); letter-spacing: var(--ls-title); line-height: 1.15; margin: 0; color: var(--ink); }
+h3, .h3 { font-size: var(--t-h3); font-weight: var(--fw-bold);  letter-spacing: var(--ls-h);     line-height: 1.25; margin: 0; color: var(--ink); }
+h4, .h4 { font-size: var(--t-h4); font-weight: var(--fw-black); letter-spacing: var(--ls-h);     margin: 0; color: var(--ink); }
+
+p, .body { font-size: var(--t-body); font-weight: var(--fw-medium); line-height: 1.5; color: var(--text); margin: 0; }
+.body-lg { font-size: var(--t-body-lg); line-height: 1.55; color: var(--muted); }
+.body-sm { font-size: var(--t-sm); line-height: 1.5; color: var(--text); }
+
+.eyebrow {
+  font-size: var(--t-xs); font-weight: var(--fw-bold); letter-spacing: var(--ls-eyebrow-lg);
+  text-transform: uppercase; color: var(--indigo);
+}
+.label { font-size: var(--t-xs); font-weight: var(--fw-semibold); color: var(--muted); }
+.meta  { font-size: var(--t-2xs); font-weight: var(--fw-semibold); color: var(--muted-2); }
+
+.mono, code, kbd, .ticker { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.num, .amount, .currency  { font-variant-numeric: tabular-nums; letter-spacing: var(--ls-h); }
+
+/* =========================================================================
+   COMPONENT BASELINES
+   ========================================================================= */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-7);
+  padding: var(--card-pad);
+}
+.card--hero {
+  border: none; border-radius: var(--r-8); color: #fff;
+  background: var(--hero-navy); position: relative; overflow: hidden;
+}
+
+.btn {
+  height: 52px; padding: 0 22px; border-radius: var(--r-5);
+  font-family: inherit; font-weight: var(--fw-bold); font-size: var(--t-body-lg);
+  letter-spacing: var(--ls-h); border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity var(--t-fast), box-shadow var(--t-fast);
+}
+.btn:active { opacity: 0.92; }
+.btn--primary { background: var(--indigo); color: #fff; box-shadow: var(--shadow-cta); }
+.btn--ink     { background: var(--ink); color: #fff; }
+.btn--ghost   { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn--pos     { background: var(--pos); color: #fff; }
+.btn--neg     { background: var(--neg); color: #fff; }
+.btn--pill    { border-radius: var(--r-pill); }
+.btn--sm      { height: 36px; padding: 0 16px; font-size: var(--t-sm); border-radius: var(--r-4); }
+.btn--full    { width: 100%; }
+
+.input {
+  height: 52px; border-radius: var(--r-5); background: var(--field-bg);
+  border: 1.5px solid var(--line); padding: 0 16px; font-family: inherit;
+  font-size: var(--t-body-lg); font-weight: var(--fw-medium); color: var(--ink);
+  width: 100%; transition: border-color var(--t-fast), box-shadow var(--t-fast), background var(--t-fast);
+}
+.input:focus, .input.is-focused {
+  outline: none; background: var(--surface);
+  border-color: var(--indigo); box-shadow: var(--ring-focus);
+}
+.input::placeholder { color: var(--muted-2); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: var(--t-2xs); font-weight: var(--fw-bold); letter-spacing: 0.01em;
+}
+.badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.85; }
+.badge--new    { background: var(--green-soft);  color: var(--green); }
+.badge--active { background: var(--amber-soft);  color: var(--amber); }
+.badge--sell   { background: var(--red-soft);    color: var(--red); }
+.badge--buy    { background: var(--blue-soft);   color: var(--blue); }
+.badge--info   { background: var(--indigo-soft); color: var(--indigo); }
+
+/* F-24 · one global focus ring — 2px indigo, 2px offset.
+   Applies to buttons, rows, sort icons, page-size select, dropdown items. */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible,
+[role="row"]:focus-visible, tr:focus-visible, [role="button"]:focus-visible,
+[role="option"]:focus-visible, [role="menuitem"]:focus-visible,
+.sort-btn:focus-visible, .page-size:focus-visible, .dropdown-item:focus-visible {
+  outline: var(--focus-ring-w) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: none;
+  border-radius: var(--r-4);
+}
+
+/* Min target — interactive elements >= 40px */
+button, [role="button"], [role="tab"], [role="option"], [role="menuitem"] {
+  min-height: var(--target-min);
+}
+
+/* =========================================================================
+   SKELETON — shimmer loading placeholder
+   ========================================================================= */
+@keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--line-2) 0%, var(--line) 40%, var(--line-2) 60%, var(--line-2) 100%);
+  background-size: 200% 100%; animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--r-2); color: transparent !important; user-select: none; pointer-events: none;
+}
+.skeleton--text   { height: 14px; border-radius: var(--r-1); }
+.skeleton--title  { height: 22px; border-radius: var(--r-1); }
+.skeleton--num    { height: 32px; border-radius: var(--r-1); min-width: 80px; }
+.skeleton--avatar { width: 44px; height: 44px; border-radius: var(--r-3); flex-shrink: 0; }
+.skeleton--card   { height: 120px; border-radius: var(--r-6); }
+.skeleton--row    { height: 52px; border-radius: var(--r-2); }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; background: var(--line-2); } }
+
+/* =========================================================================
+   EMPTY STATE
+   ========================================================================= */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: var(--s-7) var(--s-5); gap: var(--s-3);
+}
+.empty-state__icon {
+  width: 56px; height: 56px; border-radius: var(--r-5); background: var(--line-2);
+  display: flex; align-items: center; justify-content: center; margin-bottom: var(--s-2);
+}
+.empty-state__title { font-size: var(--t-h4); font-weight: var(--fw-bold); letter-spacing: var(--ls-h); color: var(--ink); margin: 0; }
+.empty-state__body  { font-size: var(--t-sm); font-weight: var(--fw-medium); color: var(--muted); line-height: 1.55; max-width: 300px; margin: 0; }
+
+/* =========================================================================
+   ERROR / ALERT STATE — neg · warn · info
+   ========================================================================= */
+.error-state {
+  display: flex; gap: var(--s-3); padding: var(--s-4); border-radius: var(--r-5);
+  background: var(--neg-soft); border: 1px solid var(--neg-border); align-items: flex-start;
+}
+.error-state__icon {
+  width: 36px; height: 36px; border-radius: var(--r-3); background: var(--neg);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.error-state__title { font-size: var(--t-body); font-weight: var(--fw-bold); color: var(--neg); margin: 0 0 2px; }
+.error-state__body  { font-size: var(--t-sm); font-weight: var(--fw-medium); color: var(--text); line-height: 1.5; margin: 0; }
+.error-state--warn { background: var(--warn-surface); border-color: var(--warn-border); }
+.error-state--warn .error-state__icon  { background: var(--warn); }
+.error-state--warn .error-state__title { color: var(--warn); }
+.error-state--info { background: var(--info-soft); border-color: var(--indigo-soft); }
+.error-state--info .error-state__icon  { background: var(--info); }
+.error-state--info .error-state__title { color: var(--info); }
+
+/* =========================================================================
+   F-01 · FLUID APP CONTENT GRID
+   main column + fixed 320px rail; every child gets min-width:0 so long
+   labels truncate instead of forcing horizontal overflow.
+   Test widths: 1280 / 1366 / 1440 / 1600 / 1920.
+   ========================================================================= */
+.app-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--app-rail);
+  gap: var(--s-5);
+  align-items: start;
+}
+.app-grid > * { min-width: 0; }                 /* every child may shrink */
+/* long labels truncate with ellipsis — always pair with title="full text" */
+.truncate { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* =========================================================================
+   F-06 · ISSUER LOGO CONTAINER
+   1:1 plate · object-fit:contain · 6px padding · neutral #F4F6FA · 8px radius.
+   Issuer-supplied art can't bleed into the card. Size via width per context.
+   ========================================================================= */
+.issuer-logo {
+  aspect-ratio: 1 / 1; width: 40px; padding: 6px;
+  background: var(--bg); border-radius: var(--r-2);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.issuer-logo > img, .issuer-logo > svg { width: 100%; height: 100%; object-fit: contain; }
+
+/* =========================================================================
+   F-07 · EXTERNAL LINK
+   Always https:// · target="_blank" rel="noopener noreferrer" · trailing
+   external-arrow icon after the label.
+   ========================================================================= */
+.ext-link { display: inline-flex; align-items: center; gap: 4px; color: var(--indigo); font-weight: var(--fw-semibold); text-decoration: none; }
+.ext-link:hover { text-decoration: underline; }
+.ext-link__icon { width: 12px; height: 12px; flex-shrink: 0; stroke: currentColor; }
+
+/* =========================================================================
+   a11y §06 · NON-COLOR DIRECTION CUE
+   Авах / Зарах always carry color + text label AND an arrow icon —
+   never color alone.
+   ========================================================================= */
+.dir { display: inline-flex; align-items: center; gap: 5px; font-weight: var(--fw-bold); font-size: var(--t-sm); letter-spacing: var(--ls-h); }
+.dir__arrow { width: 12px; height: 12px; flex-shrink: 0; }
+.dir--buy  { color: var(--pos); }   /* Авах — up arrow */
+.dir--sell { color: var(--neg); }   /* Зарах — down arrow */
+
+/* Shared tabular-numeral utility — pair with mono font-family where needed */
+.num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+/* =========================================================================
+   F-24 · SKIP-TO-CONTENT LINK — visible only on keyboard focus, top-left
+   ========================================================================= */
+.skip-link {
+  position: fixed; top: 12px; left: 12px; z-index: 100;
+  transform: translateY(-160%);
+  background: var(--indigo); color: #fff;
+  padding: 10px 16px; border-radius: var(--r-4);
+  font-weight: 700; font-size: 13px; text-decoration: none;
+  box-shadow: var(--e-3);
+  transition: transform .18s var(--ease-default);
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: var(--focus-ring-w) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* =========================================================================
+   DROPDOWN MENU ITEM — base row for avatar / overflow menus (F-24 ring auto)
+   ========================================================================= */
+.dropdown-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; border: none; background: transparent;
+  border-radius: var(--r-3); font-family: inherit; font-size: 13.5px;
+  font-weight: 600; color: var(--text); cursor: pointer; text-align: left;
+  min-height: 0;
+}
+.dropdown-item:hover { background: var(--indigo-soft); color: var(--indigo); }

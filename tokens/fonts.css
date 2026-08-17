@@ -1,0 +1,5 @@
+/* Money Market Fund — Webfonts
+   Manrope (UI, full Cyrillic coverage) + JetBrains Mono (numerics/tickers).
+   Loaded from Google Fonts — no binary font files were supplied by the client.
+   If brand-owned font files arrive, replace this @import with local @font-face. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');

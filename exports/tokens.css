@@ -1,0 +1,327 @@
+/* =========================================================================
+   Money Market Fund — Design Tokens (--mmf-* namespace · MMF contract v1.0)
+   Source of truth for colors, type, spacing, radii, shadows, motion.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
+
+:root {
+  /* -------- BRAND COLORS -------- */
+  --mmf-logo-orange:    #FE5E00;   /* logo top-left wedge — preserved as-is */
+  --mmf-logo-blue:      #1677FF;   /* logo bottom-right wedge — preserved as-is */
+
+  --mmf-indigo:         #4F46E5;   /* PRIMARY action color */
+  --mmf-indigo-soft:    #EEF0FE;   /* primary tint surfaces, focus rings */
+  --mmf-blue:           #2D6BFF;   /* brand accent — charts, secondary highlights */
+  --mmf-blue-soft:      #E7EEFF;
+  --mmf-orange:         #FF6B2C;   /* accent — progress bars, notification dot */
+  --mmf-orange-soft:    #FFEDE2;
+  --mmf-navy:           #050B1F;   /* dark accent surface */
+  --mmf-navy-2:         #0E1631;
+  --mmf-navy-3:         #1A2547;
+
+  /* -------- SEMANTIC STATUS -------- */
+  --mmf-green:          #0E9F6E;   /* new / approved / income */
+  --mmf-green-soft:     #E3F5EE;
+  --mmf-amber:          #B7791F;   /* active / warning */
+  --mmf-amber-soft:     #FFF3D6;
+  --mmf-red:            #DC2626;   /* sell / outflow / error */
+  --mmf-red-soft:       #FDECEC;
+  --mmf-info:           var(--mmf-indigo);
+  --mmf-info-soft:      var(--mmf-indigo-soft);
+  --mmf-surface-warning:#FFFBF2;
+  --mmf-border-warning: #FFE9C4;
+
+  /* -------- NEUTRAL / INK -------- */
+  --mmf-bg:             #F4F6FA;   /* page wash */
+  --mmf-surface:        #FFFFFF;   /* default card surface */
+  --mmf-ink:            #0B1020;   /* primary text */
+  --mmf-ink-2:          #1F2540;
+  --mmf-text:           #2A3052;   /* body text */
+  --mmf-muted:          #6B7191;   /* labels, secondary text */
+  --mmf-muted-2:        #9099B5;   /* placeholders, tertiary */
+  --mmf-line:           #E7E9F2;   /* card borders, dividers */
+  --mmf-line-2:         #EFF1F8;   /* internal separators */
+  --mmf-field-bg:       #FAFBFE;   /* resting input fill */
+
+  /* -------- TYPOGRAPHY -------- */
+  --mmf-font-ui:        'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --mmf-font-mono:      'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale (px) */
+  --mmf-t-display:      44px;   /* splash hero, big numbers */
+  --mmf-t-title:        30px;   /* onboarding titles */
+  --mmf-t-h1:           28px;   /* page titles */
+  --mmf-t-h2:           22px;   /* section titles inside screens */
+  --mmf-t-h3:           18px;   /* card titles */
+  --mmf-t-h4:           16px;   /* section labels */
+  --mmf-t-body-lg:      15px;   /* primary body */
+  --mmf-t-body:         14px;   /* default body */
+  --mmf-t-sm:           13px;   /* card body */
+  --mmf-t-xs:           12px;   /* labels */
+  --mmf-t-2xs:          11px;   /* meta */
+  --mmf-t-3xs:          10px;   /* eyebrows */
+
+  /* Weights */
+  --mmf-fw-regular:     400;
+  --mmf-fw-medium:      500;
+  --mmf-fw-semibold:    600;
+  --mmf-fw-bold:        700;
+  --mmf-fw-black:       800;
+
+  /* Letter spacing */
+  --mmf-ls-display:     -0.02em;
+  --mmf-ls-title:       -0.02em;
+  --mmf-ls-h:           -0.01em;
+  --mmf-ls-body:        0;
+  --mmf-ls-eyebrow:     0.08em;
+  --mmf-ls-eyebrow-lg:  0.18em;
+
+  /* -------- SPACING SCALE -------- */
+  --mmf-s-1:            4px;
+  --mmf-s-2:            8px;
+  --mmf-s-3:            12px;
+  --mmf-s-4:            16px;
+  --mmf-s-5:            24px;
+  --mmf-s-6:            32px;
+  --mmf-s-7:            48px;
+  --mmf-margin-h:       24px;   /* mobile horizontal margin */
+  --mmf-card-pad:       20px;   /* default card padding */
+  --mmf-tabbar-h:       80px;   /* bottom tab bar height incl. safe area */
+
+  /* -------- RADII -------- */
+  --mmf-r-1:            6px;    /* checkbox glyph */
+  --mmf-r-2:            8px;    /* small chip */
+  --mmf-r-3:            10px;   /* badge, icon container */
+  --mmf-r-4:            12px;   /* button-small, chip */
+  --mmf-r-5:            14px;   /* button, input */
+  --mmf-r-6:            16px;   /* card */
+  --mmf-r-7:            18px;   /* card */
+  --mmf-r-8:            22px;   /* hero card */
+  --mmf-r-9:            28px;   /* large hero / device frame */
+  --mmf-r-frame:        48px;   /* device frame outer */
+  --mmf-r-pill:         999px;
+
+  /* -------- SHADOWS -------- */
+  --mmf-shadow-frame:   0 30px 60px -25px rgba(15,20,55,.18),
+                    0 8px 20px -10px rgba(15,20,55,.08);
+  --mmf-shadow-card:    0 2px 6px -2px rgba(15,20,55,.04);
+  --mmf-shadow-cta:     0 8px 22px -8px rgba(79,70,229,.5);
+  --mmf-shadow-floating:0 10px 30px -10px rgba(15,20,55,.25);
+  --mmf-shadow-press:   0 1px 3px rgba(15,20,55,.06);
+  --mmf-ring-focus:     0 0 0 4px var(--mmf-indigo-soft);
+
+  /* -------- MOTION -------- */
+  --mmf-ease-default:   cubic-bezier(.2,.8,.2,1);
+  --mmf-t-fast:         0.15s;
+  --mmf-t-medium:       0.2s;
+  --mmf-t-slow:         0.35s;
+
+  /* -------- HERO GRADIENTS -------- */
+  --mmf-hero-navy:      linear-gradient(135deg, #050B1F 0%, #4F46E5 130%);
+  --mmf-hero-pastel:    linear-gradient(160deg, #EEF0FE 0%, #E7EEFF 60%, #F4F6FA 100%);
+  --mmf-hero-promo:     linear-gradient(140deg, #FFFFFF 0%, #F4F1FF 60%, #EEF0FE 100%);
+  --mmf-bar-orange:     linear-gradient(90deg, #FF6B2C, #FF8B4F);
+}
+
+/* =========================================================================
+   SEMANTIC ELEMENT RULES
+   Apply these by including this stylesheet on any HTML doc.
+   ========================================================================= */
+
+html, body {
+  margin: 0;
+  font-family: var(--mmf-font-ui);
+  background: var(--mmf-bg);
+  color: var(--mmf-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+/* SVG icons: brand default = 2px rounded stroke */
+svg.icon, .icon svg {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Display / hero numbers */
+.display, h1.display {
+  font-size: var(--mmf-t-display);
+  font-weight: var(--mmf-fw-black);
+  letter-spacing: var(--mmf-ls-display);
+  line-height: 1.05;
+  color: var(--mmf-ink);
+}
+
+h1, .h1 {
+  font-size: var(--mmf-t-h1);
+  font-weight: var(--mmf-fw-black);
+  letter-spacing: var(--mmf-ls-title);
+  line-height: 1.1;
+  margin: 0;
+  color: var(--mmf-ink);
+}
+
+h2, .h2 {
+  font-size: var(--mmf-t-h2);
+  font-weight: var(--mmf-fw-black);
+  letter-spacing: var(--mmf-ls-title);
+  line-height: 1.15;
+  margin: 0;
+  color: var(--mmf-ink);
+}
+
+h3, .h3 {
+  font-size: var(--mmf-t-h3);
+  font-weight: var(--mmf-fw-bold);
+  letter-spacing: var(--mmf-ls-h);
+  line-height: 1.25;
+  margin: 0;
+  color: var(--mmf-ink);
+}
+
+h4, .h4 {
+  font-size: var(--mmf-t-h4);
+  font-weight: var(--mmf-fw-black);
+  letter-spacing: var(--mmf-ls-h);
+  margin: 0;
+  color: var(--mmf-ink);
+}
+
+p, .body {
+  font-size: var(--mmf-t-body);
+  font-weight: var(--mmf-fw-medium);
+  line-height: 1.5;
+  color: var(--mmf-text);
+  margin: 0;
+}
+
+.body-lg { font-size: var(--mmf-t-body-lg); line-height: 1.55; color: var(--mmf-muted); }
+.body-sm { font-size: var(--mmf-t-sm); line-height: 1.5; color: var(--mmf-text); }
+
+.eyebrow {
+  font-size: var(--mmf-t-xs);
+  font-weight: var(--mmf-fw-bold);
+  letter-spacing: var(--mmf-ls-eyebrow-lg);
+  text-transform: uppercase;
+  color: var(--mmf-indigo);
+}
+
+.label {
+  font-size: var(--mmf-t-xs);
+  font-weight: var(--mmf-fw-semibold);
+  color: var(--mmf-muted);
+}
+
+.meta {
+  font-size: var(--mmf-t-2xs);
+  font-weight: var(--mmf-fw-semibold);
+  color: var(--mmf-muted-2);
+}
+
+.mono, code, kbd, .ticker {
+  font-family: var(--mmf-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.num, .amount, .currency {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--mmf-ls-h);
+}
+
+/* =========================================================================
+   COMPONENT BASELINES
+   ========================================================================= */
+
+.card {
+  background: var(--mmf-surface);
+  border: 1px solid var(--mmf-line-2);
+  border-radius: var(--mmf-r-7);
+  padding: var(--mmf-card-pad);
+}
+
+.card--hero {
+  border: none;
+  border-radius: var(--mmf-r-8);
+  color: #fff;
+  background: var(--mmf-hero-navy);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn {
+  height: 52px;
+  padding: 0 22px;
+  border-radius: var(--mmf-r-5);
+  font-family: inherit;
+  font-weight: var(--mmf-fw-bold);
+  font-size: var(--mmf-t-body-lg);
+  letter-spacing: var(--mmf-ls-h);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity var(--mmf-t-fast), box-shadow var(--mmf-t-fast);
+}
+.btn:active { opacity: 0.92; }
+.btn--primary {
+  background: var(--mmf-indigo);
+  color: #fff;
+  box-shadow: var(--mmf-shadow-cta);
+}
+.btn--ink     { background: var(--mmf-ink); color: #fff; }
+.btn--ghost   {
+  background: transparent;
+  color: var(--mmf-ink);
+  border: 1.5px solid var(--mmf-line);
+}
+.btn--pill    { border-radius: var(--mmf-r-pill); }
+.btn--sm      { height: 36px; padding: 0 16px; font-size: var(--mmf-t-sm); border-radius: var(--mmf-r-4); }
+.btn--full    { width: 100%; }
+
+.input {
+  height: 52px;
+  border-radius: var(--mmf-r-5);
+  background: var(--mmf-field-bg);
+  border: 1.5px solid var(--mmf-line);
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: var(--mmf-t-body-lg);
+  font-weight: var(--mmf-fw-medium);
+  color: var(--mmf-ink);
+  width: 100%;
+  transition: border-color var(--mmf-t-fast), box-shadow var(--mmf-t-fast), background var(--mmf-t-fast);
+}
+.input:focus, .input.is-focused {
+  outline: none;
+  background: var(--mmf-surface);
+  border-color: var(--mmf-indigo);
+  box-shadow: var(--mmf-ring-focus);
+}
+.input::placeholder { color: var(--mmf-muted-2); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--mmf-r-pill);
+  font-size: var(--mmf-t-2xs);
+  font-weight: var(--mmf-fw-bold);
+  letter-spacing: 0.01em;
+}
+.badge::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+.badge--new    { background: var(--mmf-green-soft);  color: var(--mmf-green); }
+.badge--active { background: var(--mmf-amber-soft);  color: var(--mmf-amber); }
+.badge--sell   { background: var(--mmf-red-soft);    color: var(--mmf-red); }
+.badge--buy    { background: var(--mmf-blue-soft);   color: var(--mmf-blue); }
+.badge--info   { background: var(--mmf-indigo-soft); color: var(--mmf-indigo); }

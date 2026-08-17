@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Миний бүтээгдэхүүн — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_status.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx?v=f3"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../order_modal.jsx?v=f3"></script>
+<script type="text/babel" src="../products_data.jsx"></script>
+<script type="text/babel" src="../products_page.jsx"></script>
+<style>
+  body { background: radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%), radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%), var(--bg); min-height:100vh; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:#DADEEA; border-radius:99px; border:3px solid transparent; background-clip:content-box; }
+  .hover-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+  .holding-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(15,20,55,.34); border-color:#DDE1EE; }
+  a { color:#4F46E5; }
+  a:hover { color:#3B32C9; }
+  select:focus-visible, input:focus-visible, button:focus-visible { outline:2px solid #4F46E5; outline-offset:2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { T, WebSidebar, WebTopbar, WebPageHeader, WebButton, ConfirmOrderModal } = window;
+
+const MyProducts = () => {
+  const [sellTarget, setSellTarget] = useState(null);
+  const [sellOrder, setSellOrder] = useState(null);
+  const [sellOpen, setSellOpen] = useState(false);
+  const [lv, setLv] = useState(0);
+
+  const continueSell = ({ holding, qty, calc }) => {
+    setSellOrder({ inst:{ bank:holding.issuer, ticker:holding.ticker, type:holding.type, unit:calc.salePrice, rate:holding.rate, term:holding.matDays, mat:holding.mat }, qty, calc:{ fee:calc.fee, total:calc.total } });
+    setSellOpen(true);
+  };
+  const onConfirmed = () => {
+    if (!sellOrder || !window.MMFListings) return;
+    window.MMFListings.add({ id:'sl'+Date.now(), bank:sellOrder.inst.bank, type:sellOrder.inst.type, ticker:sellOrder.inst.ticker, side:'sell', qty:sellOrder.qty, total:sellOrder.calc.total, status:'new', date:new Date().toISOString().slice(0,10) });
+    setLv(v => v + 1);   // flips the holding to "Зарагдаж байна" behind the modal
+  };
+  const closeSell = () => { setSellOpen(false); setSellOrder(null); setSellTarget(null); };
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <WebSidebar activePath="/products"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Миний бүтээгдэхүүн" notifCount={2}/>
+        <main style={{ flex:1, padding:'26px 32px 60px', maxWidth:1400, width:'100%', margin:'0 auto', boxSizing:'border-box' }}>
+          <WebPageHeader
+            title="Миний бүтээгдэхүүн"
+            subtitle="Эзэмшиж байгаа бүх хөрөнгө оруулалт — төрөл, хугацаа, статусаар шүүж харах"
+            right={<WebButton variant="primary" onClick={() => location.href='02 Trade Screen.html'}>Шинэ хөрөнгө оруулалт</WebButton>}/>
+          <window.MyProductsBody onSell={setSellTarget} listingsVersion={lv}/>
+        </main>
+      </div>
+      <window.PSellSheet holding={sellTarget} onClose={() => setSellTarget(null)} onContinue={continueSell}/>
+      <ConfirmOrderModal open={sellOpen} onClose={closeSell} instrument={sellOrder?sellOrder.inst:null} qty={sellOrder?sellOrder.qty:0} side="sell" calc={sellOrder?sellOrder.calc:{}} balance={Infinity} onConfirmed={onConfirmed}/>
+    </div>
+  );
+};
+ReactDOM.createRoot(document.getElementById('root')).render(<MyProducts/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

@@ -24,7 +24,23 @@ const RP_FLOW = [
   { id:'onb4', sect:'Танилцуулга', name:'Онбординг 4', el:<Onb4/>, nav:[['Алгасах','phone'], ['Эхлэх','phone'], ['Үргэлжлүүлэх','phone']] },
 
   { id:'phone',     sect:'Бүртгэл', name:'Утас баталгаажуулах',   el:<PhoneVerify/>,    nav:[['Үргэлжлүүлэх','email']] },
-  { id:'email',     sect:'Бүртгэл', name:'И-мэйл баталгаажуулах', el:<EmailVerify/>,    nav:[['Үргэлжлүүлэх','password']] },
+  { id:'email',     sect:'Бүртгэл', name:'И-мэйл баталгаажуулах', el:<EmailVerify/>,    nav:[['Үргэлжлүүлэх','bankVerify']] },
+
+  // Данс баталгаажуулах — step 3, right after email verification
+  { id:'bankVerify',   sect:'Данс', name:'Данс баталгаажуулах', el:<BankVerify/>,       nav:[['гүйлгээ авах','bankSending']] },
+  { id:'ibanSheet',    sect:'Данс', name:'IBAN лавлах · хайх',  el:<IbanLookupSheet/>,  overlay:true, nav:[['Хуулах','__back']] },
+  { id:'ibanResult',   sect:'Данс', name:'IBAN лавлах · үр дүн', el:<IbanLookupResult/>, overlay:true, nav:[['Хуулах','__back']] },
+  { id:'bankSending',  sect:'Данс', name:'Гүйлгээ илгээж байна', el:<DepositSending/>,   tap:'bankInfo' },
+  { id:'bankInfo',     sect:'Данс', name:'Баталгаажуулах заавар', el:<DepositInfo/>,      nav:[['код оруулах','bankCode']] },
+  { id:'bankCode',     sect:'Данс', name:'Баталгаажуулах код',   el:<CodeEntry/>,        nav:[['Үргэлжлүүлэх','bankVerified']] },
+  { id:'bankVerified', sect:'Данс', name:'Данс баталгаажлаа',   el:<BankVerified/>,     nav:[['Үргэлжлүүлэх','cardAsk']] },
+
+  // Карт холбох — optional add-on right after bank verification
+  { id:'cardAsk',     sect:'Карт', name:'Карт холбох уу?',       el:<CardAsk/>,     nav:[['Карт холбох','cardAdd'], ['Дараа нь','password']] },
+  { id:'cardAdd',     sect:'Карт', name:'Карт нэмэх',            el:<CardAdd/>,     nav:[['Холбох','cardLinking']] },
+  { id:'cardLinking', sect:'Карт', name:'Холбогдож байна',       el:<CardLinking/>, tap:'cardLinked' },
+  { id:'cardLinked',  sect:'Карт', name:'Карт холбогдлоо',       el:<CardLinked/>,  nav:[['Үргэлжлүүлэх','password']] },
+  { id:'cardFailed',  sect:'Карт', name:'Холбогдсонгүй · алдаа', el:<CardFailed/>,  nav:[['Дахин оролдох','cardAdd'], ['Дараа нь','password']] },
   { id:'password',  sect:'Бүртгэл', name:'Нууц үг үүсгэх',        el:<CreatePassword/>, nav:[['Үргэлжлүүлэх','pin']] },
   { id:'pin',       sect:'Бүртгэл', name:'Гүйлгээний PIN',        el:<CreatePin/>,      nav:[['Үргэлжлүүлэх','biometric']] },
   { id:'biometric', sect:'Бүртгэл', name:'Биометр тохиргоо',      el:<BiometricSetup/>, nav:[['Идэвхжүүлэх','kyc'], ['Алгасах','kyc']] },
@@ -41,21 +57,17 @@ const RP_FLOW = [
   { id:'esignCanvas',  sect:'Цахим гарын үсэг', name:'Гарын үсэг зурах', el:<ESignCanvas/>,
     nav:[['Гарын үсэг баталгаажуулах','esignSuccess']] },
   { id:'esignSuccess', sect:'Цахим гарын үсэг', name:'Амжилттай',        el:<ESignSuccess/>,
-    nav:[['Данс баталгаажуулах','bankVerify'], ['G-Sign-ээр','gsignRequest']] },
+    nav:[['Үргэлжлүүлэх','kycComplete'], ['G-Sign-ээр','gsignRequest']] },
 
   { id:'gsignRequest',  sect:'G-Sign', name:'G-Sign хүсэлт',       el:<GSignRequest/>,
     nav:[['хүсэлт илгээх','gsignWaiting'], ['хэрхэн ашиглах','gsignTutorial']] },
   { id:'gsignWaiting',  sect:'G-Sign', name:'G-Sign хүлээж байна', el:<GSignWaiting/>,  tap:'gsignSuccess' },
   { id:'gsignSuccess',  sect:'G-Sign', name:'G-Sign амжилттай',    el:<GSignSuccess/>,
-    nav:[['Данс баталгаажуулах','bankVerify']] },
+    nav:[['Үргэлжлүүлэх','kycComplete']] },
   { id:'gsignTutorial', sect:'G-Sign', name:'G-Sign заавар',       el:<GSignTutorial/>, overlay:true, nav:[['Ойлголоо','__back']] },
 
-  { id:'bankVerify',   sect:'Данс', name:'Данс баталгаажуулах', el:<BankVerify/>,       nav:[['Данс шалгах','bankChecking']] },
-  { id:'ibanSheet',    sect:'Данс', name:'IBAN лавлах · хайх',  el:<IbanLookupSheet/>,  overlay:true, nav:[['Хуулах','__back']] },
-  { id:'ibanResult',   sect:'Данс', name:'IBAN лавлах · үр дүн', el:<IbanLookupResult/>, overlay:true, nav:[['Хуулах','__back']] },
-  { id:'bankChecking', sect:'Данс', name:'Данс шалгаж байна',   el:<BankChecking/>,     tap:'bankVerified' },
-  { id:'bankVerified', sect:'Данс', name:'Данс баталгаажлаа',   el:<BankVerified/>,     nav:[['Үргэлжлүүлэх','kycComplete']] },
-  { id:'kycComplete',  sect:'Данс', name:'KYC бүрэн дууссан',   el:<KycComplete/>,      nav:[['Нүүр хуудас','home']] },
+  // Registration complete — terminal screen after contract signing
+  { id:'kycComplete',  sect:'Дуусгах', name:'Бүртгэл баталгаажлаа', el:<KycComplete/>, nav:[['Нүүр хуудас','home']] },
 
   { id:'home', sect:'Нүүр', name:'Нүүр хуудас', el:<Home activeTab="home" onNav={()=>{}} signMethod="gsign"/> },
 

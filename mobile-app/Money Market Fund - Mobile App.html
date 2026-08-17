@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Money Market Fund — Mobile App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 20% 0%, #EEF0FE 0%, transparent 60%),
+      radial-gradient(1000px 500px at 80% 100%, #FFEDE2 0%, transparent 60%),
+      #F6F7FB;
+    min-height: 100vh;
+    color: #0B1020;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  button { font-family: inherit; }
+
+  .artboard-header {
+    padding: 40px 64px 24px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .artboard-title {
+    font-weight: 800; font-size: 28px; letter-spacing: -0.02em; line-height: 1.1;
+    color: #050B1F;
+  }
+  .artboard-sub {
+    font-size: 14px; color: #6B7191; margin-top: 6px;
+  }
+  .artboard-meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: #6B7191; text-align: right; letter-spacing: 0.06em;
+  }
+  .artboard-meta strong { color: #0B1020; }
+
+  .canvas {
+    padding: 0 64px 80px;
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+  .canvas-inner {
+    display: inline-flex; gap: 32px; align-items: flex-start;
+    padding: 24px 0;
+  }
+
+  /* scrollbar styling */
+  .canvas::-webkit-scrollbar { height: 10px; }
+  .canvas::-webkit-scrollbar-track { background: transparent; }
+  .canvas::-webkit-scrollbar-thumb { background: #D4D8E6; border-radius: 999px; }
+
+  /* hint */
+  .hint {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(11, 16, 32, 0.92); color: #fff;
+    padding: 10px 16px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 30px -10px rgba(11,16,32,.4);
+    z-index: 100;
+    pointer-events: none;
+    opacity: 1; transition: opacity .4s;
+  }
+  .hint.hide { opacity: 0; }
+  .hint kbd {
+    background: rgba(255,255,255,.15); padding: 2px 8px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  }
+
+  /* hide native scrollbar on inner mobile screens for cleanliness */
+  .canvas-inner *::-webkit-scrollbar { display: none; }
+  .canvas-inner * { scrollbar-width: none; }
+
+  /* onboarding-v2 animation helpers */
+  @keyframes omf-spin { to { transform: rotate(360deg); } }
+  .omf-spin { animation: omf-spin 0.9s linear infinite; }
+  @keyframes omf-pulse { 0% { transform: scale(.7); opacity:.7; } 70% { transform: scale(1.5); opacity:0; } 100% { opacity:0; } }
+  .omf-pulse { animation: omf-pulse 2s cubic-bezier(.2,.8,.2,1) infinite; }
+  .omf-pulse-2 { animation-delay: 1s; }
+  @keyframes omf-pin-shake { 0%,100%{transform:translateX(0)} 15%,45%,75%{transform:translateX(-7px)} 30%,60%,90%{transform:translateX(7px)} }
+  .omf-pin-shake { animation: omf-pin-shake 0.4s ease; }
+
+  /* loan amount slider */
+  .loan-range { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; outline:none; cursor:pointer; }
+  .loan-range::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:26px; height:26px; border-radius:999px; background:#4F46E5; border:3px solid #fff; box-shadow:0 4px 12px -2px rgba(79,70,229,.5); cursor:pointer; }
+  .loan-range::-moz-range-thumb { width:24px; height:24px; border-radius:999px; background:#4F46E5; border:3px solid #fff; box-shadow:0 4px 12px -2px rgba(79,70,229,.5); cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="artboard-header">
+  <div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+        <path d="M9.6 11.4V28.6L0 34.4V0h9.9L24 8.4 38.1 0H48v5.6L24 20 9.6 11.4z" fill="#FF6B2C"/>
+        <path d="M38.4 36.6V19.4L48 13.6V48h-9.9L24 39.6 9.9 48H0v-5.6L24 28l14.4 8.6z" fill="#2D6BFF"/>
+      </svg>
+      <div>
+        <div class="artboard-title">Money Market Fund — Mobile App</div>
+        <div class="artboard-sub">Hi-fi designs · 85 screens · 3 trading flows · 390×844 · Мони Маркет Фанд ХХК</div>
+      </div>
+    </div>
+  </div>
+  <div class="artboard-meta">
+    <div><strong>v3</strong> · 2026.07.23</div>
+    <div style="margin-top:4px;">scroll horizontally →</div>
+  </div>
+</div>
+
+<div class="canvas" id="canvas">
+  <div class="canvas-inner" id="root"></div>
+</div>
+
+<div class="hint" id="hint">
+  <span>↔ Drag to scroll · Onboarding → signing → home · Tabs & toggles work</span>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="../screens.jsx"></script>
+<script type="text/babel" src="../onboarding_v2.jsx"></script>
+<script type="text/babel" src="../loan_eligibility.jsx"></script>
+<script type="text/babel" src="../flow_kit.jsx"></script>
+<script type="text/babel" src="../loan_payoff.jsx"></script>
+<script type="text/babel" src="../primary_flow.jsx"></script>
+<script type="text/babel" src="../secondary_flow.jsx"></script>
+<script type="text/babel" src="../sell_flow.jsx"></script>
+<script type="text/babel" src="../trading_states.jsx"></script>
+<script type="text/babel" src="../bank_verify.jsx"></script>
+<script type="text/babel" src="../reset_password.jsx"></script>
+<script type="text/babel" src="../wallet_flows.jsx"></script>
+<script type="text/babel" src="../notifications.jsx"></script>
+<script type="text/babel" src="../profile.jsx"></script>
+<script type="text/babel" src="../profile_security.jsx"></script>
+<script type="text/babel" src="../card_link.jsx"></script>
+<script type="text/babel" src="../card_manage.jsx"></script>
+<script type="text/babel" src="../auto_invest.jsx"></script>
+<script type="text/babel" src="../auto_invest_v2.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+function App() {
+  // Bottom-tab state: shared between screens 08/09/13/14
+  const [tab, setTab] = useState('home');
+
+  const nav = (t) => setTab(t);
+
+  // Auto-invest plan config, shared across the AI screens below
+  const [aiCfg, setAiCfg] = useState(AI_DEFAULT);
+  const setAi = (p) => setAiCfg(c => ({ ...c, ...p }));
+
+  // Render the 4 "tab" screens; the visible one is highlighted by the active tab.
+  // For prototype: all screens are visible side-by-side, but bottom-tab state syncs across them.
+
+  return (
+    <React.Fragment>
+      <div data-screen-label="01 Splash"><Splash/></div>
+      <div data-screen-label="02 Login / Register"><Login/></div>
+
+      {/* ── Password reset · from Login “Нууц үг мартсан?” ── */}
+      <div data-screen-label="R1 Reset · Phone"><ResetEnterPhone/></div>
+      <div data-screen-label="R2 Reset · Code"><ResetVerifyCode/></div>
+      <div data-screen-label="R3 Reset · New password"><ResetNewPassword/></div>
+      <div data-screen-label="R4 Reset · Success"><ResetSuccess/></div>
+      <div data-screen-label="03 Onboarding 1"><Onb1/></div>
+      <div data-screen-label="04 Onboarding 2"><Onb2/></div>
+      <div data-screen-label="05 Onboarding 3"><Onb3/></div>
+      <div data-screen-label="06 Onboarding 4"><Onb4/></div>
+      <div data-screen-label="07 Phone verification"><PhoneVerify/></div>
+      <div data-screen-label="08 Email verification"><EmailVerify/></div>
+
+      {/* ── Bank account verification · now step 3, right after email verification ──
+           Micro-deposit verification: enter account → deposit sent → read the
+           code from гүйлгээний утга → enter it (OTP-style). ── */}
+      <div data-screen-label="08-1 Bank account verify"><BankVerify/></div>
+      <div data-screen-label="08-2 IBAN lookup · search"><IbanLookupSheet/></div>
+      <div data-screen-label="08-2b IBAN lookup · result"><IbanLookupResult/></div>
+      <div data-screen-label="08-3 Deposit sending (pending)"><DepositSending/></div>
+      <div data-screen-label="08-3b Deposit info"><DepositInfo/></div>
+      <div data-screen-label="08-4 Code entry"><CodeEntry/></div>
+      <div data-screen-label="08-4b Code entry · wrong code"><CodeEntry seed={{ phase:'error', attempts:2, cd:64 }} label="08-4b — Код буруу · оролдлого"/></div>
+      <div data-screen-label="08-4c Code entry · resend ready"><CodeEntry seed={{ cd:0 }} label="08-4c — Гүйлгээ дахин илгээх"/></div>
+      <div data-screen-label="08-5 Bank verified"><BankVerified/></div>
+
+      {/* ── Card linking · optional add-on right after bank verification ──
+           Ask → add (autopay consent toggle) → linked · failed edge case ── */}
+      <div data-screen-label="08-6 Card · ask"><CardAsk/></div>
+      <div data-screen-label="08-7 Card · add"><CardAdd/></div>
+      <div data-screen-label="08-7b Card · add (expired error)"><CardAdd seed={{ num:'4218 4021 5567 4821', exp:'05/24', cvv:'318', name:'BATBOLD TEMUUJIN' }} label="C2b — Карт · хугацаа дууссан"/></div>
+      <div data-screen-label="08-7c Card · linking (pending)"><CardLinking/></div>
+      <div data-screen-label="08-8 Card · linked"><CardLinked/></div>
+      <div data-screen-label="08-9 Card · failed"><CardFailed/></div>
+
+      <div data-screen-label="08A Create password"><CreatePassword/></div>
+      <div data-screen-label="08B Transaction PIN"><CreatePin/></div>
+      <div data-screen-label="08C Biometric setup"><BiometricSetup/></div>
+      <div data-screen-label="09 KYC · DAN/ХУР"><KycConsent/></div>
+      <div data-screen-label="10 MONPEP check"><MonpepCheck/></div>
+      <div data-screen-label="11 MONPEP failed"><MonpepFailed/></div>
+      <div data-screen-label="12 Terms of Use"><TermsOfUse/></div>
+      <div data-screen-label="13 Master Contract"><MasterContract/></div>
+      <div data-screen-label="14 Signing method"><SigningMethod/></div>
+      <div data-screen-label="15 E-signature canvas"><ESignCanvas/></div>
+      <div data-screen-label="16 E-signature success"><ESignSuccess/></div>
+      <div data-screen-label="17 G-Sign request"><GSignRequest/></div>
+      <div data-screen-label="18 G-Sign waiting"><GSignWaiting/></div>
+      <div data-screen-label="19 G-Sign success"><GSignSuccess/></div>
+      <div data-screen-label="20 G-Sign tutorial"><GSignTutorial/></div>
+
+      {/* ── Registration complete (terminal) · after contract signing ──
+           Bank verification itself now runs earlier (step 3, after email). ── */}
+      <div data-screen-label="B6 KYC complete"><KycComplete/></div>
+      <div data-screen-label="21 Home · G-Sign (full access)"><Home activeTab={tab} onNav={nav} signMethod="gsign" label="21 — Home · G-Sign (бүх эрх)"/></div>
+      <div data-screen-label="21A Home · Empty багц"><Home activeTab={tab} onNav={nav} signMethod="gsign" portfolio="empty" label="21A — Home · Миний багц (хоосон)"/></div>
+      <div data-screen-label="22 Home · E-sign (Trust locked)"><Home activeTab={tab} onNav={nav} signMethod="esign" label="22 — Home · Цахим (Итгэлцэл түгжээтэй)"/></div>
+      <div data-screen-label="23 Home · Locked Trust sheet"><Home activeTab={tab} onNav={nav} signMethod="esign" showLockSheet={true} label="23 — Home · G-Sign шаардлага"/></div>
+      <div data-screen-label="24 Trading"><Trading activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="25 Category"><Category/></div>
+      <div data-screen-label="26 Primary market"><PrimaryMarket/></div>
+
+      {/* ── FLOW 1 · Анхдагч зах (primary buy) ── */}
+      <div data-screen-label="P1.1 Primary detail"><PrimaryDetail/></div>
+      <div data-screen-label="P1.2 Primary buy setup"><PrimaryBuySetup/></div>
+      <div data-screen-label="P1.3 Primary review"><PrimaryBuyReview/></div>
+      <div data-screen-label="P1.3b Primary PIN confirm"><PrimaryBuyPin/></div>
+      <div data-screen-label="P1.4 Primary success"><PrimaryBuySuccess/></div>
+
+      {/* ── FLOW 2 · Хоёрдогч зах (secondary buy) ── */}
+      <div data-screen-label="S2.1 Secondary listing detail"><SecondaryDetail/></div>
+      <div data-screen-label="S2.2 Secondary buy setup"><SecondaryBuySetup/></div>
+      <div data-screen-label="S2.3 Secondary review"><SecondaryBuyReview/></div>
+      <div data-screen-label="S2.3b Secondary PIN confirm"><SecondaryBuyPin/></div>
+      <div data-screen-label="S2.4 Secondary success"><SecondaryBuySuccess/></div>
+
+      {/* ── FLOW 3 · Хоёрдогч зах зээлд зарах (sell listing) ── */}
+      <div data-screen-label="L3.1 Owned detail · default"><OwnedDetail state="default"/></div>
+      <div data-screen-label="L3.1b Owned detail · on sale"><OwnedDetail state="onsale"/></div>
+      <div data-screen-label="L3.1c Owned detail · near maturity"><OwnedDetail state="soon"/></div>
+      <div data-screen-label="L3.5 Contract viewer"><ContractViewer/></div>
+      <div data-screen-label="L3.2 Sell setup"><SellSetup/></div>
+      <div data-screen-label="L3.3 Sell review"><SellReview/></div>
+      <div data-screen-label="L3.3b Sell PIN confirm"><SellPin/></div>
+      <div data-screen-label="L3.4 Sell listing success"><SellSuccess/></div>
+
+      {/* ── Edge case / state screens ── */}
+      <div data-screen-label="E1 Insufficient balance"><StateInsufficient/></div>
+      <div data-screen-label="E2 Sold out"><StateSoldOut/></div>
+      <div data-screen-label="E3 Listing unavailable"><StateUnavailable/></div>
+      <div data-screen-label="E4 Info changed"><StatePriceChanged/></div>
+      <div data-screen-label="E5 OTP error"><StateOtpError/></div>
+      <div data-screen-label="E6 Network error"><StateNetworkError/></div>
+
+      {/* ── Автомат хөрөнгө оруулалт (auto-invest) · entered from Арилжаа ── */}
+      <div data-screen-label="AI1 Auto-invest · intro"><AIIntro/></div>
+      <div data-screen-label="AI2 Auto-invest · product type"><AICriteria cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI3 Auto-invest · product term"><AITerm cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI4 Auto-invest · units"><AIUnits cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI5 Auto-invest · interval"><AIInterval cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI6 Auto-invest · payment day"><AIPayDay cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI7 Auto-invest · end date"><AIEnd cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI8 Auto-invest · projection"><AIProjection cfg={aiCfg}/></div>
+      <div data-screen-label="AI9 Auto-invest · priority order"><AIPriority cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI10 Auto-invest · funding source"><AIPayment cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI11 Auto-invest · review"><AIReviewV2 cfg={aiCfg}/></div>
+      <div data-screen-label="AI12 Auto-invest · PIN confirm"><AIPin/></div>
+      <div data-screen-label="AI13 Auto-invest · activated"><AISuccess cfg={aiCfg}/></div>
+      <div data-screen-label="AI14 Auto-invest · my plan"><AIPlans cfg={aiCfg} set={setAi}/></div>
+      <div data-screen-label="AI15 Auto-invest · multiple plans"><AIPlansMulti/></div>
+      <div data-screen-label="AI16 Auto-invest · plan detail"><AIPlansMulti start="p2"/></div>
+      <div data-screen-label="AI17 Wallet · active plan"><AIWallet cfg={aiCfg}/></div>
+
+      <div data-screen-label="28 Wallet"><Wallet activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="28A Wallet · empty"><Wallet activeTab={tab} onNav={nav} view="empty"/></div>
+      <div data-screen-label="28B Wallet · many products"><Wallet activeTab={tab} onNav={nav} view="many"/></div>
+      <div data-screen-label="28C Wallet · listings select mode"><Wallet activeTab={tab} onNav={nav} view="many" listingView="select"/></div>
+      <div data-screen-label="28D Wallet · cancel listings confirm"><Wallet activeTab={tab} onNav={nav} view="many" listingView="confirm"/></div>
+      <div data-screen-label="28E Transaction history · See all"><TransactionHistory/></div>
+
+      {/* ── Wallet · Орлого (add money) ── */}
+      <div data-screen-label="W1 Add money · amount"><AddMoneyAmount/></div>
+      <div data-screen-label="W2 Add money · QPay"><AddMoneyQPay/></div>
+      <div data-screen-label="W2b Add money · transfer"><AddMoneyBank/></div>
+      <div data-screen-label="W2c Add money · bank pending"><AddMoneyBankPending/></div>
+      <div data-screen-label="W2d Add money · bank success"><AddMoneyBankSuccess/></div>
+      <div data-screen-label="W2e Add money · bank not found"><AddMoneyBankNotFound/></div>
+      <div data-screen-label="W3 Add money · success"><AddMoneySuccess/></div>
+
+      {/* ── Wallet · Зарлага (withdraw) ── */}
+      <div data-screen-label="W4 Withdraw · amount"><WithdrawAmount/></div>
+      <div data-screen-label="W5 Withdraw · review"><WithdrawReview/></div>
+      <div data-screen-label="W5b Withdraw · PIN confirm"><WithdrawPin/></div>
+      <div data-screen-label="W6 Withdraw · success"><WithdrawSuccess/></div>
+      <div data-screen-label="W7 Withdraw · insufficient"><WithdrawInsufficient/></div>
+      <div data-screen-label="29 News"><News activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="29A News detail"><NewsDetail onNav={nav}/></div>
+      <div data-screen-label="29B Education article"><EduDetail onNav={nav}/></div>
+      <div data-screen-label="30 Loan"><Loan activeTab={tab} onNav={nav}/></div>
+      <div data-screen-label="30L Loan · олон зээл"><Loan activeTab={tab} onNav={nav} multi/></div>
+
+      {/* ── Notifications ── */}
+      <div data-screen-label="N1 Notifications · default"><NotificationList onNav={nav}/></div>
+      <div data-screen-label="N2 Notifications · all read"><NotificationList state="allread" onNav={nav}/></div>
+      <div data-screen-label="N3 Notifications · unread-heavy"><NotificationList state="unread" onNav={nav}/></div>
+      <div data-screen-label="N4 Notifications · empty"><NotificationList state="empty" onNav={nav}/></div>
+      <div data-screen-label="N5 Notifications · filtered empty"><NotificationList state="filterEmpty" onNav={nav}/></div>
+      <div data-screen-label="N6 Notification detail · announcement"><NotificationDetail/></div>
+      <div data-screen-label="N7 Notification detail · system-critical"><NotificationDetailCrit/></div>
+
+      {/* ── Profile ── */}
+      <div data-screen-label="P1 Profile · main"><ProfileMain onNav={nav}/></div>
+      <div data-screen-label="P2 Profile · personal info"><PersonalInfo/></div>
+      <div data-screen-label="P3 Profile · notif settings"><NotifSettings/></div>
+      <div data-screen-label="P4 Profile · my contracts"><MyContracts onNav={nav}/></div>
+      <div data-screen-label="P5 Profile · cert (invest)"><CertRequest type="invest"/></div>
+      <div data-screen-label="P6 Profile · cert (loan)"><CertRequest type="loan"/></div>
+      <div data-screen-label="P7 Profile · cert success"><CertSuccess/></div>
+      <div data-screen-label="P8 Profile · terms"><TermsScreen/></div>
+      <div data-screen-label="P9 Profile · my cards"><MyCards/></div>
+      <div data-screen-label="P9b Profile · my cards (empty)"><MyCards view="empty"/></div>
+      <div data-screen-label="P10 Profile · PIN change"><PinChange onNav={nav}/></div>
+      <div data-screen-label="P11 Profile · password change"><PasswordChange onNav={nav}/></div>
+      <div data-screen-label="P12 Profile · language"><LangScreen onNav={nav}/></div>
+      <div data-screen-label="P13 Profile · help"><HelpScreen onNav={nav}/></div>
+      <div data-screen-label="31 Home (loan coming soon)"><Home activeTab={tab} onNav={nav} loanState="coming-soon" label="31 — Home · Зээл тун удахгүй"/></div>
+      <div data-screen-label="32 Home (loan promo)"><Home activeTab={tab} onNav={nav} loanState="check-eligibility" label="32 — Home · Зээл"/></div>
+      <div data-screen-label="32A Home (loan request pending)"><Home activeTab={tab} onNav={nav} loanState="request-pending" label="32A — Home · Хүсэлт хянагдаж байна"/></div>
+      <div data-screen-label="32B Home (loan request result)"><Home activeTab={tab} onNav={nav} loanState="request-result" label="32B — Home · Зээл зөвшөөрөгдлөө"/></div>
+      <div data-screen-label="33 Loan check · Entry"><LoanCheckEntry/></div>
+      <div data-screen-label="33B Loan · blocked today"><LoanBlocked/></div>
+      <div data-screen-label="35 QPay Payment"><QPayPayment/></div>
+      <div data-screen-label="37 Payment · Confirmed"><PayConfirmed/></div>
+      <div data-screen-label="38 Payment · Failed"><PayFailed/></div>
+      <div data-screen-label="41 Result · Accepted"><LoanAccepted/></div>
+      <div data-screen-label="41A Result · Partly accepted"><LoanPartial/></div>
+      <div data-screen-label="42 — Loan · PIN confirm"><LoanPinConfirm/></div>
+      <div data-screen-label="43 Loan disbursed"><LoanSubmitted/></div>
+      <div data-screen-label="44 Declined"><LoanDeclined/></div>
+      <div data-screen-label="45 Loan payoff · Review"><PayoffReview/></div>
+      <div data-screen-label="46 Loan payoff · PIN"><PayoffPin/></div>
+      <div data-screen-label="47 Loan payoff · Success"><PayoffSuccess/></div>
+      <div data-screen-label="48 Хувааж төлөх · Amount"><PartialPayAmount/></div>
+      <div data-screen-label="49 Хувааж төлөх · PIN"><PartialPayPin/></div>
+      <div data-screen-label="50 Хувааж төлөх · Success"><PartialPaySuccess/></div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+// Drag-to-scroll on the canvas
+(function() {
+  const c = document.getElementById('canvas');
+  let down = false, startX = 0, scrollLeft = 0;
+  c.addEventListener('mousedown', (e) => {
+    if (e.target.closest('button') || e.target.closest('[onclick]') || e.target.closest('[data-nodrag]')) return;
+    down = true; startX = e.pageX - c.offsetLeft; scrollLeft = c.scrollLeft;
+    c.style.cursor = 'grabbing'; c.style.userSelect = 'none';
+  });
+  window.addEventListener('mouseup', () => { down = false; c.style.cursor = ''; c.style.userSelect = ''; });
+  window.addEventListener('mousemove', (e) => {
+    if (!down) return;
+    e.preventDefault();
+    c.scrollLeft = scrollLeft - (e.pageX - c.offsetLeft - startX);
+  });
+  // Hide hint after a moment
+  setTimeout(() => document.getElementById('hint').classList.add('hide'), 5000);
+})();
+</script>
+</body>
+</html>

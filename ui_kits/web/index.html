@@ -1,0 +1,335 @@
+<!-- @dsCard group="Web app" viewport="1440x900" -->
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Миний самбар — Money Market Fund</title>
+<link rel="stylesheet" href="../../colors_and_type.css"/>
+<script src="../../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../../comp_atoms.jsx"></script>
+<script type="text/babel" src="../../comp_kit.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const {
+  T, WebBadge, WebButton, WebSkeletonBlock, WebEmptyState,
+  WebStatCard, WebDataTable, WebSegmentedControl,
+  WebSidebar, WebTopbar, WebPageHeader,
+} = window;
+
+/* ── Data ─────────────────────────────────────────────────────── */
+const CHART_DATA = [
+  { label:'2025.12', value:1800000 },
+  { label:'2026.01', value:1920000 },
+  { label:'2026.02', value:1880000 },
+  { label:'2026.03', value:2100000 },
+  { label:'2026.04', value:2250000 },
+  { label:'2026.05', value:2180000 },
+  { label:'2026.06', value:2450000 },
+];
+const ACCOUNTS = [
+  { id:'a1', bank:'Дарь Финанс ББСБ',   type:'trust', ticker:'DARI 2300 IT 270227',  qty:5, unit:100000,  rate:23.0, mat:'2027-02-27', bought:'2026-06-01', status:'new',    term:272 },
+  { id:'a2', bank:'Хөтөлномгон ББСБ',   type:'trust', ticker:'HOTL 2200 IT 270618',  qty:3, unit:100000,  rate:22.0, mat:'2027-06-18', bought:'2026-05-15', status:'active', term:365 },
+  { id:'a3', bank:'Капитрон банк',        type:'cd',    ticker:'CAPIT 1450 CD 270218', qty:1, unit:1000000, rate:14.5, mat:'2027-02-18', bought:'2026-04-10', status:'active', term:240 },
+];
+const NEWS = [
+  { id:'n1', cat:'Зах зээл',     title:'ТБ: Хүүгийн хэмжээ тогтвортой хэвээр байна',         src:'Монцамэ', date: new Date(Date.now() - 2*3600000)   },
+  { id:'n2', cat:'Бүтээгдэхүүн', title:'Дарь Финанс ББСБ шинэ итгэлцэл гаргалаа',             src:'MMF',     date: new Date(Date.now() - 14*3600000)  },
+  { id:'n3', cat:'Зохицуулалт',  title:'СЗХ 2026 оны хагас жилийн тайланг нийтэллээ',         src:'СЗХ',     date: new Date(Date.now() - 2*86400000)  },
+  { id:'n4', cat:'Эдийн засаг',  title:'Монголбанк: Инфляц 7.2%-д хүрч буй дохио илэрхийлэв', src:'МБ',      date: new Date(Date.now() - 5*86400000)  },
+];
+const ORDERS = [
+  { id:'o1', bank:'Дарь Финанс ББСБ',  type:'trust', ticker:'DARI 2300 IT 270227',  side:'buy', qty:5, total:500500,  status:'new',    date:'2026-06-01' },
+  { id:'o2', bank:'Хөтөлномгон ББСБ',  type:'trust', ticker:'HOTL 2200 IT 270618',  side:'buy', qty:3, total:300300,  status:'active', date:'2026-05-15' },
+  { id:'o3', bank:'Капитрон банк',       type:'cd',    ticker:'CAPIT 1450 CD 270218', side:'buy', qty:1, total:1001000, status:'active', date:'2026-04-10' },
+];
+
+const TC = { cd:{c1:'#2D6BFF',c2:'#4F46E5'}, trust:{c1:'#4F46E5',c2:'#7C3AED'}, inv:{c1:'#0E9F6E',c2:'#0891B2'}, cp:{c1:'#FF6B2C',c2:'#DC2626'} };
+const TL = { cd:'Хадгаламжийн сертификат', trust:'Итгэлцэл', inv:'Нэхэмжлэх', cp:'Арилжааны бичиг' };
+const init = s => s.replace('ББСБ','').replace('банк','').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+const TREND_LONG  = CHART_DATA.map(d => d.value);
+const TREND_SHORT = [88,90,85,92,95,91,98,104,108,112];
+const CAT_COLOR   = { 'Зах зээл':T.blue, 'Бүтээгдэхүүн':T.pos, 'Зохицуулалт':T.warn, 'Эдийн засаг':T.indigo };
+
+/* ── Portfolio chart ─────────────────────────────────────────── */
+const PortfolioChart = ({ data, loading }) => {
+  if (loading) return <WebSkeletonBlock variant="card" style={{ height:200 }}/>;
+  if (!data || data.length < 2) return (
+    <div style={{ height:200, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:10, textAlign:'center' }}>
+      <div style={{ width:52, height:52, borderRadius:14, background:T.line2, display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 20l4-4 4 2 4-8 4 4" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{ fontSize:14, fontWeight:700, color:T.ink }}>Идэвхтэй байршуулалт байхгүй</div>
+      <div style={{ fontSize:12.5, color:T.muted, maxWidth:260, lineHeight:1.5 }}>Зах зээлээс хөрөнгө оруулж эхлэхэд энд харагдана.</div>
+    </div>
+  );
+  const VW = 800, VH = 160, PAD = 16;
+  const vals = data.map(d => d.value);
+  const min = Math.min(...vals), rng = Math.max(...vals) - min || 1;
+  const isPos = vals[vals.length-1] >= vals[0];
+  const color = isPos ? T.pos : T.neg;
+  const pts = data.map((d,i) => ({
+    x: (i/(data.length-1)) * VW,
+    y: PAD + (VH - 2*PAD) * (1 - (d.value - min)/rng),
+  }));
+  const lineD = 'M' + pts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L');
+  const areaD = lineD + ` L${VW},${VH} L0,${VH} Z`;
+  return (
+    <div>
+      <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none" style={{ width:'100%', height:180, display:'block' }}>
+        <defs>
+          <linearGradient id="dashGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.28"/>
+            <stop offset="100%" stopColor={color} stopOpacity="0.02"/>
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill="url(#dashGrad)"/>
+        <path d={lineD} stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke"/>
+        {pts.map((p,i) => <circle key={i} cx={p.x} cy={p.y} r="4" fill={T.surface} stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke"/>)}
+      </svg>
+      <div style={{ display:'flex', justifyContent:'space-between', marginTop:6, paddingTop:8, borderTop:`1px solid ${T.line2}`, fontSize:11, fontWeight:600, color:T.muted, fontFamily:"'JetBrains Mono',monospace" }}>
+        {data.map(d => <span key={d.label}>{d.label}</span>)}
+      </div>
+    </div>
+  );
+};
+
+/* ── Accounts accordion row ──────────────────────────────────── */
+const AccordionRow = ({ acc, expanded, onToggle }) => {
+  const tc = TC[acc.type] || TC.trust;
+  const fv = acc.unit * acc.qty;
+  const daysLeft = Math.max(0, Math.round((new Date(acc.mat) - Date.now()) / 86400000));
+  const expectedYield = fv * (acc.rate/100) * (acc.term/365);
+  return (
+    <div style={{ borderBottom:`1px solid ${T.line2}` }}>
+      <div onClick={onToggle} style={{ display:'flex', alignItems:'center', gap:14, padding:'15px 20px', cursor:'pointer', background:expanded?T.line2:'transparent', transition:'background .12s' }}>
+        <div style={{ width:38, height:38, borderRadius:10, background:`linear-gradient(135deg,${tc.c1},${tc.c2})`, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:800, fontSize:13, flexShrink:0 }}>{init(acc.bank)}</div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:13.5, fontWeight:700, color:T.ink, lineHeight:1.2 }}>{acc.bank}</div>
+          <div style={{ fontSize:10.5, fontWeight:600, color:T.muted2, marginTop:2, fontFamily:"'JetBrains Mono',monospace" }}>{acc.ticker}</div>
+        </div>
+        <div style={{ textAlign:'right', flexShrink:0, marginRight:8 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:T.ink, fontVariantNumeric:'tabular-nums', fontFamily:"'JetBrains Mono',monospace" }}>{formatMNT(fv)}</div>
+          <div style={{ fontSize:11.5, color:T.pos, fontWeight:700, marginTop:2 }}>{formatPct(acc.rate)}</div>
+        </div>
+        <WebBadge tone={acc.status}>{acc.status==='new'?'Шинэ':'Идэвхтэй'}</WebBadge>
+        <svg style={{ flexShrink:0, transition:'transform .2s', transform:expanded?'rotate(180deg)':'none' }} width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M6 9l6 6 6-6" stroke={T.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      {expanded && (
+        <div style={{ padding:'12px 20px 18px 72px', display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'12px 20px', borderTop:`1px solid ${T.line2}` }}>
+          {[
+            ['Төрөл',            TL[acc.type]||'—'],
+            ['Тоо ширхэг',       acc.qty+' ширхэг'],
+            ['Нэрлэсэн үнэ',     formatMNT(acc.unit)],
+            ['Авсан огноо',      formatDate(acc.bought)],
+            ['Дуусах огноо',     formatDate(acc.mat)],
+            ['Үлдсэн хоног',     daysLeft+' хоног'],
+            ['Хүлээгдэх өгөөж',  formatMNT(expectedYield)],
+          ].map(([k,v]) => (
+            <div key={k}>
+              <div style={{ fontSize:11, color:T.muted, fontWeight:600 }}>{k}</div>
+              <div style={{ fontSize:13, fontWeight:700, color:T.ink, marginTop:3, fontVariantNumeric:'tabular-nums' }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/* ── News card ───────────────────────────────────────────────── */
+const NewsCard = ({ item }) => {
+  const cc = CAT_COLOR[item.cat] || T.muted;
+  return (
+    <div style={{ padding:'14px 0', borderBottom:`1px solid ${T.line2}` }}>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8 }}>
+        <span style={{ fontSize:10.5, fontWeight:700, color:cc, background:`${cc}1A`, padding:'2px 8px', borderRadius:99 }}>{item.cat}</span>
+        <span style={{ fontSize:11, color:T.muted2, fontWeight:600, fontFamily:"'JetBrains Mono',monospace" }}>{formatRelative(item.date)}</span>
+      </div>
+      <div style={{ fontSize:13.5, fontWeight:700, color:T.ink, lineHeight:1.45, marginBottom:6 }}>{item.title}</div>
+      <div style={{ fontSize:11.5, color:T.muted, fontWeight:600 }}>{item.src}</div>
+    </div>
+  );
+};
+
+/* ── Orders table columns ────────────────────────────────────── */
+const IssuerCell = ({ r }) => {
+  const tc = TC[r.type]||TC.trust;
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+      <div style={{ width:32, height:32, borderRadius:9, background:`linear-gradient(135deg,${tc.c1},${tc.c2})`, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:800, fontSize:12, flexShrink:0 }}>{init(r.bank)}</div>
+      <div>
+        <div style={{ fontWeight:700, color:T.ink, fontSize:13, lineHeight:1.2 }}>{r.bank}</div>
+        <div style={{ fontSize:10.5, color:T.muted2, fontFamily:"'JetBrains Mono',monospace" }}>{r.ticker}</div>
+      </div>
+    </div>
+  );
+};
+const ORDER_COLS = [
+  { key:'bank',   label:'Бүтээгдэхүүн', width:'36%', render: r => <IssuerCell r={r}/> },
+  { key:'side',   label:'Тал',   render: r => <WebBadge tone={r.side==='buy'?'buy':'sell'}>{r.side==='buy'?'Авах':'Зарах'}</WebBadge> },
+  { key:'qty',    label:'Тоо',   align:'right', mono:true },
+  { key:'total',  label:'Нийт дүн', align:'right', mono:true, render: r => <span style={{ fontWeight:800, color:T.ink }}>{formatMNT(r.total)}</span> },
+  { key:'status', label:'Статус', render: r => <WebBadge tone={r.status}>{r.status==='new'?'Шинэ':'Идэвхтэй'}</WebBadge> },
+  { key:'date',   label:'Огноо', align:'right', mono:true, render: r => <span style={{ color:T.muted }}>{formatDate(r.date)}</span> },
+];
+
+/* ── Dashboard ───────────────────────────────────────────────── */
+const Dashboard = () => {
+  const [loading,   setLoading]   = useState(true);
+  const [expanded,  setExpanded]  = useState(null);
+  const [chartPeriod, setChartPeriod] = useState('6m');
+
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 1100); return () => clearTimeout(t); }, []);
+
+  const toggle = id => setExpanded(expanded === id ? null : id);
+  const totalPortfolio = ACCOUNTS.reduce((s,a) => s + a.unit*a.qty, 0);
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <WebSidebar activePath="/dashboard"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Миний самбар" notifCount={2}/>
+        <main style={{ padding:'30px 36px 56px', maxWidth:1560, width:'100%' }}>
+
+          <WebPageHeader
+            title="Миний самбар"
+            subtitle={`Сайн байна уу. Өнөөдөр ${formatDate(new Date())}`}
+          />
+
+          {/* ── Stat cards ── */}
+          <div style={{ display:'grid', gridTemplateColumns:'1.2fr 1fr 1fr', gap:20, marginBottom:22 }}>
+            <WebStatCard
+              label="Нийт байршуулалт"
+              value={loading ? undefined : formatMNT(totalPortfolio)}
+              delta={formatDelta(125000)} deltaPositive
+              trend={TREND_LONG} loading={loading} heroValue
+            />
+            <WebStatCard
+              label="Дундаж өгөөж"
+              value={loading ? undefined : formatPct(21.8)}
+              delta="+1.2%" deltaPositive
+              trend={TREND_SHORT} loading={loading}
+            />
+            <WebStatCard
+              label="Идэвхтэй инструмент"
+              value={loading ? undefined : String(ACCOUNTS.length)}
+              trend={null} loading={loading}
+            />
+          </div>
+
+          {/* ── Main 2-col layout ── */}
+          <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 340px', gap:22, alignItems:'start', marginBottom:22 }}>
+
+            {/* Left: chart + accounts */}
+            <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
+
+              {/* Portfolio chart */}
+              <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, padding:20 }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:12 }}>
+                  <div>
+                    <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Байршуулалтын гүйцэтгэл</div>
+                    <div style={{ fontSize:12, color:T.muted, fontWeight:600, marginTop:3 }}>Сүүлийн 6 сарын хөрөнгийн өөрчлөлт</div>
+                  </div>
+                  <WebSegmentedControl
+                    value={chartPeriod} onChange={setChartPeriod}
+                    options={[{value:'3m',label:'3 сар'},{value:'6m',label:'6 сар'},{value:'1y',label:'1 жил'}]}
+                  />
+                </div>
+                <PortfolioChart data={loading ? null : CHART_DATA} loading={loading}/>
+              </div>
+
+              {/* Accounts accordion */}
+              <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', borderBottom:`1px solid ${T.line2}` }}>
+                  <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Миний байршуулалт</div>
+                  <WebBadge tone="info">{ACCOUNTS.length}</WebBadge>
+                </div>
+                {loading ? (
+                  [0,1,2].map(i => (
+                    <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'15px 20px', borderBottom:`1px solid ${T.line2}` }}>
+                      <WebSkeletonBlock variant="avatar"/>
+                      <div style={{ flex:1, display:'flex', flexDirection:'column', gap:8 }}>
+                        <WebSkeletonBlock variant="text" width="55%"/>
+                        <WebSkeletonBlock variant="text" width="36%"/>
+                      </div>
+                      <WebSkeletonBlock variant="num" width="110px"/>
+                    </div>
+                  ))
+                ) : ACCOUNTS.length === 0 ? (
+                  <WebEmptyState
+                    icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke={T.muted} strokeWidth="1.8" fill="none"/><path d="M3 10h18M16 14.5h2" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round"/></svg>}
+                    title="Байршуулалт байхгүй байна"
+                    body="Зах зээлээс хөрөнгө оруулж эхлэхэд энд харагдана."
+                    action={{ label:'Арилжаа руу очих', onClick:()=>{} }}
+                  />
+                ) : (
+                  ACCOUNTS.map(acc => (
+                    <AccordionRow key={acc.id} acc={acc} expanded={expanded===acc.id} onToggle={()=>toggle(acc.id)}/>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Right: news feed */}
+            <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', borderBottom:`1px solid ${T.line2}` }}>
+                <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Мэдээ мэдээлэл</div>
+                <WebButton variant="ghost" size="sm">Бүгд</WebButton>
+              </div>
+              <div style={{ padding:'0 20px' }}>
+                {loading
+                  ? [0,1,2,3].map(i => (
+                      <div key={i} style={{ padding:'14px 0', borderBottom:`1px solid ${T.line2}`, display:'flex', flexDirection:'column', gap:9 }}>
+                        <WebSkeletonBlock variant="text" width="28%"/>
+                        <WebSkeletonBlock variant="title" width="88%"/>
+                        <WebSkeletonBlock variant="text" width="38%"/>
+                      </div>
+                    ))
+                  : NEWS.map(item => <NewsCard key={item.id} item={item}/>)
+                }
+              </div>
+            </div>
+          </div>
+
+          {/* ── Orders table ── */}
+          <WebDataTable
+            title="Сүүлийн захиалгууд"
+            action={<WebButton variant="ghost" size="sm">Бүгдийг харах</WebButton>}
+            columns={ORDER_COLS}
+            rows={loading ? [] : ORDERS}
+            loading={loading}
+            emptyTitle="Захиалга байхгүй байна"
+            emptyBody="Та одоогоор ямар нэг захиалга өгөөгүй байна. Анхдагч зах зээлээс бүтээгдэхүүн сонгоно уу."
+            emptyAction={{ label:'Захиалга өгөх →', onClick:()=>{} }}
+          />
+
+        </main>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Dashboard/>);
+</script>
+</body>
+</html>

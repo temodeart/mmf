@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Хэтэвч — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_status.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx?v=f3"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../holdings_summary.jsx"></script>
+<script type="text/babel" src="../wallet_desktop.jsx?v=f3"></script>
+<script type="text/babel" src="../cards_desktop.jsx"></script>
+<script type="text/babel" src="../auto_invest_web.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+  @keyframes wallet-spin { to { transform: rotate(360deg); } }
+  .wallet-spin { animation: wallet-spin 1s linear infinite; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo } = React;
+const {
+  T, WebBadge, WebButton, WebEmptyState,
+  WebSidebar, WebTopbar, WebFooter, WebDot,
+  TopUpModal, WithdrawModal, LinkedBankRow, TxTable,
+} = window;
+
+/* ── Data ─────────────────────────────────────────────────────── */
+const BANK = { name:'Хаан Банк', ab:'ХБ', color:'#0E5F2E', holder:'Батболд Тэмүүжин', masked:'•••• 5026 940 450' };
+const WALLET_BALANCE = 12000000;
+
+/* Holdings summary + Сарын урсгал data and components now live in
+   ../holdings_summary.jsx — shared with 04 Dashboard (Миний самбар). */
+const { MonthlyFlowChart, HoldingsSummaryCard, FLOW_DATA } = window;
+
+/* Transaction history — recent preview; full list lives on 13 Transaction History.
+   Row shape matches TxTable in wallet_desktop.jsx: { type, desc, date, amount }. */
+const TX_FILTERS = [
+  { key:'all',      label:'Бүгд' },
+  { key:'deposit',  label:'Орлого' },
+  { key:'withdraw', label:'Зарлага' },
+  { key:'buy',      label:'Худалдан авалт' },
+  { key:'sell',     label:'Зарсан' },
+];
+const TX_ALL = [
+  { type:'deposit',  desc:'Орлого · QPay',                          date:'2026-06-28', amount:5000000 },
+  { type:'buy',      desc:'Захиалга · MSTRT 2400 IT 260711',        date:'2026-06-20', amount:10000000 },
+  { type:'sell',     desc:'Зарсан · CAPIT 1450 CD 270218',          date:'2026-06-14', amount:3120000 },
+  { type:'withdraw', desc:'Зарлага · Хаан Банк •••• 450',           date:'2026-06-08', amount:2000000 },
+  { type:'deposit',  desc:'Хүүгийн орлого · GOLDH 2300 IT 270914',  date:'2026-06-01', amount:1240000 },
+  { type:'buy',      desc:'Захиалга · XACB 1380 CD 261210',         date:'2026-05-26', amount:15000000 },
+  { type:'deposit',  desc:'Орлого · Дансаар',                       date:'2026-05-21', amount:8000000 },
+  { type:'withdraw', desc:'Зээлийн төлбөр',                         date:'2026-05-12', amount:1100000 },
+];
+
+const Wallet = () => {
+  const [txFilter, setTxFilter] = useState('all');
+  const [topUpOpen, setTopUpOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [balance, setBalance] = useState(WALLET_BALANCE);
+
+  const txRows = useMemo(() => {
+    const rows = txFilter==='all' ? TX_ALL : TX_ALL.filter(t => t.type===txFilter);
+    return rows.slice(0, 6);
+  }, [txFilter]);
+
+  const onTopUpSuccess = (amt) => setBalance(b => b + amt);
+  const onWithdrawSuccess = (amt) => setBalance(b => b - amt - 300);
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebar activePath="/wallet"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Хэтэвч" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+          <div style={{ maxWidth:1040, margin:'0 auto', display:'flex', flexDirection:'column', gap:24 }}>
+
+            {/* ── Balance hero + F-20 CTA hierarchy ── */}
+            <div style={{ background:`linear-gradient(135deg, ${T.ink} 0%, #1B2140 100%)`, borderRadius:24, padding:'28px 30px', color:'#fff' }}>
+              <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', flexWrap:'wrap', gap:20 }}>
+                <div>
+                  <div style={{ fontSize:12, fontWeight:700, opacity:.65, letterSpacing:'.06em', textTransform:'uppercase' }}>Боломжит үлдэгдэл</div>
+                  <div className="num" style={{ fontSize:38, fontWeight:800, letterSpacing:'-0.02em', marginTop:8, fontFamily:"'JetBrains Mono',monospace" }}>{window.formatMNT(balance)}</div>
+                </div>
+                <div style={{ display:'flex', gap:12, flexWrap:'wrap', justifyContent:'flex-end', marginLeft:'auto' }}>
+                  <div>
+                    {/* F-20 · Орлого = primary filled CTA; R11: verb-led label + limit microcopy */}
+                    <WebButton variant="primary" onClick={() => setTopUpOpen(true)} style={{ boxShadow:'0 8px 22px -8px rgba(79,70,229,.7)' }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      Орлого хийх
+                    </WebButton>
+                    <div style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,.6)', marginTop:8, textAlign:'center' }}>Шимтгэлгүй · Өдөрт ₮50,000,000 хүртэл</div>
+                  </div>
+                  <div>
+                    {/* F-20 · Зарлага = outline secondary; R11: verb-led label + limit microcopy */}
+                    <button onClick={() => setWithdrawOpen(true)} style={{ height:52, padding:'0 22px', borderRadius:14, background:'transparent', border:'1.5px solid rgba(255,255,255,.35)', color:'#fff', fontWeight:700, fontSize:15, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:8 }}>
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M19 12l-7 7-7-7" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      Зарлага гаргах
+                    </button>
+                    <div style={{ fontSize:11, fontWeight:600, color:'rgba(255,255,255,.6)', marginTop:8, textAlign:'center' }}>₮300 шимтгэл · Өдөрт ₮20,000,000 хүртэл</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Автомат хөрөнгө оруулалт — next to the money it moves */}
+            {window.AiwWalletCard && React.createElement(window.AiwWalletCard)}
+
+            {/* P4 · monthly cash-flow chart */}
+            <MonthlyFlowChart data={FLOW_DATA}/>
+
+            {/* F5 · holdings summary (replaces sub-account tabs) + F-21 linked bank */}
+            <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) minmax(0,340px)', gap:20, alignItems:'start' }}>
+              <HoldingsSummaryCard/>
+              <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
+                <div>
+                  <div style={{ fontSize:12.5, fontWeight:700, color:T.muted, marginBottom:10 }}>Холбогдсон банкны данс</div>
+                  <LinkedBankRow bank={BANK}/>
+                </div>
+                {/* Картууд — compact list; full card faces live in the add/edit dialogs */}
+                <div id="cards">{window.WalletCardsSection && React.createElement(window.WalletCardsSection, { compact:true })}</div>
+              </div>
+            </div>
+
+            {/* Transaction history — recent preview + full-history link */}
+            <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', flexWrap:'wrap', gap:12 }}>
+                <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Гүйлгээний түүх</div>
+                <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+                  {TX_FILTERS.map(f => {
+                    const on = txFilter===f.key;
+                    return (
+                      <button key={f.key} onClick={() => setTxFilter(f.key)} style={{ height:34, padding:'0 14px', borderRadius:99, border:`1px solid ${on?T.ink:T.line}`, background:on?T.ink:T.surface, color:on?'#fff':T.text, fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{f.label}</button>
+                    );
+                  })}
+                  <a href="13 Transaction History.html" style={{ fontSize:12.5, fontWeight:700, color:T.indigo, textDecoration:'none', marginLeft:4, whiteSpace:'nowrap' }}>Бүгдийг харах →</a>
+                </div>
+              </div>
+              {txRows.length === 0 ? (
+                <WebEmptyState title="Гүйлгээ алга" body="Энэ төрлийн гүйлгээ олдсонгүй."/>
+              ) : (
+                <TxTable rows={txRows}/>
+              )}
+            </div>
+
+          </div>
+        </main>
+        <WebFooter/>
+      </div>
+
+      <TopUpModal open={topUpOpen} onClose={() => setTopUpOpen(false)} onSuccess={onTopUpSuccess}/>
+      <WithdrawModal open={withdrawOpen} onClose={() => setWithdrawOpen(false)} onSuccess={onWithdrawSuccess} balance={balance} bank={BANK}/>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Wallet/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

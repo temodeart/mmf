@@ -1,0 +1,60 @@
+<!-- @dsCard group="Components" viewport="700x430" name="Data" subtitle="StatCard · DataTable · Pagination" -->
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="../../styles.css"/>
+<script src="../../foundations.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../../comp_atoms.jsx"></script>
+<script type="text/babel" src="../../comp_kit.jsx"></script>
+<style>
+  body { margin:0; background:var(--bg); padding:22px; }
+  .lbl { font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:20px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { WebStatCard, WebDataTable, WebBadge } = window;
+const fmt = window.formatMNT;
+const ROWS = [
+  { id:'r1', bank:'Хас банк', ticker:'KHAN 1000 CD 240712', rate:19.5, term:180, price:1000000, badge:'new' },
+  { id:'r2', bank:'Голомт банк', ticker:'GLMT 500 IT 240630', rate:18.2, term:90, price:500000, badge:'active' },
+  { id:'r3', bank:'ТДБ', ticker:'TDBM 2000 CD 250110', rate:20.1, term:272, price:2000000, badge:'new' },
+  { id:'r4', bank:'Төрийн банк', ticker:'STAT 1450 CP 240905', rate:17.8, term:120, price:1450000, badge:'active' },
+];
+const COLS = [
+  { key:'bank', label:'Гаргагч', render:r=><b style={{color:'var(--ink)'}}>{r.bank}</b> },
+  { key:'ticker', label:'Код', mono:true },
+  { key:'rate', label:'Үр шим', align:'right', mono:true, sortable:true, render:r=><span style={{color:'var(--pos)',fontWeight:800}}>{r.rate.toFixed(1)}%</span> },
+  { key:'term', label:'Хугацаа', align:'right', mono:true, render:r=>r.term+' хоног' },
+  { key:'price', label:'Нэрлэсэн үнэ', align:'right', mono:true, render:r=>fmt(r.price) },
+  { key:'st', label:'Төлөв', render:r=><WebBadge tone={r.badge}>{r.badge==='new'?'Шинэ':'Идэвхтэй'}</WebBadge> },
+];
+function Card(){
+  const [sel,setSel]=useState('r3');
+  const [page,setPage]=useState(1);
+  return (
+    <div>
+      <div className="lbl">StatCard</div>
+      <div className="stats">
+        <WebStatCard label="Нийт багц" value={fmt(48250000)} delta="+2.4%" deltaPositive trend={[4,6,5,8,7,10,9]} heroValue/>
+        <WebStatCard label="24 цагийн өгөөж" value={fmt(126400)} delta="+0.9%" deltaPositive trend={[2,3,2,4,5,4,6]}/>
+        <WebStatCard label="Нийт өгөөж" value="—" trend={null}/>
+      </div>
+      <div className="lbl">DataTable — sortable, selectable, paginated</div>
+      <WebDataTable title="Анхдагч зах зээл" columns={COLS} rows={ROWS} selected={sel} onRowClick={r=>setSel(r.id)}
+        sortBy="rate" sortDir="desc" onSort={()=>{}} total={42} page={page} perPage={10} onPageChange={setPage}/>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Card/>);
+</script>
+</body>
+</html>

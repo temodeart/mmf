@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Money Market Fund — UX/UI Audit</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-center {
+      content: "Money Market Fund — UX/UI Audit  ·  Page " counter(page) " of " counter(pages);
+      font-family: Inter, Helvetica, sans-serif;
+      font-size: 8.5pt;
+      color: #6B6F76;
+    }
+    @top-right {
+      content: "mmf.moneymarket.mn  ·  May 2026";
+      font-family: Inter, Helvetica, sans-serif;
+      font-size: 8pt;
+      color: #9A9EA6;
+    }
+  }
+  @page :first {
+    @top-right { content: ""; }
+    @bottom-center { content: ""; }
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #1F2330;
+    font-size: 10pt;
+    line-height: 1.55;
+  }
+  h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; margin: 0; color: #0F1320; }
+  h1 { font-size: 26pt; letter-spacing: -0.5pt; }
+  h2 { font-size: 16pt; margin-top: 18pt; margin-bottom: 6pt; letter-spacing: -0.2pt; border-bottom: 2px solid #1F2330; padding-bottom: 6pt; }
+  h3 { font-size: 12.5pt; margin-top: 14pt; margin-bottom: 5pt; color: #2A3247; }
+  h4 { font-size: 10.5pt; margin-top: 10pt; margin-bottom: 3pt; color: #3D455C; }
+  p { margin: 0 0 8pt 0; }
+  ul, ol { margin: 4pt 0 8pt 0; padding-left: 18pt; }
+  li { margin-bottom: 3pt; }
+  small { font-size: 8.5pt; color: #6B6F76; }
+  strong { color: #0F1320; }
+  code { background: #F4F5F8; padding: 1pt 4pt; border-radius: 3pt; font-size: 9pt; color: #2D3656; font-family: "JetBrains Mono", "SF Mono", Consolas, monospace; }
+  a { color: #3F4FCB; text-decoration: none; }
+
+  /* Cover */
+  .cover {
+    page-break-after: always;
+    background: linear-gradient(135deg, #1F2A6B 0%, #2F3CA0 55%, #FF7A1A 130%);
+    color: white;
+    padding: 38mm 22mm;
+    min-height: 297mm;
+    position: relative;
+  }
+  .cover .brand {
+    font-size: 10pt;
+    letter-spacing: 4pt;
+    text-transform: uppercase;
+    color: #B7C0FF;
+    margin-bottom: 18pt;
+  }
+  .cover h1 {
+    color: white;
+    font-size: 40pt;
+    letter-spacing: -1pt;
+    line-height: 1.05;
+    max-width: 16cm;
+  }
+  .cover h1 span { color: #FFB06B; }
+  .cover .sub {
+    color: #D5DCFF;
+    font-size: 13pt;
+    margin-top: 14pt;
+    max-width: 14cm;
+  }
+  .cover .meta {
+    position: absolute;
+    bottom: 28mm;
+    left: 22mm;
+    right: 22mm;
+    border-top: 1px solid rgba(255,255,255,0.25);
+    padding-top: 14pt;
+    color: #D5DCFF;
+    font-size: 10pt;
+    display: flex;
+    justify-content: space-between;
+  }
+  .cover .meta b { color: white; font-weight: 600; }
+  .cover .rev { position: absolute; top: 22mm; right: 22mm; font-size: 9pt; color: #C8D2FF; letter-spacing: 1pt; }
+
+  /* Layout helpers */
+  .row { display: flex; gap: 12pt; }
+  .col { flex: 1; }
+  .panel {
+    background: #F8F9FB;
+    border: 1px solid #E5E7EE;
+    border-radius: 6pt;
+    padding: 11pt 13pt;
+  }
+  .panel.tight { padding: 8pt 11pt; }
+  .panel + .panel { margin-top: 6pt; }
+
+  /* Severity badges */
+  .sev { display: inline-block; padding: 1pt 7pt; border-radius: 10pt; font-size: 7.5pt; font-weight: 700; letter-spacing: 0.4pt; text-transform: uppercase; }
+  .sev-critical { background: #FCE0E1; color: #8B1116; }
+  .sev-high     { background: #FFE6D2; color: #8A3300; }
+  .sev-medium   { background: #FFF4CC; color: #66510B; }
+  .sev-low      { background: #DCEAF7; color: #1B466B; }
+  .sev-pos      { background: #DCF1E1; color: #1A5630; }
+
+  /* Tables */
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; }
+  table.findings { margin-top: 6pt; }
+  table.findings th { text-align: left; background: #1F2330; color: white; padding: 6pt 8pt; font-size: 8.5pt; font-weight: 600; letter-spacing: 0.3pt; text-transform: uppercase; }
+  table.findings td { padding: 6pt 8pt; border-bottom: 1px solid #E5E7EE; vertical-align: top; }
+  table.findings tr:last-child td { border-bottom: none; }
+  table.findings td.id { font-weight: 700; color: #2F3CA0; white-space: nowrap; width: 28pt; }
+  table.findings td.sev-cell { width: 60pt; }
+  table.findings td.area { white-space: nowrap; width: 70pt; color: #5C6477; font-size: 8.5pt; }
+
+  /* Finding card */
+  .finding {
+    border: 1px solid #E5E7EE;
+    border-radius: 6pt;
+    padding: 10pt 12pt;
+    margin-top: 9pt;
+    background: white;
+    page-break-inside: avoid;
+  }
+  .finding .head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8pt; margin-bottom: 5pt; }
+  .finding .id { color: #2F3CA0; font-weight: 700; font-size: 9pt; letter-spacing: 0.5pt; }
+  .finding .title { font-weight: 700; font-size: 11pt; flex: 1; }
+  .finding .where { font-size: 8.5pt; color: #6B6F76; margin-bottom: 6pt; }
+  .finding .body { font-size: 9.5pt; }
+  .finding .fix { margin-top: 6pt; padding-top: 6pt; border-top: 1px dashed #DDE0E8; font-size: 9.5pt; }
+  .finding .fix b { color: #1A5630; }
+
+  /* Mockup boxes */
+  .mock {
+    background: white;
+    border: 1px solid #DDE0E8;
+    border-radius: 5pt;
+    padding: 0;
+    page-break-inside: avoid;
+    margin: 6pt 0 4pt 0;
+  }
+  .mock-caption {
+    font-size: 8pt;
+    color: #6B6F76;
+    margin-bottom: 8pt;
+    font-style: italic;
+  }
+  .mock svg { display: block; width: 100%; height: auto; }
+
+  /* Page-break helpers */
+  .pb { page-break-before: always; }
+  .avoid-break { page-break-inside: avoid; }
+
+  /* Score summary tiles */
+  .scores { display: flex; gap: 8pt; margin: 10pt 0 4pt 0; }
+  .score {
+    flex: 1;
+    background: white;
+    border: 1px solid #E5E7EE;
+    border-radius: 6pt;
+    padding: 9pt 11pt;
+  }
+  .score .label { font-size: 8pt; color: #6B6F76; letter-spacing: 0.4pt; text-transform: uppercase; }
+  .score .val { font-size: 22pt; font-weight: 700; color: #1F2330; line-height: 1; margin-top: 3pt; }
+  .score .delta { font-size: 8.5pt; color: #6B6F76; margin-top: 2pt; }
+  .bar { background: #ECEEF4; height: 5pt; border-radius: 3pt; margin-top: 5pt; overflow: hidden; }
+  .bar > div { height: 100%; border-radius: 3pt; }
+
+  /* TOC */
+  .toc { padding-top: 4pt; }
+  .toc-row { display: flex; justify-content: space-between; padding: 4pt 0; border-bottom: 1px dotted #D8DBE3; font-size: 10pt; }
+  .toc-row .num { color: #6B6F76; font-weight: 600; margin-right: 8pt; }
+
+  /* Page tile */
+  .pages-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; }
+  .page-tile { border: 1px solid #E5E7EE; border-radius: 5pt; padding: 8pt 10pt; background: #FCFCFD; }
+  .page-tile .pt-title { font-weight: 700; font-size: 10pt; }
+  .page-tile .pt-url { font-family: "SF Mono", Consolas, monospace; font-size: 8pt; color: #5C6477; margin-top: 1pt; }
+  .page-tile .pt-note { font-size: 8.5pt; color: #3D455C; margin-top: 4pt; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<section class="cover">
+  <div class="rev">Rev. 2 · client-reviewed</div>
+  <div class="brand">UX / UI Audit Report</div>
+  <h1>Money Market Fund<br><span>Investor Portal Review</span></h1>
+  <div class="sub">A WCAG&nbsp;2.1 AA accessibility, heuristic, and information-architecture pass across the authenticated investor experience at mmf.moneymarket.mn.</div>
+  <div class="meta">
+    <div><b>Prepared for</b><br>Temuujin B.</div>
+    <div><b>Scope</b><br>13 screens, desktop 1440×900</div>
+    <div><b>Date</b><br>15 May 2026</div>
+  </div>
+</section>
+
+<!-- ============================ EXEC SUMMARY ============================ -->
+<section>
+  <h1 style="font-size:22pt;">Executive summary</h1>
+  <p style="margin-top:6pt;">
+    The Money Market Fund investor portal presents a clean, modern shell with a recognisable brand and a sensible
+    primary navigation. Underneath the surface, however, the experience has a set of repeating problems that compound
+    each other: a fixed-width layout that breaks at common desktop widths, dense data tables that overflow horizontally,
+    information-density without onboarding or empty-state guidance, and a sprinkling of accessibility and microcopy
+    gaps that will hurt first-time investors more than power users.
+  </p>
+  <p>
+    The biggest single issue is a <strong>structural horizontal-overflow bug on the dashboard</strong> that clips the
+    right-hand column (Accounts and News) at both 1440&nbsp;px and 1920&nbsp;px viewports — a regression any new user
+    would see on first login. The biggest <em>opportunity</em> is wrapping the existing data behind a clearer
+    information architecture, better empty states, and tighter tables.
+  </p>
+
+  <div class="scores">
+    <div class="score">
+      <div class="label">Findings</div>
+      <div class="val">24</div>
+      <div class="delta">across 13 screens</div>
+    </div>
+    <div class="score">
+      <div class="label">Critical</div>
+      <div class="val" style="color:#C81B22;">2</div>
+      <div class="delta">block usability</div>
+    </div>
+    <div class="score">
+      <div class="label">High</div>
+      <div class="val" style="color:#B5530F;">6</div>
+      <div class="delta">significant friction</div>
+    </div>
+    <div class="score">
+      <div class="label">Medium / Low</div>
+      <div class="val" style="color:#3D455C;">16</div>
+      <div class="delta">polish + a11y</div>
+    </div>
+  </div>
+
+  <h3>Health by area</h3>
+  <table style="font-size:9.5pt;">
+    <tr><td style="width:36%;">Visual design &amp; brand consistency</td>
+        <td><div class="bar"><div style="width:78%;background:#28a745;"></div></div></td>
+        <td style="width:30pt;text-align:right;">B+</td></tr>
+    <tr><td>Information architecture &amp; navigation</td>
+        <td><div class="bar"><div style="width:55%;background:#ffb24c;"></div></div></td>
+        <td style="text-align:right;">C+</td></tr>
+    <tr><td>Layout &amp; responsive behaviour</td>
+        <td><div class="bar"><div style="width:32%;background:#e11d48;"></div></div></td>
+        <td style="text-align:right;">D</td></tr>
+    <tr><td>Tables &amp; data density</td>
+        <td><div class="bar"><div style="width:38%;background:#e11d48;"></div></div></td>
+        <td style="text-align:right;">D+</td></tr>
+    <tr><td>Microcopy, empty states, onboarding</td>
+        <td><div class="bar"><div style="width:42%;background:#ffb24c;"></div></div></td>
+        <td style="text-align:right;">C-</td></tr>
+    <tr><td>Accessibility (WCAG 2.1 AA)</td>
+        <td><div class="bar"><div style="width:50%;background:#ffb24c;"></div></div></td>
+        <td style="text-align:right;">C</td></tr>
+    <tr><td>Forms (login, profile, password)</td>
+        <td><div class="bar"><div style="width:72%;background:#28a745;"></div></div></td>
+        <td style="text-align:right;">B</td></tr>
+    <tr><td>Trust &amp; financial credibility cues</td>
+        <td><div class="bar"><div style="width:60%;background:#ffb24c;"></div></div></td>
+        <td style="text-align:right;">C+</td></tr>
+  </table>
+
+  <h3>Top three things to fix first</h3>
+  <ol>
+    <li><strong>F-01 · Dashboard horizontal overflow.</strong> The right rail (ДАНС / Мэдээ мэдээлэл) is clipped at 1440&nbsp;px and 1920&nbsp;px and forces a horizontal scrollbar. Fix the grid to wrap or use a 3+1 column with min-width: 0 and proper text overflow.</li>
+    <li><strong>F-02 · Sidebar label "HYYP".</strong> The cryptic acronym at the top of the navigation is the very first word an authenticated user sees. Replace with a labelled section header (e.g. "ҮНДСЭН" / "Main") or remove.</li>
+    <li><strong>F-03 · Table density across Trade and Wallet.</strong> Tables overflow inside their own container while the page already overflows, producing two scrollbars stacked. Fix the ticker column and add a column-toggle / sticky-first-column pattern; biggest single readability win in the product.</li>
+  </ol>
+
+  <h2 style="border:none; margin-top:18pt;">Contents</h2>
+  <div class="toc">
+    <div class="toc-row"><span><span class="num">01</span>Method &amp; scope</span><span>3</span></div>
+    <div class="toc-row"><span><span class="num">02</span>Screen inventory</span><span>4</span></div>
+    <div class="toc-row"><span><span class="num">03</span>Critical findings</span><span>5</span></div>
+    <div class="toc-row"><span><span class="num">04</span>High-severity findings</span><span>7</span></div>
+    <div class="toc-row"><span><span class="num">05</span>Medium &amp; low findings</span><span>10</span></div>
+    <div class="toc-row"><span><span class="num">06</span>Accessibility (WCAG 2.1 AA) pass</span><span>12</span></div>
+    <div class="toc-row"><span><span class="num">07</span>Microcopy &amp; localisation</span><span>13</span></div>
+    <div class="toc-row"><span><span class="num">08</span>What's working well</span><span>14</span></div>
+    <div class="toc-row"><span><span class="num">09</span>Prioritised roadmap</span><span>15</span></div>
+  </div>
+</section>
+
+<!-- ============================ METHOD ============================ -->
+<section class="pb">
+  <h2>01 · Method &amp; scope</h2>
+  <div class="row">
+    <div class="col">
+      <h4>Audit type</h4>
+      <p>Heuristic evaluation (Nielsen's 10) combined with a structured WCAG&nbsp;2.1 AA spot-check, plus an
+        information-architecture and microcopy review. A single auditor, single session, ~45 minutes of clickthrough.</p>
+      <h4>Browser &amp; viewport</h4>
+      <p>Dia browser (Chromium-based) on macOS, primary viewport <code>1440×900</code>. The site renders inside a
+        single sign-on, JS-rendered SPA at <a>mmf.moneymarket.mn</a>.</p>
+      <h4>Coverage</h4>
+      <p>13 screens covering sign-in, dashboard, four trade verticals, four wallet/account tabs, profile, password,
+        news article, and the settings drawer.</p>
+      <h4>Revision history</h4>
+      <p><strong>Rev. 1</strong> — initial delivery, 27 findings. <strong>Rev. 2</strong> — incorporated client review:
+        three findings reclassified as <em>not actually issues</em> and removed (transparent dropdown, settings-drawer
+        clipping, red sell-pill colour convention). F-04 (profile) rewritten around the correct read-only intent.</p>
+    </div>
+    <div class="col">
+      <h4>What this report does not cover</h4>
+      <ul>
+        <li><strong>No main-flow testing included.</strong> Task-based walkthroughs of the core investor flows
+          (sign-up, fund wallet, place primary-market order, place secondary-market order, withdraw, sell) are
+          <em>not</em> in this report — they will be conducted as a separate exercise next week.</li>
+        <li>Mobile responsive behaviour was not testable in this session — Dia's window resize did not change the
+          viewport reliably. Findings labelled "responsive" are based on layout structure and proportional sizing,
+          not measured breakpoints.</li>
+        <li>Performance, load time, and Core Web Vitals.</li>
+        <li>Real user data — every observation that involves account numbers, balances, names, or transaction history
+          has been redacted in this report.</li>
+        <li>Localisation correctness in Mongolian — the report flags <em>structural</em> microcopy issues but does
+          not claim to evaluate translation quality.</li>
+      </ul>
+      <h4>Severity scale</h4>
+      <p>
+        <span class="sev sev-critical">Critical</span> blocks core tasks for a meaningful share of users.<br>
+        <span class="sev sev-high">High</span> introduces material friction or confusion.<br>
+        <span class="sev sev-medium">Medium</span> degrades polish, trust, or efficiency.<br>
+        <span class="sev sev-low">Low</span> cosmetic or edge-case.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SCREEN INVENTORY ============================ -->
+<section class="pb">
+  <h2>02 · Screen inventory</h2>
+  <p>Thirteen distinct screens were reached during the audit. The map below uses the in-product Mongolian labels
+    with English glosses in parentheses.</p>
+
+  <div class="pages-grid">
+    <div class="page-tile"><div class="pt-title">Sign-in</div><div class="pt-url">/sign-in</div><div class="pt-note">Pre-login. Two-column hero + form, "Remember me", show-password toggle.</div></div>
+    <div class="page-tile"><div class="pt-title">Миний самбар (Dashboard)</div><div class="pt-url">/dashboard</div><div class="pt-note">3 KPI tiles, repayment chart, portfolio summary, orders table, news + accounts rail.</div></div>
+    <div class="page-tile"><div class="pt-title">Арилжаа → Хадгаламжийн сертификат</div><div class="pt-url">/trade-cd</div><div class="pt-note">CD trading. Primary market (3 issuer cards) + secondary order book.</div></div>
+    <div class="page-tile"><div class="pt-title">Арилжаа → Итгэлцэл</div><div class="pt-url">/trade-it</div><div class="pt-note">Trust certificates. Same primary/secondary pattern.</div></div>
+    <div class="page-tile"><div class="pt-title">Арилжаа → Нэхэмжлэх</div><div class="pt-url">/trade-inv</div><div class="pt-note">Receivables. Empty primary market; secondary table; sell form.</div></div>
+    <div class="page-tile"><div class="pt-title">Арилжаа → Арилжааны бичиг</div><div class="pt-url">/trade-cp</div><div class="pt-note">Commercial paper. Empty primary; secondary; sell form.</div></div>
+    <div class="page-tile"><div class="pt-title">Хэтэвч → Wallet</div><div class="pt-url">/wallet/billing</div><div class="pt-note">Cash balance, bank account row, transaction table, Орлого/Зарлага CTAs.</div></div>
+    <div class="page-tile"><div class="pt-title">Хэтэвч → Итгэлцэл данс</div><div class="pt-url">/wallet/account</div><div class="pt-note">Trust-account holdings + order ledger.</div></div>
+    <div class="page-tile"><div class="pt-title">Хэтэвч → Нэхэмжлэх данс</div><div class="pt-url">/wallet/inv_account</div><div class="pt-note">Receivables holdings + order ledger.</div></div>
+    <div class="page-tile"><div class="pt-title">Хэтэвч → Арилжааны бичиг данс</div><div class="pt-url">/wallet/cp_account</div><div class="pt-note">Commercial-paper holdings + order ledger.</div></div>
+    <div class="page-tile"><div class="pt-title">Хэтэвч → Profile</div><div class="pt-url">/wallet/profile</div><div class="pt-note">Personal info tab (last/first/email/phone) + Change password tab.</div></div>
+    <div class="page-tile"><div class="pt-title">Мэдээ мэдээлэл (News article)</div><div class="pt-url">/news/article?id=-1</div><div class="pt-note">Article body + related-articles rail.</div></div>
+    <div class="page-tile"><div class="pt-title">Settings drawer (Загвар тохируулах)</div><div class="pt-url">— (right-side drawer)</div><div class="pt-note">Dark-mode toggle, menu type (Default/Themed), menu layout (Classic / Modern / Stacked Side / Simple).</div></div>
+  </div>
+
+  <h3 style="margin-top:14pt;">Information architecture</h3>
+  <div class="mock">
+    <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, sans-serif">
+      <rect x="290" y="10" width="120" height="34" rx="4" fill="#1F2A6B"/>
+      <text x="350" y="32" fill="white" font-size="11" font-weight="700" text-anchor="middle">Investor portal</text>
+
+      <g font-size="9.5" font-weight="600">
+        <rect x="20"  y="80" width="120" height="30" rx="4" fill="#E8EAF7" stroke="#2F3CA0"/>
+        <text x="80"  y="100" text-anchor="middle" fill="#1F2A6B">Dashboard</text>
+
+        <rect x="160" y="80" width="120" height="30" rx="4" fill="#E8EAF7" stroke="#2F3CA0"/>
+        <text x="220" y="100" text-anchor="middle" fill="#1F2A6B">Trade (4 verticals)</text>
+
+        <rect x="300" y="80" width="120" height="30" rx="4" fill="#E8EAF7" stroke="#2F3CA0"/>
+        <text x="360" y="100" text-anchor="middle" fill="#1F2A6B">Wallet (4 tabs)</text>
+
+        <rect x="440" y="80" width="120" height="30" rx="4" fill="#E8EAF7" stroke="#2F3CA0"/>
+        <text x="500" y="100" text-anchor="middle" fill="#1F2A6B">News</text>
+
+        <rect x="580" y="80" width="100" height="30" rx="4" fill="#FEF2F2" stroke="#E11D48" stroke-dasharray="3,2"/>
+        <text x="630" y="100" text-anchor="middle" fill="#9B1C2E">Profile (hidden)</text>
+      </g>
+
+      <g stroke="#7780A7" stroke-width="1" fill="none">
+        <path d="M350,44 L80,80 M350,44 L220,80 M350,44 L360,80 M350,44 L500,80 M350,44 L630,80"/>
+      </g>
+
+      <g font-size="8.5">
+        <rect x="142" y="140" width="38" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="161" y="155" text-anchor="middle" fill="#3D455C">CD</text>
+        <rect x="182" y="140" width="38" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="201" y="155" text-anchor="middle" fill="#3D455C">Trust</text>
+        <rect x="222" y="140" width="38" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="241" y="155" text-anchor="middle" fill="#3D455C">Inv.</text>
+        <rect x="262" y="140" width="38" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="281" y="155" text-anchor="middle" fill="#3D455C">CP</text>
+        <path d="M220,110 L220,140" stroke="#B7BCD3"/>
+        <path d="M220,138 L161,140 M220,138 L201,140 M220,138 L241,140 M220,138 L281,140" stroke="#B7BCD3"/>
+      </g>
+
+      <g font-size="8.5">
+        <rect x="282" y="140" width="40" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="302" y="155" text-anchor="middle" fill="#3D455C">Cash</text>
+        <rect x="324" y="140" width="40" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="344" y="155" text-anchor="middle" fill="#3D455C">Trust</text>
+        <rect x="366" y="140" width="40" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="386" y="155" text-anchor="middle" fill="#3D455C">Inv.</text>
+        <rect x="408" y="140" width="40" height="22" rx="3" fill="white" stroke="#B7BCD3"/>
+        <text x="428" y="155" text-anchor="middle" fill="#3D455C">CP</text>
+      </g>
+
+      <text x="350" y="200" text-anchor="middle" font-size="9" fill="#6B6F76" font-style="italic">
+        The Trade verticals and Wallet tabs are parallel but use different navigation patterns (left rail vs. tabs).
+      </text>
+      <text x="350" y="216" text-anchor="middle" font-size="9" fill="#9B1C2E" font-weight="600">
+        Profile lives inside Wallet's URL space (/wallet/profile) but is only reachable from the avatar dropdown.
+      </text>
+    </svg>
+  </div>
+  <p class="mock-caption">IA observation: the Trade and Wallet hierarchies are parallel but visually different. Trade uses a left-nav fly-out; Wallet uses in-page tabs. This makes the relationship between "trade an instrument" and "see my holdings of that instrument" harder to grasp than it needs to be.</p>
+</section>
+
+<!-- ============================ CRITICAL FINDINGS ============================ -->
+<section class="pb">
+  <h2>03 · Critical findings</h2>
+
+  <!-- F-01 -->
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-01 · Dashboard right rail is clipped; horizontal scrollbar appears on the entire app</div>
+      <span class="sev sev-critical">Critical</span>
+    </div>
+    <div class="where">Where: <code>/dashboard</code> · Viewport 1440×900 and 1920×1080 · Affects every authenticated session.</div>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <rect x="6" y="6" width="640" height="200" fill="white" stroke="#1F2330"/>
+        <text x="324" y="20" font-size="8.5" fill="#6B6F76" text-anchor="middle">Viewport 1440 px (or 1920 px — same behaviour)</text>
+
+        <rect x="10" y="28" width="78" height="174" fill="#F5F6FA" stroke="#DDE0E8"/>
+        <text x="49" y="44" font-size="8" text-anchor="middle" fill="#3D455C">Side nav</text>
+        <rect x="18" y="56" width="62" height="9" rx="2" fill="#D7DAEA"/>
+        <rect x="18" y="70" width="62" height="9" rx="2" fill="#D7DAEA"/>
+        <rect x="18" y="84" width="62" height="9" rx="2" fill="#D7DAEA"/>
+        <rect x="18" y="98" width="62" height="9" rx="2" fill="#D7DAEA"/>
+
+        <rect x="96" y="34" width="120" height="40" rx="3" fill="#E8EAF7" stroke="#B5BBD7"/>
+        <rect x="220" y="34" width="120" height="40" rx="3" fill="#E8EAF7" stroke="#B5BBD7"/>
+        <rect x="344" y="34" width="120" height="40" rx="3" fill="#E8EAF7" stroke="#B5BBD7"/>
+        <rect x="96" y="80" width="368" height="74" rx="3" fill="#F4F5FB" stroke="#B5BBD7"/>
+        <text x="280" y="120" font-size="9" text-anchor="middle" fill="#3D455C">Repayment chart</text>
+
+        <rect x="472" y="34" width="208" height="120" rx="3" fill="#FFE6E6" stroke="#E11D48" stroke-dasharray="4,2"/>
+        <text x="540" y="52" font-size="9" fill="#9B1C2E" font-weight="700">ДАНС (Accounts)</text>
+        <rect x="480" y="58" width="170" height="8" rx="2" fill="#F7C0C5"/>
+        <rect x="480" y="70" width="170" height="8" rx="2" fill="#F7C0C5"/>
+        <rect x="480" y="82" width="170" height="8" rx="2" fill="#F7C0C5"/>
+        <text x="540" y="110" font-size="9" fill="#9B1C2E" font-weight="700">Мэдээ мэдээлэл</text>
+        <rect x="480" y="118" width="170" height="8" rx="2" fill="#F7C0C5"/>
+        <rect x="480" y="130" width="170" height="8" rx="2" fill="#F7C0C5"/>
+
+        <line x1="640" y1="6" x2="640" y2="206" stroke="#E11D48" stroke-width="2"/>
+        <text x="660" y="100" font-size="9" fill="#E11D48" font-weight="700" transform="rotate(90 660 100)">clipped here</text>
+
+        <text x="324" y="180" font-size="9.5" fill="#1F2330" text-anchor="middle">Horizontal scrollbar appears at the page level →</text>
+        <rect x="20" y="190" width="620" height="6" rx="2" fill="#ECEEF4"/>
+        <rect x="20" y="190" width="380" height="6" rx="2" fill="#9B9EAE"/>
+      </svg>
+    </div>
+
+    <div class="body">
+      The dashboard uses a fixed-width grid that exceeds the viewport. At <strong>1440&nbsp;px</strong> the right
+      column showing Accounts and News begins at roughly x = 1090 but its content runs to ~1290&nbsp;px, forcing a
+      horizontal scrollbar across the entire page. At <strong>1920&nbsp;px</strong> the same overflow is reproducible
+      because the layout uses an absolute (or min-width) container rather than fluid columns. Headings like "Хадгаламжи",
+      "Итгэлцэл", "Нэхэмжлэх", and "Арилжааны" are truncated mid-word. News-card titles are clipped.
+    </div>
+    <div class="fix">
+      <b>Fix:</b> replace the fixed-width grid with a CSS grid such as
+      <code>grid-template-columns: minmax(0, 1fr) 320px;</code>, give every grid item <code>min-width: 0;</code> so
+      long labels can shrink, and let truncated titles wrap (<code>overflow-wrap: anywhere</code>) or apply
+      <code>text-overflow: ellipsis</code> with a tooltip. Test at 1280, 1366, 1440, 1600, 1920.
+    </div>
+  </div>
+
+  <!-- F-02 -->
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-02 · "HYYP" appears as the first label inside the sidebar with no explanation</div>
+      <span class="sev sev-critical">Critical</span>
+    </div>
+    <div class="where">Where: every authenticated page · Left rail · Heading above the nav list.</div>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <rect x="10" y="10" width="190" height="110" fill="#F5F6FA" stroke="#DDE0E8"/>
+        <text x="22" y="34" font-size="11" font-weight="700" fill="#FF7A1A">Money Market Fund (logo)</text>
+        <text x="22" y="60" font-size="13" font-weight="700" fill="#E11D48">HYYP</text>
+        <rect x="22" y="72" width="160" height="9" rx="2" fill="#9AA0B5"/>
+        <rect x="22" y="86" width="120" height="9" rx="2" fill="#9AA0B5"/>
+        <rect x="22" y="100" width="100" height="9" rx="2" fill="#9AA0B5"/>
+
+        <g transform="translate(220 30)">
+          <text x="0" y="0" font-size="10" font-weight="700" fill="#1F2330">What's wrong</text>
+          <text x="0" y="18" font-size="9" fill="#3D455C">• "HYYP" is the first authenticated label — no context, no tooltip.</text>
+          <text x="0" y="32" font-size="9" fill="#3D455C">• Reads as an error to native Mongolian speakers (Cyrillic vs Latin glyphs).</text>
+          <text x="0" y="46" font-size="9" fill="#3D455C">• A new investor cannot tell whether it is a status, a product, or a section header.</text>
+          <text x="0" y="64" font-size="10" font-weight="700" fill="#1A5630">Fix</text>
+          <text x="0" y="82" font-size="9" fill="#3D455C">→ Replace with "ҮНДСЭН" / "Main" or remove the label altogether.</text>
+          <text x="0" y="96" font-size="9" fill="#3D455C">→ If "HYYP" is a brand, move it to the logo lockup so it isn't read as a nav section.</text>
+        </g>
+      </svg>
+    </div>
+    <div class="fix">
+      <b>Fix:</b> rename the section header to something semantic (<em>"Main"</em>, <em>"My account"</em>) or drop it.
+      The pattern of "section header → menu items" is fine, but the header must mean something.
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HIGH FINDINGS ============================ -->
+<section class="pb">
+  <h2>04 · High-severity findings</h2>
+
+  <!-- F-03 — TABLE OVERFLOW with detailed solution mockup -->
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-03 · Tables overflow horizontally inside their own container — two scrollbars stacked</div>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="where">Where: <code>/trade-cd</code>, <code>/trade-it</code>, <code>/trade-inv</code>, <code>/trade-cp</code>, <code>/wallet/*</code>.</div>
+    <div class="body">
+      Every trade and account page has a wide table (7–9 columns) inside a card that itself sits inside the
+      already-overflowing dashboard grid. The result: users see a <em>horizontal scrollbar on the page</em>
+      <strong>and</strong> a <em>second horizontal scrollbar on the table</em>. Columns like "Захиалга хүчинтэй
+      хугацаа" wrap onto two lines while CD ticker columns ("CAPIT 1450 CD 200526") wrap onto four lines, making
+      the row height inconsistent and the data hard to scan.
+    </div>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 410" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <!-- CURRENT STATE -->
+        <text x="10" y="18" font-size="11" font-weight="700" fill="#9B1C2E">Today  ·  two scrollbars, four-line tickers</text>
+        <rect x="10" y="26" width="680" height="120" fill="white" stroke="#E5E7EE"/>
+        <!-- header row -->
+        <rect x="10" y="26" width="680" height="22" fill="#F4F5F8"/>
+        <g font-size="7.5" fill="#3D455C" font-weight="700">
+          <text x="20" y="40">ТИКЕР ⇅</text>
+          <text x="120" y="40">ТӨРӨЛ ⇅</text>
+          <text x="190" y="40">ТОО ШИРХЭГ ⇅</text>
+          <text x="280" y="40">ХУДАЛДАХ ҮНЭ ⇅</text>
+          <text x="390" y="40">НЭГЖ ҮНЭ ⇅</text>
+          <text x="470" y="40">ТӨЛӨГДӨХ ХҮРТЭЛХ ХОНОГ ⇅</text>
+          <text x="620" y="40">ЗАХИАЛГА ХҮЧИНТЭЙ…</text>
+        </g>
+        <!-- row 1, multi-line ticker -->
+        <g font-size="8" fill="#1F2330">
+          <text x="20" y="62">CAPIT</text>
+          <text x="20" y="74">1450</text>
+          <text x="20" y="86">CD</text>
+          <text x="20" y="98">200526</text>
+          <text x="120" y="74" fill="#C81B22" font-weight="700">Зарах</text>
+          <text x="190" y="74">10</text>
+          <text x="280" y="74">100,000.00</text>
+          <text x="280" y="86">MNT</text>
+          <text x="390" y="74">100,000.00</text>
+          <text x="390" y="86">MNT</text>
+          <text x="470" y="74">5</text>
+          <text x="620" y="68" font-size="7.5">Нөхцөл</text>
+          <text x="620" y="78" font-size="7.5">биелтэл</text>
+          <text x="620" y="88" font-size="7.5">хүчинтэй</text>
+        </g>
+        <!-- inner scrollbar -->
+        <rect x="20" y="120" width="660" height="5" rx="2" fill="#ECEEF4"/>
+        <rect x="20" y="120" width="420" height="5" rx="2" fill="#9B9EAE"/>
+        <text x="350" y="140" font-size="8" text-anchor="middle" fill="#C81B22">↑ table scrollbar  +  page scrollbar below</text>
+
+        <!-- DIVIDER -->
+        <line x1="0" y1="160" x2="700" y2="160" stroke="#DDE0E8" stroke-dasharray="3,3"/>
+
+        <!-- SOLUTION 1: compact mono ticker + sticky first col -->
+        <text x="10" y="178" font-size="11" font-weight="700" fill="#1A5630">Option A · Mono ticker + sticky first column + hover-reveal full name</text>
+        <rect x="10" y="186" width="680" height="60" fill="white" stroke="#28a745"/>
+        <rect x="10" y="186" width="100" height="60" fill="#F0F8F2"/>
+        <text x="20" y="200" font-size="8.5" font-weight="700" fill="#1F2330">CAPIT-1450-CD-200526</text>
+        <text x="20" y="212" font-size="7" fill="#6B6F76">Capitron Bank · 12 mo</text>
+        <g font-size="8" fill="#1F2330">
+          <text x="125" y="206" fill="#C81B22" font-weight="700">Зарах</text>
+          <text x="180" y="206">10</text>
+          <text x="220" y="206">100,000.00 ₮</text>
+          <text x="320" y="206">100,000.00 ₮</text>
+          <text x="430" y="206">5 days</text>
+          <text x="490" y="206">Open · cond. met</text>
+          <text x="620" y="206" fill="#2F3CA0">Buy</text>
+        </g>
+        <text x="20" y="234" font-size="7.5" fill="#1A5630">↑ one-line ticker, sticky first column highlighted, secondary issuer info in small caption</text>
+
+        <!-- SOLUTION 2: column toggle -->
+        <text x="10" y="266" font-size="11" font-weight="700" fill="#1A5630">Option B · Column-toggle: user picks the 5 columns they need today</text>
+        <rect x="10" y="274" width="680" height="50" fill="white" stroke="#28a745"/>
+        <rect x="20" y="282" width="68" height="16" rx="8" fill="#2F3CA0"/>
+        <text x="54" y="293" font-size="7.5" text-anchor="middle" fill="white">Ticker ●</text>
+        <rect x="92" y="282" width="60" height="16" rx="8" fill="#2F3CA0"/>
+        <text x="122" y="293" font-size="7.5" text-anchor="middle" fill="white">Price ●</text>
+        <rect x="156" y="282" width="58" height="16" rx="8" fill="#2F3CA0"/>
+        <text x="185" y="293" font-size="7.5" text-anchor="middle" fill="white">Qty ●</text>
+        <rect x="218" y="282" width="76" height="16" rx="8" fill="#2F3CA0"/>
+        <text x="256" y="293" font-size="7.5" text-anchor="middle" fill="white">Maturity ●</text>
+        <rect x="298" y="282" width="60" height="16" rx="8" fill="#2F3CA0"/>
+        <text x="328" y="293" font-size="7.5" text-anchor="middle" fill="white">Yield ●</text>
+        <rect x="362" y="282" width="72" height="16" rx="8" fill="white" stroke="#B7BCD3"/>
+        <text x="398" y="293" font-size="7.5" text-anchor="middle" fill="#6B6F76">+ Status</text>
+        <rect x="438" y="282" width="90" height="16" rx="8" fill="white" stroke="#B7BCD3"/>
+        <text x="483" y="293" font-size="7.5" text-anchor="middle" fill="#6B6F76">+ Order validity</text>
+        <text x="20" y="314" font-size="7.5" fill="#1A5630">↑ Defaults to 5 essential columns; user adds the rest. State persists per user via localStorage.</text>
+
+        <!-- SOLUTION 3: card pattern on narrow viewports -->
+        <text x="10" y="344" font-size="11" font-weight="700" fill="#1A5630">Option C · Card list below ~960 px — same data, no horizontal scroll</text>
+        <rect x="10" y="352" width="220" height="50" fill="white" stroke="#28a745"/>
+        <text x="20" y="368" font-size="9" font-weight="700" fill="#1F2330">CAPIT-1450-CD-200526</text>
+        <text x="20" y="380" font-size="7.5" fill="#3D455C">Зарах · 10 ширхэг · 5 хоног</text>
+        <text x="20" y="392" font-size="8" font-weight="700" fill="#1A5630">100,000.00 ₮</text>
+        <rect x="180" y="378" width="44" height="18" rx="9" fill="#2F3CA0"/>
+        <text x="202" y="391" font-size="8" text-anchor="middle" fill="white">Buy</text>
+
+        <rect x="240" y="352" width="220" height="50" fill="white" stroke="#28a745"/>
+        <text x="250" y="368" font-size="9" font-weight="700" fill="#1F2330">CAPIT-1450-CD-240227</text>
+        <text x="250" y="380" font-size="7.5" fill="#3D455C">Зарах · 12 ширхэг · 285 хоног</text>
+        <text x="250" y="392" font-size="8" font-weight="700" fill="#1A5630">100,000.00 ₮</text>
+        <rect x="410" y="378" width="44" height="18" rx="9" fill="#2F3CA0"/>
+        <text x="432" y="391" font-size="8" text-anchor="middle" fill="white">Buy</text>
+
+        <rect x="470" y="352" width="220" height="50" fill="white" stroke="#28a745"/>
+        <text x="480" y="368" font-size="9" font-weight="700" fill="#1F2330">CAPIT-1450-CD-011226</text>
+        <text x="480" y="380" font-size="7.5" fill="#3D455C">Зарах · 4 ширхэг · 200 хоног</text>
+        <text x="480" y="392" font-size="8" font-weight="700" fill="#1A5630">100,000.00 ₮</text>
+        <rect x="640" y="378" width="44" height="18" rx="9" fill="#2F3CA0"/>
+        <text x="662" y="391" font-size="8" text-anchor="middle" fill="white">Buy</text>
+      </svg>
+    </div>
+    <p class="mock-caption">Before/after sketch — three options shown side-by-side. They can be combined: Option&nbsp;A &amp; B for desktop, Option&nbsp;C for &lt;&nbsp;960&nbsp;px.</p>
+
+    <div class="fix">
+      <b>Recommended sequence:</b> ship Option&nbsp;A first (mono ticker + sticky first column) — it's the smallest
+      diff and unblocks the page-level scrollbar fix in F-01. Then add Option&nbsp;B (column toggle) as a power-user
+      feature. Option&nbsp;C (card list) becomes the responsive fallback once mobile work is in scope.
+    </div>
+  </div>
+
+  <!-- F-04 — PROFILE READ-ONLY -->
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-04 · Profile fields look editable but are intentionally read-only — wrong component for the intent</div>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="where">Where: <code>/wallet/profile</code> → Харилцагчийн мэдээлэл tab.</div>
+    <div class="body">
+      Last name, first name, email, and phone are rendered using the standard text-input component (rounded border,
+      placeholder-style hint, icon affordance). The fields cannot actually be edited — that's the correct product
+      behaviour, since KYC-bound personal data needs to go through support. The problem is purely a presentation
+      mismatch: an editable-looking input promises an interaction the user can never complete, and there is no Save
+      button to confirm or deny that promise. Users will click the field, try to type, and silently fail.
+    </div>
+
+    <div class="mock">
+      <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+        <!-- LEFT: current -->
+        <text x="10" y="18" font-size="11" font-weight="700" fill="#9B1C2E">Today · text-input component</text>
+        <rect x="10" y="28" width="320" height="160" fill="white" stroke="#E5E7EE"/>
+        <text x="22" y="50" font-size="10" font-weight="700" fill="#1F2330">Нэр</text>
+        <rect x="22" y="58" width="290" height="32" rx="4" fill="white" stroke="#C7CCD8"/>
+        <circle cx="38" cy="74" r="6" fill="none" stroke="#9AA0B5"/>
+        <text x="50" y="78" font-size="9.5" fill="#9AA0B5">Тэмүүжин</text>
+        <text x="22" y="112" font-size="10" font-weight="700" fill="#1F2330">Утас</text>
+        <rect x="22" y="120" width="290" height="32" rx="4" fill="white" stroke="#C7CCD8"/>
+        <text x="38" y="140" font-size="9.5" fill="#9AA0B5">95522981</text>
+        <text x="22" y="174" font-size="8" fill="#9B1C2E" font-style="italic">↑ looks editable, isn't, no Save button anywhere</text>
+
+        <!-- RIGHT: proposed -->
+        <text x="350" y="18" font-size="11" font-weight="700" fill="#1A5630">Proposed · definition-list / read-only component</text>
+        <rect x="350" y="28" width="340" height="160" fill="white" stroke="#28a745"/>
+        <text x="362" y="50" font-size="9" fill="#6B6F76" letter-spacing="0.5">FIRST NAME</text>
+        <text x="362" y="68" font-size="11" font-weight="600" fill="#1F2330">Тэмүүжин</text>
+        <line x1="362" y1="78" x2="678" y2="78" stroke="#ECEEF4"/>
+        <text x="362" y="98" font-size="9" fill="#6B6F76" letter-spacing="0.5">PHONE</text>
+        <text x="362" y="116" font-size="11" font-weight="600" fill="#1F2330">955•••981</text>
+        <line x1="362" y1="126" x2="678" y2="126" stroke="#ECEEF4"/>
+        <text x="362" y="146" font-size="8.5" fill="#3D455C" font-style="italic">
+          To update your name or phone, contact support →
+        </text>
+        <rect x="362" y="154" width="160" height="22" rx="11" fill="#F4F5FB" stroke="#B5BBD7"/>
+        <text x="442" y="169" font-size="9" text-anchor="middle" fill="#2F3CA0" font-weight="600">Contact support</text>
+      </svg>
+    </div>
+
+    <div class="fix">
+      <b>Fix — two options, both correct:</b><br>
+      <strong>(a) Definition-list pattern</strong> (preferred) — render label on top, value below, no border, no
+      icon. Apply optional masking on sensitive fields (phone shows <code>955•••981</code>). Add an explicit "Contact
+      support to update" affordance. The user instantly knows the screen is informational, not transactional.<br>
+      <strong>(b) Disabled input pattern</strong> — keep the input component but apply <code>disabled</code> +
+      <code>aria-readonly="true"</code>, lower the field's contrast and remove the focus ring. Same outcome, more
+      code reuse, slightly weaker signal than (a).
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-05 · Empty "Анхдагч" (Primary market) sections show a header but no content or empty state</div>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="where">Where: <code>/trade-inv</code>, <code>/trade-cp</code>.</div>
+    <div class="body">
+      Both the Receivables and Commercial Paper pages show an "Анхдагч" header with the section frame, but no
+      offers, no skeleton, no "No primary offerings right now" message, and no "Notify me" call-to-action. A
+      first-time user has no way to tell whether this is a loading state, a permanent state, or a bug.
+    </div>
+    <div class="fix">
+      <b>Fix:</b> add an empty state with (1) a one-sentence explanation of what primary market means in this
+      vertical, (2) the next expected offering date if known, and (3) a "Notify me" toggle.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-06 · Issuer logos render at different aspect ratios; some look like contrast bugs</div>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="where">Where: Primary-market issuer cards on Trade pages.</div>
+    <div class="body">
+      The "Анлок Капитал" logo on <code>/trade-it</code> renders against a black band that bleeds into the card
+      surface, giving the impression of a contrast failure. "Кредитех СТМ" sits on a dark navy background that
+      collides with the white card. Logo treatment is inconsistent: some logos have transparent backgrounds, others
+      ship with their own coloured plates baked in.
+    </div>
+    <div class="fix">
+      <b>Fix:</b> add a 1:1 logo container (<code>aspect-ratio: 1/1; object-fit: contain; padding: 6px</code>) with
+      a neutral background so issuer-supplied colours don't fight the card. Enforce a min-contrast requirement on
+      logos in the issuer onboarding flow.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-07 · External issuer links lack a protocol and open with no rel="noopener"</div>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="where">Where: Issuer cards on <code>/trade-cd</code>.</div>
+    <div class="body">
+      The Capitron Bank link is wired as <code>href="www.capitronbank.mn"</code> with no <code>https://</code>
+      prefix, which makes the browser resolve it as a relative URL inside <code>mmf.moneymarket.mn</code> — the
+      link silently fails. Other issuer links (Trust page) are correctly formed but lack <code>target="_blank"
+      rel="noopener noreferrer"</code> for security.
+    </div>
+    <div class="fix">
+      <b>Fix:</b> normalise outbound URLs at the API or render layer; always include the scheme; always render
+      external anchors with <code>target="_blank" rel="noopener noreferrer"</code> and a small "external" icon.
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="head">
+      <div class="title">F-08 · KPI tiles show ₮0 with no empty-state copy or onboarding cue</div>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="where">Where: Dashboard top — "Сүүлийн 24 цагийн өгөөж" / "Нийт багц" / "Нийт өгөөж" tiles.</div>
+    <div class="body">
+      A brand-new investor lands on three large zero values and a flat chart. There is no "Welcome — make your
+      first investment" treatment, no link to the Trade section, and no explanation of what "Нийт багц" includes.
+      For an investment product, the first-time empty state is the most consequential surface in the entire UI.
+    </div>
+    <div class="fix">
+      <b>Fix:</b> when balances are all zero, swap the chart card for an onboarding card with three steps:
+      (1) Fund your wallet, (2) Pick an instrument, (3) Place your first order. Keep the KPI tiles as zeros but
+      annotate them with a small <em>"Start investing to see your portfolio here"</em> caption.
+    </div>
+  </div>
+</section>
+
+<!-- ============================ MEDIUM/LOW FINDINGS ============================ -->
+<section class="pb">
+  <h2>05 · Medium &amp; low findings</h2>
+  <table class="findings">
+    <thead>
+      <tr><th>ID</th><th>Area</th><th>Severity</th><th>Finding</th><th>Suggested fix</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="id">F-09</td>
+        <td class="area">Sign-in</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>No language switcher. Mongolian is the only available locale; Latin-script users (English readers, foreign investors) have no fallback.</td>
+        <td>Add an MN / EN toggle in the header. Persist the preference across sessions.</td>
+      </tr>
+      <tr>
+        <td class="id">F-10</td>
+        <td class="area">Sign-in</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>Left hero column has marketing copy that competes with the form; on widescreens it pushes the form to the right and looks unbalanced. There is no visible link back to the marketing site.</td>
+        <td>Either anchor the form centred (single-column on &lt; 1024 px) or shrink the hero panel and add a clear "← Back to moneymarket.mn" link.</td>
+      </tr>
+      <tr>
+        <td class="id">F-11</td>
+        <td class="area">Sign-in</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>The visible password placeholder is shown via dots before any input — easy to confuse with a pre-filled value.</td>
+        <td>Use a single-row password field; render the dot mask only after the user types.</td>
+      </tr>
+      <tr>
+        <td class="id">F-12</td>
+        <td class="area">Dashboard</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>"Эргэн төлөгдөх хуваарь" (Repayment schedule) shows a flat 0–5 axis with no data. No legend, no explanation.</td>
+        <td>When there is no schedule, hide the chart and surface an empty state with the next coupon / maturity date.</td>
+      </tr>
+      <tr>
+        <td class="id">F-13</td>
+        <td class="area">Dashboard</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>Date shown as "2026-05-15, 02:05 PM" mixes ISO date with 12-hour US time.</td>
+        <td>Pick one locale. For Mongolian default, use <em>"2026.05.15, 14:05"</em>.</td>
+      </tr>
+      <tr>
+        <td class="id">F-14</td>
+        <td class="area">Dashboard</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>The "Миний захиалгууд" tabs (Active / Cancelled) use a soft purple pill for the active tab but no border on inactive tabs — looks like a button cluster, not a tab strip.</td>
+        <td>Use an underline tab pattern (consistent with the Wallet tabs already in the product).</td>
+      </tr>
+      <tr>
+        <td class="id">F-15</td>
+        <td class="area">Trade</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>Issuer-card "Авах" (Buy) button uses a purple fill on /trade-it but a lighter purple on /trade-cd. Same component, different visual weight.</td>
+        <td>Audit and unify the primary-button token across all four trade verticals.</td>
+      </tr>
+      <tr>
+        <td class="id">F-16</td>
+        <td class="area">Trade</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>Interest rate displayed as <em>"14.5 % /Жил/"</em> with slash delimiters reads as code, not as a label.</td>
+        <td>Drop the slashes: "14.5% per year" or Mongolian equivalent without slashes.</td>
+      </tr>
+      <tr>
+        <td class="id">F-17</td>
+        <td class="area">Trade</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>"Хайх" (search) field is wired but no result count, no recent searches, no clear-all affordance.</td>
+        <td>Add: result count "Showing X of Y", debounce input, clear-button (×) inside the field.</td>
+      </tr>
+      <tr>
+        <td class="id">F-18</td>
+        <td class="area">News</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>The article URL uses <code>?id=-1</code> as a default — looks broken in browser history and shareable links.</td>
+        <td>Use semantic slugs (e.g. <code>/news/cp-anhdagch-2026-04</code>); never use -1 as a real id.</td>
+      </tr>
+      <tr>
+        <td class="id">F-19</td>
+        <td class="area">News</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>"Мэдээ мэдээлэл" landing seems to redirect into a single article rather than an index of news.</td>
+        <td>Add a proper news index (cards or list) with filters by issuer/instrument and a search.</td>
+      </tr>
+      <tr>
+        <td class="id">F-20</td>
+        <td class="area">Wallet</td>
+        <td class="sev-cell"><span class="sev sev-medium">Medium</span></td>
+        <td>"Орлого" / "Зарлага" (Deposit / Withdraw) sit as adjacent buttons with similar weight; the destructive-ish action gets the brand-purple emphasis.</td>
+        <td>Make Deposit the primary CTA (filled), Withdraw the secondary (outline). Add helper microcopy for daily/monthly limits.</td>
+      </tr>
+      <tr>
+        <td class="id">F-21</td>
+        <td class="area">Wallet</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>"Банкны дансны мэдээлэл" shows the bank account with leading-edge dots — pattern is fine, but there's no "Edit" / "Change linked account" affordance.</td>
+        <td>Add a Manage linked accounts entry-point (even if it just opens a help article today).</td>
+      </tr>
+      <tr>
+        <td class="id">F-22</td>
+        <td class="area">Profile</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>Change-password tab uses a primary purple "Хадгалах" CTA at the bottom of the panel — consistent with the broader product, but the button is partially below the fold on a 900-px viewport.</td>
+        <td>Stick the action bar to the bottom of the form card.</td>
+      </tr>
+      <tr>
+        <td class="id">F-23</td>
+        <td class="area">Footer</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>The only footer link is "Үйлчилгээний нөхцөл" (Terms of service). No privacy policy, no contact, no regulator disclosure.</td>
+        <td>For a financial product, add: Privacy, Contact, Regulator (FRC) license info, security/incident contact.</td>
+      </tr>
+      <tr>
+        <td class="id">F-24</td>
+        <td class="area">Global</td>
+        <td class="sev-cell"><span class="sev sev-low">Low</span></td>
+        <td>No skip-to-content link, no visible focus ring on most interactive elements when tabbing.</td>
+        <td>Add a "Skip to main content" link and a globally consistent <code>:focus-visible</code> ring.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ A11Y ============================ -->
+<section class="pb">
+  <h2>06 · Accessibility (WCAG 2.1 AA) pass</h2>
+  <p>This is a structured spot-check, not a full conformance audit. Findings are organised by WCAG principle and
+    grouped with the broader audit's severity scale.</p>
+
+  <h3>1. Perceivable</h3>
+  <ul>
+    <li><strong>1.1.1 Non-text content (A).</strong> The sign-in page logo has no <code>alt</code> attribute exposed
+      via accessible name. Issuer-card buttons rely on text "Авах" only — fine. Note: red/green sell-buy colour
+      coding is a trading-platform convention and is not flagged as a contrast issue, but make sure direction is
+      also encoded with text or an icon for colour-blind users.</li>
+    <li><strong>1.4.3 Contrast (minimum, AA).</strong> The orange-on-blue brand combo in the sign-in hero is fine; the
+      placeholder text inside form fields (the grey "Нэвтрэх нэр" / "Нууц үг") sits below 4.5:1 against the white
+      surface. Several "Үүсгэсэн: 2025-04-08 15:56:18" date stamps in the News rail are #9AA0B5 on white — also under
+      threshold for body text.</li>
+    <li><strong>1.4.4 Resize text.</strong> Because of the fixed-width grid (F-01) the layout breaks well before
+      200% zoom; content gets clipped rather than reflowed.</li>
+    <li><strong>1.4.10 Reflow (AA).</strong> Fails on every wide table and on the dashboard. Reflow at
+      320 × 256 CSS px is not provided.</li>
+  </ul>
+
+  <h3>2. Operable</h3>
+  <ul>
+    <li><strong>2.1.1 Keyboard.</strong> The settings gear and avatar dropdown both <em>open</em> with keyboard,
+      but trap focus inconsistently — there is no visible focus ring on the menu items inside the dropdown.</li>
+    <li><strong>2.4.3 Focus order.</strong> Tabbing through the dashboard moves from the burger toggle straight to
+      the gear, skipping the page heading and KPI tiles. Heading regions should be in the tab order via a "Skip to
+      main content" pattern.</li>
+    <li><strong>2.4.6 Headings &amp; labels.</strong> "HYYP" (F-02) fails as a meaningful heading; "Анхдагч" /
+      "Хоёрдогч" are correctly used as section headings, but they lack <code>aria-level</code> hints when the
+      surrounding scope changes.</li>
+    <li><strong>2.4.7 Focus visible.</strong> The brand-purple buttons get a soft glow on focus; the table sort
+      icons and the "10 / хуудас" page-size selector do not.</li>
+  </ul>
+
+  <h3>3. Understandable</h3>
+  <ul>
+    <li><strong>3.1.1 Language of page.</strong> Verify <code>&lt;html lang="mn"&gt;</code> is set. The mixed
+      Latin/Cyrillic in "HYYP" (and any English fragments such as "Commercial Paper" inside an article body) should
+      be wrapped in <code>&lt;span lang="en"&gt;</code>.</li>
+    <li><strong>3.3.1 Error identification.</strong> Login validation behaviour was not exercised, but the
+      placeholder-driven design suggests errors will overwrite the placeholder. Use explicit labelled errors below
+      each field instead.</li>
+    <li><strong>3.3.2 Labels &amp; instructions.</strong> Profile inputs are unlabelled in the DOM beyond placeholder
+      text; placeholders disappear on focus, removing the label — relevant to F-04's read-only treatment too.</li>
+  </ul>
+
+  <h3>4. Robust</h3>
+  <ul>
+    <li><strong>4.1.2 Name, Role, Value.</strong> Sortable column headers in the secondary-market table use ▲▼ glyph
+      buttons without ARIA roles or pressed/active state — screen readers can't tell sort direction.</li>
+    <li><strong>4.1.3 Status messages.</strong> The page-level loading state (3–5 second blank between navigations)
+      has no <code>aria-live</code> region; screen readers get nothing to announce.</li>
+  </ul>
+</section>
+
+<!-- ============================ MICROCOPY ============================ -->
+<section class="pb">
+  <h2>07 · Microcopy &amp; localisation</h2>
+  <p>The Mongolian copy is reasonably consistent and avoids most banking jargon traps. The biggest microcopy
+    opportunities are at empty states, where current screens show structure without explanation.</p>
+
+  <table style="font-size:9.5pt; margin-top:6pt;">
+    <thead>
+      <tr style="background:#1F2330; color:white;">
+        <th style="padding:6pt 8pt; text-align:left;">Surface</th>
+        <th style="padding:6pt 8pt; text-align:left;">Current copy</th>
+        <th style="padding:6pt 8pt; text-align:left;">Suggested rewrite (intent)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Dashboard KPI tile</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Сүүлийн 24 цагийн өгөөж · ₮0</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Add: "Start investing to see your 24-hour return."</td></tr>
+      <tr><td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Empty primary market</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Анхдагч (heading only)</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">"No primary offerings right now — the next CP issue is expected in [date]. Want a notification?"</td></tr>
+      <tr><td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Order status</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Нөхцөл биелтэл хүчинтэй</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">"Open until conditions met" with a tooltip that lists the conditions explicitly.</td></tr>
+      <tr><td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Wallet CTA</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Орлого / Зарлага</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">"Deposit funds" / "Withdraw funds" — verb-led, both labels match length.</td></tr>
+      <tr><td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Profile contact-support hint</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">(none)</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">"To update your name or phone, please contact support →" with a clear link/CTA. (Pairs with F-04.)</td></tr>
+      <tr><td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Login submit</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Нэвтрэх</td>
+          <td style="padding:6pt 8pt;border-bottom:1px solid #E5E7EE;">Fine. Optionally add loading state: "Нэвтрэж байна…"</td></tr>
+      <tr><td style="padding:6pt 8pt;">Footer</td>
+          <td style="padding:6pt 8pt;">Үйлчилгээний нөхцөл (single link)</td>
+          <td style="padding:6pt 8pt;">Expand: Terms · Privacy · Help · Contact · FRC license #</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ POSITIVES ============================ -->
+<section class="pb">
+  <h2>08 · What's working well</h2>
+  <p>This audit is mostly diagnostic, but it's worth naming the parts of the product that already work — partly because
+    they're the right foundation to build on, partly to keep the team's morale calibrated.</p>
+
+  <div class="row">
+    <div class="col panel">
+      <h4>Brand &amp; visual system</h4>
+      <p>The logo, brand-purple primary, and orange accent give the product a confident, modern look. Typography is
+        consistent, line-heights are generous, and white space on cards is well-judged.</p>
+    </div>
+    <div class="col panel">
+      <h4>Navigation pattern</h4>
+      <p>A left rail with icons + labels is the right choice for a multi-vertical investor portal. The active-item
+        pill is clear. Once the "HYYP" issue is fixed, the rail is solid.</p>
+    </div>
+  </div>
+  <div class="row" style="margin-top:6pt;">
+    <div class="col panel">
+      <h4>Form fundamentals</h4>
+      <p>The sign-in page has a "Remember me", a show-password toggle, a "Forgot password?" link, and a "Sign up"
+        link — every essential is present. The password-change form correctly requires the current password.</p>
+    </div>
+    <div class="col panel">
+      <h4>Trading-convention colour coding</h4>
+      <p>Red for Sell and the implicit Buy convention follow trading-industry norms, which is the right call for an
+        investor audience. Just keep a non-colour cue (icon or label) alongside it for colour-blind accessibility.</p>
+    </div>
+  </div>
+  <div class="row" style="margin-top:6pt;">
+    <div class="col panel">
+      <h4>Theme &amp; customisation</h4>
+      <p>The settings drawer is a genuinely nice touch — dark mode plus four menu layouts gives investors agency
+        over the workspace, which is uncommon in MN-market banking products.</p>
+    </div>
+    <div class="col panel">
+      <h4>Pagination &amp; sort affordances</h4>
+      <p>Tables consistently show pagination controls and a page-size selector. Sort affordances are present on most
+        columns. Cleaning up the column widths (F-03) will make the whole pattern shine.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ROADMAP ============================ -->
+<section class="pb">
+  <h2>09 · Prioritised roadmap</h2>
+  <p>A two-sprint plan that takes the experience from "looks polished, breaks under inspection" to "polished and
+    sturdy." Effort estimates are deliberately coarse — a way to sequence, not to scope.</p>
+
+  <h3>Sprint 1 — Stop the bleeding (1–2 weeks)</h3>
+  <table class="findings">
+    <thead><tr><th>Item</th><th>Why now</th><th>Effort</th></tr></thead>
+    <tbody>
+      <tr><td>F-01 Fix dashboard grid overflow</td><td>Every user hits this on first login.</td><td>M</td></tr>
+      <tr><td>F-02 Replace "HYYP" sidebar label</td><td>One-line copy change with a high trust payoff.</td><td>XS</td></tr>
+      <tr><td>F-03 Mono-ticker + sticky first column (Option A only)</td><td>Smallest diff that unblocks the page-level scroll fix.</td><td>M</td></tr>
+      <tr><td>F-04 Swap profile inputs to read-only / definition-list</td><td>Removes a silent dead-end interaction.</td><td>S</td></tr>
+      <tr><td>F-07 Normalise external URLs</td><td>Silent broken links on issuer cards.</td><td>S</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Sprint 2 — Polish &amp; empty-state pass (2–3 weeks)</h3>
+  <table class="findings">
+    <thead><tr><th>Item</th><th>Why next</th><th>Effort</th></tr></thead>
+    <tbody>
+      <tr><td>F-03 Column-toggle + card list (Options B and C)</td><td>Power-user feature plus responsive fallback.</td><td>L</td></tr>
+      <tr><td>F-05 Empty states for primary markets</td><td>High-leverage with low engineering cost.</td><td>S</td></tr>
+      <tr><td>F-06 Unify issuer-logo container</td><td>Visual consistency across all Trade pages.</td><td>S</td></tr>
+      <tr><td>F-08 First-time investor onboarding card on Dashboard</td><td>Converts dormant ₮0 accounts.</td><td>M</td></tr>
+      <tr><td>F-09 Language toggle (MN / EN)</td><td>Opens the door to foreign-investor segment.</td><td>M</td></tr>
+      <tr><td>F-20 Deposit-as-primary CTA in Wallet</td><td>Activates dormant cash balances.</td><td>XS</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Sprint 3 — Accessibility &amp; trust (3–4 weeks)</h3>
+  <table class="findings">
+    <thead><tr><th>Item</th><th>Why later (not skipped)</th><th>Effort</th></tr></thead>
+    <tbody>
+      <tr><td>Full WCAG 2.1 AA pass (section 06 list)</td><td>Needs design-token + component-library changes; do it once, do it right.</td><td>L</td></tr>
+      <tr><td>F-23 Expand footer (Privacy, Contact, FRC license)</td><td>Regulatory + trust win.</td><td>S</td></tr>
+      <tr><td>F-19 News index page</td><td>Currently a dead-end article URL; needs IA work.</td><td>M</td></tr>
+      <tr><td>Component-library audit (button, table, dropdown, drawer)</td><td>Prevents future regressions.</td><td>L</td></tr>
+    </tbody>
+  </table>
+
+  <h3>What's coming next (out of scope for this report)</h3>
+  <p>Task-based main-flow testing — sign-up, fund wallet, place primary-market order, place secondary-market order,
+    sell, and withdraw — is scheduled as a separate exercise <strong>next week</strong>. Findings from that round
+    will be appended as a Rev. 3 of this document.</p>
+
+  <h3>How I'd measure success</h3>
+  <ul>
+    <li><strong>Onboarding activation:</strong> share of new accounts that fund the wallet within 7 days of sign-up.</li>
+    <li><strong>Time-to-first-trade:</strong> minutes from first login to first executed order.</li>
+    <li><strong>Dashboard scroll behaviour:</strong> percentage of sessions where horizontal scroll occurs on
+      <code>/dashboard</code> — target zero after Sprint 1.</li>
+    <li><strong>Customer-support tickets</strong> mentioning "where do I save my profile?" or "I can't edit my name" —
+      target zero after Sprint 1.</li>
+    <li><strong>Accessibility:</strong> automated axe-core score, plus a screen-reader walkthrough of the core
+      sign-in → fund wallet → place order path (after the next-week flow testing).</li>
+  </ul>
+</section>
+
+<section style="margin-top:18pt; padding-top:12pt; border-top:1px solid #E5E7EE;">
+  <p style="font-size:8.5pt; color:#6B6F76;">
+    <strong>Author note.</strong> This audit was conducted with the user logged in by Temuujin B. and Claude navigating
+    only on the user's behalf — no passwords or financial data were entered by the auditor. All account numbers, names,
+    and personal contact details encountered during the walkthrough have been redacted from this report. Findings are
+    based on the live state of <a>mmf.moneymarket.mn</a> as observed on 15 May 2026. Revision&nbsp;2 incorporates
+    client review feedback that removed three findings reclassified as not-issues, reframed F-04 around the correct
+    read-only intent, and added a before/after mockup for the tables-overflow recommendation.
+  </p>
+</section>
+
+</body>
+</html>

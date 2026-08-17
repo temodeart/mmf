@@ -1,0 +1,332 @@
+{
+  "components_version": "r1",
+  "components": {
+    "Frame": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "iOS device frame: status bar + 390×844 viewport + home indicator"
+    },
+    "StatusBar": {
+      "variants": [
+        "light",
+        "dark"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": ""
+    },
+    "HomeIndicator": {
+      "variants": [
+        "light",
+        "dark"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": ""
+    },
+    "LogoMark": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "orange+blue glyph only"
+    },
+    "LogoFull": {
+      "variants": [
+        "light",
+        "dark"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": ""
+    },
+    "BackBar": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "top bar with back chevron + centered title"
+    },
+    "FlowHeader": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "back + title + subtitle + optional right action (trading flows)"
+    },
+    "BottomTabs": {
+      "variants": [
+        "home",
+        "trade",
+        "loan",
+        "wallet",
+        "news"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "active item routed by tab prop"
+    },
+    "Badge": {
+      "variants": [
+        "info",
+        "buy",
+        "sell",
+        "new",
+        "active"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "dot + label, soft-tinted pill"
+    },
+    "BigBtn": {
+      "variants": [
+        "primary",
+        "ghost",
+        "ink",
+        "disabled"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "full-width 52px CTA"
+    },
+    "PillBtn": {
+      "variants": [
+        "solid",
+        "ghost"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": ""
+    },
+    "Field": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "labeled text input, 52px, focus ring"
+    },
+    "PwField": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "password input with show/hide toggle"
+    },
+    "SectionCard": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "titled group of label/value rows"
+    },
+    "ProductMini": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "issuer letter-mark + name + meta + right slot"
+    },
+    "QtyStepper": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "– / value / + with range slider (.loan-range)"
+    },
+    "Consent": {
+      "variants": [
+        "checked",
+        "unchecked"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "inline checkbox + body copy"
+    },
+    "StickyBar": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "bottom CTA bar with top hairline"
+    },
+    "ReviewScaffold": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "scroll body + consent + enable-gated sticky CTA"
+    },
+    "PinConfirm": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "dedicated transaction-PIN confirmation screen"
+    },
+    "SuccessScreen": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "check medallion + title + rows + 2 CTAs"
+    },
+    "StateScreen": {
+      "variants": [
+        "insufficient",
+        "soldOut",
+        "unavailable",
+        "priceChanged",
+        "otpError",
+        "networkError"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "edge-state template; glyph+tone by variant"
+    },
+    "TransactionPin": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "6-digit PIN entry (PinDots + Keypad)"
+    },
+    "Keypad": {
+      "variants": [
+        "numeric",
+        "withLetters"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "on-screen keypad"
+    },
+    "PinDots": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "filled/empty PIN progress dots"
+    },
+    "OTP": {
+      "variants": [
+        "default",
+        "error",
+        "resendReady"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "one-time-code entry row + countdown"
+    },
+    "CodeBoxes": {
+      "variants": [
+        "default",
+        "error"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "micro-deposit code boxes (bank verify)"
+    },
+    "SortSheet": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "secondary-market sort bottom sheet"
+    },
+    "TickerSheet": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "instrument ticker detail sheet"
+    },
+    "SecCard": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "secondary-market listing card"
+    },
+    "EarningsHero": {
+      "variants": [
+        "filled",
+        "empty"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "navy→indigo portfolio balance hero"
+    },
+    "HomeAllocCard": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "portfolio allocation chart card"
+    },
+    "EduCard": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "education / news content card"
+    },
+    "NotifRow": {
+      "variants": [
+        "read",
+        "unread",
+        "critical"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "notification list row"
+    },
+    "MenuRow": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "profile menu row"
+    },
+    "MenuGroup": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "grouped profile menu section"
+    },
+    "Toggle": {
+      "variants": [
+        "on",
+        "off"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "settings switch"
+    },
+    "BankTile": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "selectable bank option"
+    },
+    "BankMark": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "bank letter-mark avatar"
+    },
+    "LoanResultCard": {
+      "variants": [
+        "accepted",
+        "partial",
+        "declined"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T00:00:00Z",
+      "note": "loan decision result card"
+    },
+    "Dot": {
+      "variants": [
+        "info",
+        "buy",
+        "sell",
+        "new",
+        "active"
+      ],
+      "hash": "r1",
+      "modified": "2026-06-14T14:00:00Z",
+      "note": "colored status dot (paired with Badge/labels)"
+    },
+    "SignupStepHeader": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T14:00:00Z",
+      "note": "sign-up step progress header (orange bar + Алхам N/total)"
+    },
+    "DanLogo": {
+      "variants": [],
+      "hash": "r1",
+      "modified": "2026-06-14T14:00:00Z",
+      "note": "DAN / ХУР consent logo lockup"
+    }
+  }
+}

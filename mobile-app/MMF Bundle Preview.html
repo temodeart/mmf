@@ -1,0 +1,133 @@
+<!DOCTYPE html><html lang="mn"><head><meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MMF — DA to CL bundle preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="../exports/tokens.css"/>
+<link rel="stylesheet" href="../exports/screens/app.css"/>
+<style>
+ body{margin:0;background:#EEF0F6;font-family:'Manrope',sans-serif;color:#0B1020;}
+ header{padding:28px 40px 8px;}
+ h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.02em;}
+ .sub{font:600 12px 'JetBrains Mono',monospace;color:#6B7191;margin-top:6px;}
+ #grid{display:flex;flex-wrap:wrap;gap:22px;padding:24px 40px 80px;align-items:flex-start;}
+ .cell{display:flex;flex-direction:column;gap:7px;}
+ .cap{font:600 11px 'JetBrains Mono',monospace;color:#6B7191;}
+ .mmf-screen{box-shadow:0 14px 40px -22px rgba(15,20,55,.45);border-radius:42px;}
+ .err{width:390px;min-height:120px;border:1.5px solid #DC2626;border-radius:18px;background:#FDECEC;color:#DC2626;padding:14px;font:600 12px/1.4 'JetBrains Mono',monospace;white-space:pre-wrap;}
+</style></head><body>
+<header><h1>Money Market Fund — DA to CL export bundle</h1>
+<div class="sub">contract v1.0 · bundle v1 · 99 self-contained screens · exports/</div></header>
+<div id="grid"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../exports/screens/Splash.jsx"></script>
+<script type="text/babel" src="../exports/screens/Login.jsx"></script>
+<script type="text/babel" src="../exports/screens/ResetEnterPhone.jsx"></script>
+<script type="text/babel" src="../exports/screens/ResetVerifyCode.jsx"></script>
+<script type="text/babel" src="../exports/screens/ResetNewPassword.jsx"></script>
+<script type="text/babel" src="../exports/screens/ResetSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/Onb1.jsx"></script>
+<script type="text/babel" src="../exports/screens/Onb2.jsx"></script>
+<script type="text/babel" src="../exports/screens/Onb3.jsx"></script>
+<script type="text/babel" src="../exports/screens/Onb4.jsx"></script>
+<script type="text/babel" src="../exports/screens/PhoneVerify.jsx"></script>
+<script type="text/babel" src="../exports/screens/EmailVerify.jsx"></script>
+<script type="text/babel" src="../exports/screens/CreatePassword.jsx"></script>
+<script type="text/babel" src="../exports/screens/CreatePin.jsx"></script>
+<script type="text/babel" src="../exports/screens/BiometricSetup.jsx"></script>
+<script type="text/babel" src="../exports/screens/KycConsent.jsx"></script>
+<script type="text/babel" src="../exports/screens/MonpepCheck.jsx"></script>
+<script type="text/babel" src="../exports/screens/MonpepFailed.jsx"></script>
+<script type="text/babel" src="../exports/screens/TermsOfUse.jsx"></script>
+<script type="text/babel" src="../exports/screens/MasterContract.jsx"></script>
+<script type="text/babel" src="../exports/screens/SigningMethod.jsx"></script>
+<script type="text/babel" src="../exports/screens/ESignCanvas.jsx"></script>
+<script type="text/babel" src="../exports/screens/ESignSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/GSignRequest.jsx"></script>
+<script type="text/babel" src="../exports/screens/GSignWaiting.jsx"></script>
+<script type="text/babel" src="../exports/screens/GSignSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/GSignTutorial.jsx"></script>
+<script type="text/babel" src="../exports/screens/BankVerify.jsx"></script>
+<script type="text/babel" src="../exports/screens/IbanLookupSheet.jsx"></script>
+<script type="text/babel" src="../exports/screens/IbanLookupResult.jsx"></script>
+<script type="text/babel" src="../exports/screens/DepositSending.jsx"></script>
+<script type="text/babel" src="../exports/screens/DepositInfo.jsx"></script>
+<script type="text/babel" src="../exports/screens/CodeEntry.jsx"></script>
+<script type="text/babel" src="../exports/screens/BankVerified.jsx"></script>
+<script type="text/babel" src="../exports/screens/KycComplete.jsx"></script>
+<script type="text/babel" src="../exports/screens/Home.jsx"></script>
+<script type="text/babel" src="../exports/screens/Trading.jsx"></script>
+<script type="text/babel" src="../exports/screens/Category.jsx"></script>
+<script type="text/babel" src="../exports/screens/PrimaryMarket.jsx"></script>
+<script type="text/babel" src="../exports/screens/PrimaryDetail.jsx"></script>
+<script type="text/babel" src="../exports/screens/PrimaryBuySetup.jsx"></script>
+<script type="text/babel" src="../exports/screens/PrimaryBuyReview.jsx"></script>
+<script type="text/babel" src="../exports/screens/PrimaryBuyPin.jsx"></script>
+<script type="text/babel" src="../exports/screens/PrimaryBuySuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/SecondaryDetail.jsx"></script>
+<script type="text/babel" src="../exports/screens/SecondaryBuySetup.jsx"></script>
+<script type="text/babel" src="../exports/screens/SecondaryBuyReview.jsx"></script>
+<script type="text/babel" src="../exports/screens/SecondaryBuyPin.jsx"></script>
+<script type="text/babel" src="../exports/screens/SecondaryBuySuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/OwnedDetail.jsx"></script>
+<script type="text/babel" src="../exports/screens/ContractViewer.jsx"></script>
+<script type="text/babel" src="../exports/screens/SellSetup.jsx"></script>
+<script type="text/babel" src="../exports/screens/SellReview.jsx"></script>
+<script type="text/babel" src="../exports/screens/SellPin.jsx"></script>
+<script type="text/babel" src="../exports/screens/SellSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/StateInsufficient.jsx"></script>
+<script type="text/babel" src="../exports/screens/StateSoldOut.jsx"></script>
+<script type="text/babel" src="../exports/screens/StateUnavailable.jsx"></script>
+<script type="text/babel" src="../exports/screens/StatePriceChanged.jsx"></script>
+<script type="text/babel" src="../exports/screens/StateOtpError.jsx"></script>
+<script type="text/babel" src="../exports/screens/StateNetworkError.jsx"></script>
+<script type="text/babel" src="../exports/screens/Wallet.jsx"></script>
+<script type="text/babel" src="../exports/screens/TransactionHistory.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneyAmount.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneyQPay.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneyBank.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneyBankPending.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneyBankSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneyBankNotFound.jsx"></script>
+<script type="text/babel" src="../exports/screens/AddMoneySuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/WithdrawAmount.jsx"></script>
+<script type="text/babel" src="../exports/screens/WithdrawReview.jsx"></script>
+<script type="text/babel" src="../exports/screens/WithdrawPin.jsx"></script>
+<script type="text/babel" src="../exports/screens/WithdrawSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/WithdrawInsufficient.jsx"></script>
+<script type="text/babel" src="../exports/screens/News.jsx"></script>
+<script type="text/babel" src="../exports/screens/NewsDetail.jsx"></script>
+<script type="text/babel" src="../exports/screens/EduDetail.jsx"></script>
+<script type="text/babel" src="../exports/screens/Loan.jsx"></script>
+<script type="text/babel" src="../exports/screens/NotificationList.jsx"></script>
+<script type="text/babel" src="../exports/screens/NotificationDetail.jsx"></script>
+<script type="text/babel" src="../exports/screens/NotificationDetailCrit.jsx"></script>
+<script type="text/babel" src="../exports/screens/ProfileMain.jsx"></script>
+<script type="text/babel" src="../exports/screens/PersonalInfo.jsx"></script>
+<script type="text/babel" src="../exports/screens/NotifSettings.jsx"></script>
+<script type="text/babel" src="../exports/screens/MyContracts.jsx"></script>
+<script type="text/babel" src="../exports/screens/CertRequest.jsx"></script>
+<script type="text/babel" src="../exports/screens/CertSuccess.jsx"></script>
+<script type="text/babel" src="../exports/screens/TermsScreen.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanCheckEntry.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanBlocked.jsx"></script>
+<script type="text/babel" src="../exports/screens/QPayPayment.jsx"></script>
+<script type="text/babel" src="../exports/screens/PayConfirmed.jsx"></script>
+<script type="text/babel" src="../exports/screens/PayFailed.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanAccepted.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanPartial.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanPinConfirm.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanSubmitted.jsx"></script>
+<script type="text/babel" src="../exports/screens/LoanDeclined.jsx"></script>
+<script type="text/babel">
+const NAMES=["Splash","Login","ResetEnterPhone","ResetVerifyCode","ResetNewPassword","ResetSuccess","Onb1","Onb2","Onb3","Onb4","PhoneVerify","EmailVerify","CreatePassword","CreatePin","BiometricSetup","KycConsent","MonpepCheck","MonpepFailed","TermsOfUse","MasterContract","SigningMethod","ESignCanvas","ESignSuccess","GSignRequest","GSignWaiting","GSignSuccess","GSignTutorial","BankVerify","IbanLookupSheet","IbanLookupResult","DepositSending","DepositInfo","CodeEntry","BankVerified","KycComplete","Home","Trading","Category","PrimaryMarket","PrimaryDetail","PrimaryBuySetup","PrimaryBuyReview","PrimaryBuyPin","PrimaryBuySuccess","SecondaryDetail","SecondaryBuySetup","SecondaryBuyReview","SecondaryBuyPin","SecondaryBuySuccess","OwnedDetail","ContractViewer","SellSetup","SellReview","SellPin","SellSuccess","StateInsufficient","StateSoldOut","StateUnavailable","StatePriceChanged","StateOtpError","StateNetworkError","Wallet","TransactionHistory","AddMoneyAmount","AddMoneyQPay","AddMoneyBank","AddMoneyBankPending","AddMoneyBankSuccess","AddMoneyBankNotFound","AddMoneySuccess","WithdrawAmount","WithdrawReview","WithdrawPin","WithdrawSuccess","WithdrawInsufficient","News","NewsDetail","EduDetail","Loan","NotificationList","NotificationDetail","NotificationDetailCrit","ProfileMain","PersonalInfo","NotifSettings","MyContracts","CertRequest","CertSuccess","TermsScreen","LoanCheckEntry","LoanBlocked","QPayPayment","PayConfirmed","PayFailed","LoanAccepted","LoanPartial","LoanPinConfirm","LoanSubmitted","LoanDeclined"];
+const dp={activeTab:'home',onNav:()=>{},type:'invest',state:'default',view:'default',signMethod:'gsign'};
+class B extends React.Component{constructor(p){super(p);this.state={e:null};}static getDerivedStateFromError(e){return{e};}render(){return this.state.e?React.createElement('div',{className:'err'},this.props.name+'\n'+String(this.state.e.message||this.state.e)):this.props.children;}}
+const reg=window.__MMF_SCREENS||{};const g=document.getElementById('grid');
+NAMES.forEach(n=>{const cell=document.createElement('div');cell.className='cell';
+ const cap=document.createElement('div');cap.className='cap';cap.textContent=n;cell.appendChild(cap);
+ const m=document.createElement('div');m.className='mmf-screen';cell.appendChild(m);g.appendChild(cell);
+ const C=reg[n];if(!C){m.className='err';m.textContent=n+'\nNOT REGISTERED';return;}
+ ReactDOM.createRoot(m).render(React.createElement(B,{name:n},React.createElement(C,dp)));});
+</script></body></html>

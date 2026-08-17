@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Зээл — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../loan_desktop.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+  @keyframes loan-spin { to { transform: rotate(360deg); } }
+  .loan-spin { animation: loan-spin 1s linear infinite; }
+  @keyframes loan-pulse { 0% { transform: scale(.85); opacity:.8; } 100% { transform: scale(1.5); opacity:0; } }
+  .loan-pulse { animation: loan-pulse 1.8s ease-out infinite; }
+  .prev-switch { position: fixed; top: 18px; right: 22px; z-index: 90; display:flex; align-items:center; gap:8px; background:rgba(11,16,32,.92); border-radius:12px; padding:6px 8px 6px 12px; }
+  .prev-switch__label { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#A8AFC9; }
+  .prev-btn { border:none; background:transparent; color:#C4C9DE; font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:8px; cursor:pointer; font-family:inherit; min-height:0; }
+  .prev-btn.active { background:#4F46E5; color:#fff; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const {
+  T, WebBadge, WebButton, WebModal, WebEmptyState,
+  WebSidebar, WebTopbar, WebFooter,
+  QrPlaceholder, LoanPinInput, CheckList, HistoryRow, LoanRail,
+} = window;
+const mnt = n => window.formatMNT(n);
+const rate = n => window.formatRate(n);
+const dt = d => window.formatDateTime(d);
+const df = d => window.formatDate(d);
+
+/* ── Data (mobile parity) ─────────────────────────────────────────────── */
+const LOAN_A = { id:'LN-2026-04823', principal:3000000, paid:1200000, accrued:15000, daysLeft:24, due:'2026-06-28', status:'partial' };
+const LOAN_B = { id:'LN-2026-05110', principal:1500000, paid:0,       accrued:10000, daysLeft:8,  due:'2026-07-12', status:'new' };
+const withDerived = (L) => { const remain = L.principal - L.paid; const payoff = remain + L.accrued; const repaidPct = Math.round((L.paid / L.principal) * 100); return { ...L, remain, payoff }; };
+const LOANS = [withDerived(LOAN_A), withDerived(LOAN_B)];
+const BULK_TOTAL = LOANS.reduce((s,l) => s + l.payoff, 0);
+/* Bulk close is its own payoff subject — one settlement covering every active
+   loan — not "payoff loan #1". Shares PayoffFlow via the same loan shape. */
+const BULK_LOAN = {
+  id: LOANS.map(l => l.id).join(' + '),
+  count: LOANS.length,
+  bulk: true,
+  remain: LOANS.reduce((s,l) => s + l.remain, 0),
+  accrued: LOANS.reduce((s,l) => s + l.accrued, 0),
+  payoff: BULK_TOTAL,
+};
+
+const ZMS_FEE = 4000;
+const feeFor = (amt) => Math.max(5000, Math.round(amt * 0.01));
+const netFor = (amt) => amt - feeFor(amt);
+const WALLET_BALANCE = 1250000;
+
+const STATUS_LABEL = { partial:'Хэсэгчлэн төлсөн', new:'Хэвийн' };
+const STATUS_TONE  = { partial:'info', new:'new' };
+
+/* ── Terms selector — 7/14/30, only 30 available in current build ──────── */
+const TermSelector = ({ term, setTerm }) => (
+  <div style={{ display:'flex', gap:8 }}>
+    {[7,14,30].map(d => {
+      const active = term === d;
+      const disabled = d !== 30;
+      return (
+        <button key={d} disabled={disabled} onClick={() => !disabled && setTerm(d)} style={{
+          flex:1, height:56, borderRadius:12, cursor: disabled?'not-allowed':'pointer',
+          background: disabled ? T.field : active ? T.indigoSoft : T.surface,
+          border:`1.5px solid ${disabled ? T.line2 : active ? T.indigo : T.line}`,
+          boxShadow: active && !disabled ? `0 0 0 3px ${T.indigoSoft}` : 'none',
+          display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:2,
+          color: disabled ? T.muted2 : active ? T.indigo : T.muted, opacity: disabled?.6:1, position:'relative',
+        }}>
+          <span className="num" style={{ fontSize:16, fontWeight:800 }}>{d}</span>
+          <span style={{ fontSize:10.5, fontWeight:700 }}>хоног</span>
+          {disabled && <span style={{ position:'absolute', top:-9, right:6, fontSize:9, fontWeight:800, color:T.muted2, background:T.surface, border:`1px solid ${T.line}`, padding:'1px 6px', borderRadius:99 }}>Тун удахгүй</span>}
+        </button>
+      );
+    })}
+  </div>
+);
+
+/* ══ HOME · eligibility/limit card + active loans + Бүгдийг хаах ══════════ */
+const LoanHome = ({ onOpenLoan, onRequest, onBulkClose }) => (
+  <div style={{ maxWidth:900, margin:'0 auto' }}>
+    <div style={{ marginBottom:22 }}>
+      <h1 style={{ fontSize:30, fontWeight:800, letterSpacing:'-0.03em', color:T.navy, margin:0 }}>Зээл</h1>
+      <p style={{ margin:'8px 0 0', fontSize:13.5, fontWeight:600, color:T.muted }}>Идэвхтэй зээл, төлбөр, шинэ хүсэлт</p>
+    </div>
+
+    {/* eligibility card — no static pre-approved limit; ЗМС determines the amount per request */}
+    <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, padding:20, marginBottom:20, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+      <div style={{ width:52, height:52, borderRadius:15, background:T.posSoft, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v5c0 4.5-3 7.5-8 9-5-1.5-8-4.5-8-9V7l8-4z" stroke={T.pos} strokeWidth="1.8" fill="none" strokeLinejoin="round"/><path d="M9 12l2 2 4-4.5" stroke={T.pos} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{ flex:1, minWidth:220 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <span style={{ fontSize:15, fontWeight:800, color:T.ink }}>Зээл авах боломжтой</span>
+          <WebBadge tone="new">Идэвхтэй {LOANS.length}</WebBadge>
+        </div>
+        <div style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:4, lineHeight:1.5 }}>Зөвшөөрөгдөх дүн тогтмол хязгааргүй — ЗМС шалгалтаар хүсэлт бүрд тодорхойлогдоно.</div>
+      </div>
+      <WebButton variant="primary" onClick={onRequest}>Дахин зээл хүсэх</WebButton>
+    </div>
+
+    {/* bulk close — subtle, not a competing primary */}
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, padding:'13px 16px', marginBottom:16, background:T.field, border:`1px dashed ${T.line}`, borderRadius:14 }}>
+      <div>
+        <div style={{ fontSize:13, fontWeight:700, color:T.ink }}>Бүх зээлээ нэг дор хаах</div>
+        <div className="num" style={{ fontSize:11.5, color:T.muted, marginTop:2 }}>Нийт төлж хаах {mnt(BULK_TOTAL)}</div>
+      </div>
+      <button onClick={onBulkClose} style={{ flexShrink:0, display:'inline-flex', alignItems:'center', gap:6, padding:'9px 14px', borderRadius:11, cursor:'pointer', background:T.surface, border:`1.5px solid ${T.indigo}`, color:T.indigo, fontSize:12.5, fontWeight:700, fontFamily:'inherit' }}>
+        Бүгдийг хаах
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke={T.indigo} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+      {LOANS.map(L => (
+        <button key={L.id} onClick={() => onOpenLoan(L)} style={{ width:'100%', textAlign:'left', background:T.surface, border:`1px solid ${T.line2}`, borderRadius:18, padding:18, cursor:'pointer', fontFamily:'inherit' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+              <div style={{ width:42, height:42, borderRadius:12, background:`linear-gradient(135deg, ${T.navy}, ${T.indigo})`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="12" rx="2" stroke="#fff" strokeWidth="2" fill="none"/><path d="M3 11h18" stroke="#fff" strokeWidth="2"/></svg>
+              </div>
+              <div>
+                <div style={{ fontSize:14, fontWeight:800, color:T.ink }}>Богино хугацааны зээл</div>
+                <div className="num" style={{ fontSize:11, color:T.muted, marginTop:2 }}>{L.id}</div>
+              </div>
+            </div>
+            <WebBadge tone={STATUS_TONE[L.status]}>{STATUS_LABEL[L.status]}</WebBadge>
+          </div>
+          <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginTop:16 }}>
+            <div>
+              <div style={{ fontSize:11, color:T.muted, fontWeight:600 }}>Төлж хаах үлдэгдэл</div>
+              <div className="num" style={{ fontSize:21, fontWeight:800, color:T.ink, marginTop:2 }}>{mnt(L.payoff)}</div>
+            </div>
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontSize:11, color:T.muted, fontWeight:600 }}>Үлдсэн</div>
+              <div className="num" style={{ fontSize:14, fontWeight:800, color:T.indigo, marginTop:2 }}>{L.daysLeft} хоног</div>
+            </div>
+          </div>
+          <div style={{ marginTop:12, height:6, borderRadius:999, background:T.line2, overflow:'hidden' }}>
+            <div style={{ width:Math.max(L.repaidPct,2)+'%', height:'100%', borderRadius:999, background:`linear-gradient(90deg, ${T.pos}, ${T.blue})` }}/>
+          </div>
+          <div style={{ display:'flex', justifyContent:'space-between', marginTop:8, fontSize:10.5, color:T.muted, fontWeight:600 }}>
+            <span className="num">{L.paid ? 'Төлсөн ' + mnt(L.paid) : 'Төлбөр эхлээгүй'}</span>
+            <span className="num">Анхны {mnt(L.principal)}</span>
+          </div>
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+/* ══ DETAIL · partly-paid hero + actions + breakdown + history + terms ═══ */
+const LoanDetail = ({ loan, onBack, onPartial, onPayoff }) => {
+  const [term, setTerm] = useState(30);
+  const HIST = [
+    { t:'Зээл хэсэгчлэн төлсөн', d:df('2026-06-10'), sub:'Хэтэвчээс суутгасан', v:'−' + mnt(loan.paid), tone:T.indigo, soft:T.indigoSoft, up:false },
+    { t:'Зээл олгогдсон',        d:df('2026-05-29'), sub:'Хэтэвчинд шилжсэн',   v:'+' + mnt(loan.principal), tone:T.pos, soft:T.posSoft, up:true },
+    { t:'ЗМС лавлагааны төлбөр', d:df('2026-05-29'), sub:'QPay',               v:'−' + mnt(ZMS_FEE), tone:T.muted, soft:T.line2, up:false },
+  ];
+  return (
+    <div style={{ maxWidth:900, margin:'0 auto' }}>
+      <button onClick={onBack} style={{ display:'inline-flex', alignItems:'center', gap:7, background:'none', border:'none', color:T.muted, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit', padding:'6px 4px', marginBottom:16, minHeight:0 }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke={T.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Зээл рүү буцах
+      </button>
+
+      {/* hero */}
+      <div style={{ borderRadius:24, padding:26, color:'#fff', background:`linear-gradient(135deg, ${T.navy} 0%, ${T.indigo} 130%)`, position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', right:-50, bottom:-50, width:200, height:200, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,107,44,.35), transparent 70%)' }}/>
+        <div style={{ position:'relative' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>
+            <div>
+              <div style={{ fontSize:11.5, opacity:.7, fontWeight:600 }}>Идэвхтэй зээл</div>
+              <div className="num" style={{ fontSize:11.5, opacity:.5, fontWeight:600, marginTop:2 }}>{loan.id} · 30 хоног</div>
+            </div>
+            <WebBadge tone={STATUS_TONE[loan.status]}>{STATUS_LABEL[loan.status]}</WebBadge>
+          </div>
+          <div style={{ fontSize:12.5, opacity:.7, marginTop:20 }}>Төлж хаахад үлдсэн</div>
+          <div className="num" style={{ fontSize:38, fontWeight:800, letterSpacing:'-0.02em', marginTop:4 }}>{mnt(loan.payoff)}</div>
+          <div className="num" style={{ fontSize:12, opacity:.55, fontWeight:600, marginTop:6 }}>Анхны зээл {mnt(loan.principal)}</div>
+
+          <div style={{ marginTop:20 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', fontSize:11.5, opacity:.7, marginBottom:7 }}>
+              <span className="num">{loan.repaidPct}% төлөгдсөн</span>
+              <span className="num">{loan.daysLeft} хоног үлдлээ</span>
+            </div>
+            <div style={{ height:6, borderRadius:999, background:'rgba(255,255,255,.15)', overflow:'hidden' }}>
+              <div style={{ width:loan.repaidPct+'%', height:'100%', borderRadius:999, background:'linear-gradient(90deg, #7FF3C2, #2D6BFF)' }}/>
+            </div>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginTop:20 }}>
+            <div style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.14)', borderRadius:13, padding:14 }}>
+              <div style={{ fontSize:10.5, opacity:.65, fontWeight:600 }}>Дуусах огноо</div>
+              <div className="num" style={{ fontSize:15, fontWeight:700, marginTop:4 }}>{df(loan.due)}</div>
+            </div>
+            <div style={{ background:'rgba(255,255,255,.08)', border:'1px solid rgba(255,255,255,.14)', borderRadius:13, padding:14 }}>
+              <div style={{ fontSize:10.5, opacity:.65, fontWeight:600 }}>Үлдэгдэл үндсэн</div>
+              <div className="num" style={{ fontSize:15, fontWeight:700, marginTop:4 }}>{mnt(loan.remain)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display:'flex', gap:12, marginTop:18 }}>
+        <WebButton variant="ghost" full onClick={() => onPartial(loan)}>Хувааж төлөх</WebButton>
+        <WebButton variant="primary" full onClick={() => onPayoff(loan)}>Зээл хаах</WebButton>
+      </div>
+
+      <div style={{ fontSize:12, color:T.muted, fontWeight:700, letterSpacing:'.04em', textTransform:'uppercase', marginTop:24, marginBottom:10 }}>Төлбөрийн мэдээлэл</div>
+      <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:18, overflow:'hidden' }}>
+        {[
+          ['Анхны зээл', mnt(loan.principal), T.ink],
+          ['Төлсөн дүн', '−' + mnt(loan.paid), T.pos],
+          ['Үлдэгдэл үндсэн', mnt(loan.remain), T.ink],
+          ['Хуримтлагдсан хүү', mnt(loan.accrued), T.ink],
+        ].map(([l,v,c],i) => (
+          <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'13px 16px', borderTop: i?`1px solid ${T.line2}`:'none' }}>
+            <span style={{ fontSize:12.5, color:T.muted, fontWeight:600 }}>{l}</span>
+            <span className="num" style={{ fontSize:13.5, fontWeight:700, color:c }}>{v}</span>
+          </div>
+        ))}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'15px 16px', background:T.field }}>
+          <span style={{ fontSize:13, color:T.ink, fontWeight:800 }}>Төлж хаах үлдэгдэл</span>
+          <span className="num" style={{ fontSize:18, color:T.indigo, fontWeight:800 }}>{mnt(loan.payoff)}</span>
+        </div>
+      </div>
+
+      <div style={{ marginTop:14, display:'flex', gap:10, alignItems:'flex-start', padding:14, borderRadius:14, background:T.indigoSoft }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0, marginTop:1 }}><circle cx="12" cy="12" r="9" stroke={T.indigo} strokeWidth="2" fill="none"/><path d="M12 8v.5M12 11v5" stroke={T.indigo} strokeWidth="2" strokeLinecap="round"/></svg>
+        <div style={{ fontSize:12, color:T.ink, lineHeight:1.5 }}><b>Хувааж төлөх</b> — үлдэгдлийн дурын хэсгийг төлж, хүүгээ бууруулна. <b>Зээл хаах</b> — үлдэгдлийг бүрэн төлж зээлээ хаана.</div>
+      </div>
+
+      <div style={{ fontSize:12, color:T.muted, fontWeight:700, letterSpacing:'.04em', textTransform:'uppercase', marginTop:22, marginBottom:10 }}>Олголтын түүх</div>
+      <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:18, overflow:'hidden' }}>
+        {HIST.map((h,i) => <HistoryRow key={i} h={h} first={i===0}/>)}
+      </div>
+
+      <div style={{ fontSize:12, color:T.muted, fontWeight:700, letterSpacing:'.04em', textTransform:'uppercase', marginTop:22, marginBottom:10 }}>Бүтээгдэхүүний нөхцөл</div>
+      <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:18, padding:18 }}>
+        <TermSelector term={term} setTerm={setTerm}/>
+        <div style={{ marginTop:12, fontSize:11.5, color:T.muted, lineHeight:1.5 }}>Одоогийн байдлаар зөвхөн <b style={{ color:T.ink }}>30 хоногийн</b> бүтээгдэхүүн боломжтой. 7 болон 14 хоногийн нөхцөл дизайн хийгдсэн, тун удахгүй нээгдэнэ.</div>
+      </div>
+    </div>
+  );
+};
+
+Object.assign(window, { LoanHome, LoanDetail, TermSelector, LOANS, BULK_LOAN, ZMS_FEE, feeFor, netFor, WALLET_BALANCE, mnt, dt, df });
+</script>
+<script type="text/babel" src="../loan_request_flow.jsx"></script>
+<script type="text/babel" src="../loan_payoff_flow.jsx"></script>
+<script type="text/babel">
+const { useState: useStateM } = React;
+const { T: TM, WebSidebar: WebSidebarM, WebTopbar: WebTopbarM, WebFooter: WebFooterM, LOANS: LOANSM, BULK_LOAN: BULK_LOANM } = window;
+const { LoanHome: LoanHomeM, LoanDetail: LoanDetailM } = window;
+const { LoanRequestFlow } = window;
+const { PayoffFlow, PartialPayFlow } = window;
+
+const LoanApp = () => {
+  const [view, setView] = useStateM('home');       // home | detail | request | payoff | partial
+  const [loan, setLoan] = useStateM(LOANSM[0]);
+
+  const openLoan = (L) => { setLoan(L); setView('detail'); };
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebarM activePath="/loan"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbarM title="Зээл" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+          {view === 'home'    && <LoanHomeM onOpenLoan={openLoan} onRequest={() => setView('request')} onBulkClose={() => { setLoan(BULK_LOANM); setView('payoff'); }}/>}
+          {view === 'detail'  && <LoanDetailM loan={loan} onBack={() => setView('home')} onPartial={(L) => { setLoan(L); setView('partial'); }} onPayoff={(L) => { setLoan(L); setView('payoff'); }}/>}
+          {view === 'request' && <LoanRequestFlow onExit={() => setView('home')}/>}
+          {view === 'payoff'  && <PayoffFlow loan={loan} onExit={() => setView(loan.bulk ? 'home' : 'detail')} onHome={() => setView('home')}/>}
+          {view === 'partial' && <PartialPayFlow loan={loan} onExit={() => setView('detail')} onHome={() => setView('home')}/>}
+        </main>
+        <WebFooterM/>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<LoanApp/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

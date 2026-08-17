@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Нүүр — багцын карт · 3 чиглэл</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; font-family:'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../design-canvas.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { DesignCanvas, DCSection, DCArtboard, DCPostIt } = window;
+
+// ---- tokens (from screens.jsx) ----
+const C = {
+  bg:'#F4F6FA', navy:'#050B1F', navy3:'#1A2547', indigo:'#4F46E5', indigoSoft:'#EEF0FE',
+  blue:'#2D6BFF', green:'#0E9F6E', orange:'#FF6B2C', ink:'#0B1020', text:'#2A3052',
+  muted:'#6B7191', muted2:'#9099B5', line:'#E7E9F2', line2:'#EFF1F8',
+};
+const MINT = '#7FF3C2';   // positive-on-dark status color
+const DIM  = '#FCA5A5';   // negative-on-dark status color
+const fmt = (n) => n.toLocaleString('en-US');
+
+const heroBase = {
+  borderRadius: 24, padding: 22, color:'#fff',
+  background:`linear-gradient(135deg, ${C.navy} 0%, ${C.indigo} 130%)`,
+  position:'relative', overflow:'hidden',
+};
+const Glow = () => <div style={{ position:'absolute', right:-40, top:-40, width:180, height:180, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,107,44,.4), transparent 70%)' }}/>;
+const HeadRow = ({ label }) => (
+  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+    <div style={{ fontSize:12, opacity:.7, fontWeight:600 }}>{label}</div>
+    <span style={{ display:'inline-flex', alignItems:'center', gap:3, fontSize:12, fontWeight:700, opacity:.85 }}>
+      Дэлгэрэнгүй
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+    </span>
+  </div>
+);
+const Stat = ({ l, v, vc, right }) => (
+  <div style={{ textAlign: right ? 'right' : 'left' }}>
+    <div style={{ fontSize:10.5, opacity:.6, fontWeight:600 }}>{l}</div>
+    <div style={{ fontSize:14, fontWeight:800, color: vc || '#fff', marginTop:3, fontVariantNumeric:'tabular-nums' }}>{v}</div>
+  </div>
+);
+const Spark = ({ color=MINT, pts, fill, w=300, h=54 }) => {
+  const max = Math.max(...pts), min = Math.min(...pts), range = (max-min)||1, step = w/(pts.length-1);
+  const co = pts.map((p,i)=>[i*step, h-((p-min)/range)*(h-8)-4]);
+  const line = co.map((c,i)=>(i===0?'M':'L')+c[0].toFixed(1)+' '+c[1].toFixed(1)).join(' ');
+  const area = line+` L ${w} ${h} L 0 ${h} Z`;
+  const last = co[co.length-1];
+  return (
+    <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display:'block', height:h }}>
+      {fill && <path d={area} fill={color} opacity="0.15"/>}
+      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx={last[0]} cy={last[1]} r="3.5" fill={color}/>
+    </svg>
+  );
+};
+
+// ===== Direction A — earnings-first =====
+// chart with subtle y (value scale) + x (date) axes and a faint ₮0 baseline
+const ChartAxes = ({ color, pts, yTop, yBot, dim }) => {
+  const w = 300, h = 56;
+  const dMin = Math.min(...pts), dMax = Math.max(...pts);
+  const lo = Math.min(0, dMin), hi = Math.max(0, dMax), range = (hi - lo) || 1;
+  const yOf = (v) => h - ((v - lo) / range) * (h - 6) - 3;
+  const step = w / (pts.length - 1);
+  const co = pts.map((p, i) => [i * step, yOf(p)]);
+  const line = co.map((c, i) => (i === 0 ? 'M' : 'L') + c[0].toFixed(1) + ' ' + c[1].toFixed(1)).join(' ');
+  const zeroY = yOf(0);
+  const area = line + ` L ${w} ${zeroY} L 0 ${zeroY} Z`;
+  const last = co[co.length - 1];
+  return (
+    <div style={{ display:'flex', gap:7, marginTop:8, opacity: dim ? .6 : 1 }}>
+      {/* y axis */}
+      <div style={{ display:'flex', flexDirection:'column', justifyContent:'space-between', height:h, fontSize:8.5, opacity:.45, fontWeight:600, textAlign:'right', whiteSpace:'nowrap', fontVariantNumeric:'tabular-nums' }}>
+        <span>{yTop}</span>
+        <span>{yBot}</span>
+      </div>
+      <div style={{ flex:1, minWidth:0 }}>
+        <svg width="100%" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display:'block', height:h }}>
+          <line x1="0" y1={zeroY} x2={w} y2={zeroY} stroke="rgba(255,255,255,.18)" strokeWidth="1" strokeDasharray="3 3"/>
+          {!dim && <path d={area} fill={color} opacity="0.14"/>}
+          <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx={last[0]} cy={last[1]} r="3.5" fill={color}/>
+        </svg>
+        {/* x axis */}
+        <div style={{ display:'flex', justifyContent:'space-between', marginTop:4, fontSize:8.5, opacity:.45, fontWeight:600, fontVariantNumeric:'tabular-nums' }}>
+          <span>06-06</span><span>06-09</span><span>Өнөөдөр</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+const HeroA = ({ mode='pos' }) => {
+  const cfg = {
+    pos:  { color: MINT, sign:'+ ', val: 48500, pts:[4,8,6,14,12,20,26,34], yTop:'₮50к', yBot:'₮0', cmp:'өчигдрөөс +6%', cmpC: MINT },
+    zero: { color:'rgba(255,255,255,.92)', sign:'', val: 0, pts:[6,6,6,6,6,6,6,6], yTop:'₮10к', yBot:'₮0', cmp:null, cmpC: null },
+    neg:  { color: DIM, sign:'− ', val: 12300, pts:[26,24,20,16,10,4,-4,-10], yTop:'₮26к', yBot:'−₮12к', cmp:'өчигдрөөс −24%', cmpC: DIM },
+  }[mode];
+  return (
+    <div style={heroBase}><Glow/>
+      <div style={{ position:'relative' }}>
+        <HeadRow label="Өдрийн өгөөж"/>
+        <div style={{ display:'flex', alignItems:'baseline', gap:8, marginTop:8 }}>
+          <span style={{ fontSize:34, fontWeight:800, color:cfg.color, letterSpacing:'-0.02em', fontVariantNumeric:'tabular-nums' }}>{cfg.sign}₮ {fmt(cfg.val)}</span>
+          <span style={{ fontSize:13, opacity:.7 }}>өнөөдөр</span>
+        </div>
+        {/* timeframe caption + vs-yesterday comparison */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:14 }}>
+          <span style={{ fontSize:10, opacity:.55, fontWeight:600 }}>Сүүлийн 7 хоног</span>
+          {cfg.cmp && (
+            <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:10.5, fontWeight:700, color:cfg.cmpC }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" style={{ transform: mode==='neg' ? 'scaleY(-1)' : 'none' }}><path d="M12 19V5M5 12l7-7 7 7" stroke={cfg.cmpC} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              {cfg.cmp}
+            </span>
+          )}
+        </div>
+        <ChartAxes color={cfg.color} pts={cfg.pts} yTop={cfg.yTop} yBot={cfg.yBot} dim={mode==='zero'}/>
+        <div style={{ display:'flex', justifyContent:'space-between', marginTop:14, paddingTop:14, borderTop:'1px solid rgba(255,255,255,.12)' }}>
+          <Stat l="Нийт хөрөнгө" v={'₮ '+fmt(48250000)}/>
+          <Stat l="Нийт өгөөж" v={'+ ₮ '+fmt(3420000)} vc={MINT} right/>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== Direction B — growth-story =====
+const HeroB = () => (
+  <div style={heroBase}><Glow/>
+    <div style={{ position:'relative' }}>
+      <HeadRow label="Нийт өгөөж"/>
+      <div style={{ fontSize:32, fontWeight:800, color:MINT, letterSpacing:'-0.02em', fontVariantNumeric:'tabular-nums', marginTop:8 }}>+ ₮ {fmt(3420000)}</div>
+      <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:12 }}>
+        <span style={{ display:'inline-flex', alignItems:'center', gap:5, padding:'5px 10px', borderRadius:999, background:'rgba(127,243,194,.15)', border:'1px solid rgba(127,243,194,.32)', fontSize:12, fontWeight:700, color:MINT }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke={MINT} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          Энэ сард +2.4%
+        </span>
+        <span style={{ fontSize:11, opacity:.6 }}>Сүүлийн 30 хоног</span>
+      </div>
+      <div style={{ marginTop:14 }}><Spark color={MINT} pts={[6,9,8,13,12,16,15,20,24,22,30,36]} fill/></div>
+      <div style={{ marginTop:14, paddingTop:14, borderTop:'1px solid rgba(255,255,255,.12)' }}>
+        <Stat l="Нийт хөрөнгө" v={'₮ '+fmt(48250000)}/>
+      </div>
+    </div>
+  </div>
+);
+
+// ===== Direction C — hybrid =====
+const TickerStat = ({ l, v, live }) => (
+  <div style={{ flex:1, background:'rgba(127,243,194,.1)', border:'1px solid rgba(127,243,194,.22)', borderRadius:14, padding:'10px 12px' }}>
+    <div style={{ display:'flex', alignItems:'center', gap:5 }}>
+      {live && <span style={{ width:6, height:6, borderRadius:999, background:MINT, boxShadow:'0 0 0 3px rgba(127,243,194,.25)' }}/>}
+      <div style={{ fontSize:10.5, opacity:.7, fontWeight:600 }}>{l}</div>
+    </div>
+    <div style={{ fontSize:15, fontWeight:800, color:MINT, marginTop:3, fontVariantNumeric:'tabular-nums' }}>{v}</div>
+  </div>
+);
+const HeroC = () => (
+  <div style={heroBase}><Glow/>
+    <div style={{ position:'relative' }}>
+      <HeadRow label="Нийт хөрөнгө"/>
+      <div style={{ fontSize:32, fontWeight:800, letterSpacing:'-0.02em', fontVariantNumeric:'tabular-nums', marginTop:6 }}>₮ {fmt(48250000)}</div>
+      <div style={{ marginTop:16, display:'flex', gap:10 }}>
+        <TickerStat l="Өдрийн өгөөж" v={'+ ₮ '+fmt(48500)} live/>
+        <TickerStat l="Нийт өгөөж" v={'+ ₮ '+fmt(3420000)}/>
+      </div>
+    </div>
+  </div>
+);
+
+// ===== relocated allocation card =====
+const AllocCard = () => (
+  <div style={{ background:'#fff', borderRadius:18, border:`1px solid ${C.line2}`, padding:16, marginTop:12 }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+      <div style={{ fontSize:13, fontWeight:800, color:C.ink }}>Багцын бүтэц</div>
+      <span style={{ fontSize:11, color:C.muted, fontWeight:700 }}>3 төрөл</span>
+    </div>
+    <div style={{ display:'flex', gap:3, marginTop:12, height:10, borderRadius:999, overflow:'hidden' }}>
+      <div style={{ flexBasis:'45%', background:'#8B7CFF' }}/>
+      <div style={{ flexBasis:'35%', background:C.blue }}/>
+      <div style={{ flexBasis:'20%', background:'#2DD4BF' }}/>
+    </div>
+    <div style={{ display:'flex', flexWrap:'wrap', gap:'8px 16px', marginTop:12 }}>
+      {[
+        { c:'#8B7CFF', l:'Итгэлцэл', p:'45%' },
+        { c:C.blue, l:'Сертификат', p:'35%' },
+        { c:'#2DD4BF', l:'Мөнгө хөрөнгө', p:'20%' },
+      ].map((x,i)=>(
+        <div key={i} style={{ display:'flex', alignItems:'center', gap:6 }}>
+          <span style={{ width:8, height:8, borderRadius:999, background:x.c }}/>
+          <span style={{ fontSize:12, fontWeight:600, color:C.text }}>{x.l}</span>
+          <span style={{ fontSize:12, fontWeight:800, color:C.ink, fontVariantNumeric:'tabular-nums' }}>{x.p}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const Pad = ({ children }) => <div style={{ padding:20, background:C.bg, minHeight:'100%' }}>{children}</div>;
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="heroes" title="Нүүр — багцын карт" subtitle="3 чиглэл · earnings-first / growth-story / hybrid. Allocation bar нь hero-оос доош карт болж шилжсэн.">
+        <DCArtboard id="A" label="A · Earnings-first" width={390} height={486}>
+          <Pad><HeroA mode="pos"/><AllocCard/></Pad>
+        </DCArtboard>
+        <DCArtboard id="A0" label="A · Тэг / сөрөг өдөр" width={390} height={570}>
+          <Pad>
+            <HeroA mode="zero"/>
+            <div style={{ height:12 }}/>
+            <HeroA mode="neg"/>
+          </Pad>
+        </DCArtboard>
+        <DCArtboard id="B" label="B · Growth-story" width={390} height={470}>
+          <Pad><HeroB/><AllocCard/></Pad>
+        </DCArtboard>
+        <DCArtboard id="C" label="C · Hybrid" width={390} height={400}>
+          <Pad><HeroC/><AllocCard/></Pad>
+        </DCArtboard>
+        <DCPostIt id="note" x={40} y={40}>
+          Status-token ногоон (#7FF3C2 dark дээр) зөвхөн өгөөж эерэг үед. Тэг → саарал, сөрөг → улаан (A · Тэг/сөрөг). Анхааруулга үг, "баталгаатай" гэхгүй.
+        </DCPostIt>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

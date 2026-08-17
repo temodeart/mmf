@@ -1,0 +1,48 @@
+/* =========================================================================
+   Money Market Fund — shared flow CSS
+   Referenced by every screen entry in manifest.json (animation keyframes +
+   range-slider chrome + scrollbar hiding used across onboarding, PIN, and
+   buy/sell/loan amount screens). Self-contained; no external @imports.
+   ========================================================================= */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Hide native scrollbars inside the device frames for a clean mobile look */
+.mmf-screen *::-webkit-scrollbar { display: none; }
+.mmf-screen * { scrollbar-width: none; }
+
+/* ---- Onboarding / verification animations (MonpepCheck, GSignWaiting, PIN) ---- */
+@keyframes omf-spin { to { transform: rotate(360deg); } }
+.omf-spin { animation: omf-spin 0.9s linear infinite; }
+
+@keyframes omf-pulse {
+  0%   { transform: scale(.7); opacity: .7; }
+  70%  { transform: scale(1.5); opacity: 0; }
+  100% { opacity: 0; }
+}
+.omf-pulse { animation: omf-pulse 2s cubic-bezier(.2,.8,.2,1) infinite; }
+.omf-pulse-2 { animation-delay: 1s; }
+
+@keyframes omf-pin-shake {
+  0%, 100% { transform: translateX(0); }
+  15%, 45%, 75% { transform: translateX(-7px); }
+  30%, 60%, 90% { transform: translateX(7px); }
+}
+.omf-pin-shake { animation: omf-pin-shake 0.4s ease; }
+
+/* ---- Amount slider (QtyStepper, loan amount, withdraw) ---- */
+.loan-range {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; border-radius: 999px; outline: none; cursor: pointer;
+}
+.loan-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 26px; height: 26px; border-radius: 999px;
+  background: #4F46E5; border: 3px solid #fff;
+  box-shadow: 0 4px 12px -2px rgba(79,70,229,.5); cursor: pointer;
+}
+.loan-range::-moz-range-thumb {
+  width: 24px; height: 24px; border-radius: 999px;
+  background: #4F46E5; border: 3px solid #fff;
+  box-shadow: 0 4px 12px -2px rgba(79,70,229,.5); cursor: pointer;
+}

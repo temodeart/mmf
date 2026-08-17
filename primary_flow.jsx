@@ -1,8 +1,49 @@
 // ============================================================
 // FLOW 1 — Buying from the PRIMARY market (Анхдагч зах)
-// Screens 1.1 detail · 1.2 buy setup · 1.3 review+OTP · 1.4 success
+// Screens 1.1 detail · 1.2 buy setup · 1.3 review+PIN · 1.4 success
 // Product: CAPIT 1450 CD · Капитрон Банк ХХК
 // ============================================================
+
+// Auto-renew loop: at maturity the principal is re-invested into the same
+// product and only the interest lands in the wallet. Shared across flow steps
+// (each renders as its own screen in the navigator).
+const PF_LOOP = (() => {
+  let on = false;
+  const subs = new Set();
+  return { get on() { return on; }, set(v) { on = v; subs.forEach(f => f(n => n + 1)); }, sub(f) { subs.add(f); return () => subs.delete(f); } };
+})();
+const usePfLoop = () => { const [, t] = useState(0); useEffect(() => PF_LOOP.sub(t), []); return PF_LOOP; };
+const PfLoopIcon = ({ c }) => (
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 0113.7-5.6M20 12a8 8 0 01-13.7 5.6" stroke={c} strokeWidth="2" strokeLinecap="round"/><path d="M18 3v4h-4M6 21v-4h4" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+);
+const PfLoopCard = ({ on, onToggle, interest }) => (
+  <div style={{ background:'#fff', borderRadius: 18, border:`${on ? 2 : 1}px solid ${on ? C.indigo : C.line2}`, padding: 18 }}>
+    <div style={{ display:'flex', alignItems:'flex-start', gap: 12 }}>
+      <div style={{ width: 38, height: 38, borderRadius: 11, background: on ? C.indigoSoft : '#F4F6FA', display:'flex', alignItems:'center', justifyContent:'center', flexShrink: 0 }}>
+        <PfLoopIcon c={on ? C.indigo : C.muted}/>
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 800, color: C.ink, letterSpacing:'-0.01em' }}>Хугацаа дуусахад дахин автоматаар авах</div>
+        <div style={{ fontSize: 11.5, color: C.muted, marginTop: 4, lineHeight: 1.55 }}>Үндсэн дүн ижил бүтээгдэхүүнд дахин хөрөнгө оруулагдаж, зөвхөн хүү хэтэвчид орно.</div>
+      </div>
+      <button onClick={onToggle} aria-label="Дахин автоматаар авах" style={{ width: 46, height: 28, borderRadius: 999, border:'none', cursor:'pointer', background: on ? C.indigo : '#D9DCE7', position:'relative', flexShrink: 0, transition:'background .2s' }}>
+        <span style={{ position:'absolute', top: 3, left: 3, width: 22, height: 22, borderRadius: 999, background:'#fff', boxShadow:'0 2px 6px rgba(0,0,0,.2)', transform: on ? 'translateX(18px)' : 'none', transition:'transform .2s', pointerEvents:'none' }}/>
+      </button>
+    </div>
+    {on ? (
+      <div style={{ marginTop: 12, padding:'12px 14px', borderRadius: 12, background: C.indigoSoft, display:'flex', flexDirection:'column', gap: 7 }}>
+        {[['Үндсэн дүн', 'Дахин авна → CAPIT 1450 CD'], ['Бодогдсон хүү', interest + ' → Хэтэвч'], ['Давталт', 'Та зогсоох хүртэл']].map(([l, v]) => (
+          <div key={l} style={{ display:'flex', justifyContent:'space-between', gap: 12 }}>
+            <span style={{ fontSize: 11.5, color: C.muted, fontWeight: 600, flexShrink: 0 }}>{l}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: C.ink, textAlign:'right' }}>{v}</span>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div style={{ fontSize: 11, color: C.muted2, marginTop: 10, lineHeight: 1.5, fontWeight: 600 }}>Асаагаагүй тохиолдолд төлөгдөх нийт дүн хэтэвчид орно.</div>
+    )}
+  </div>
+);
 
 // ---------- 1.1 — Primary product detail ----------
 const PrimaryDetail = () => (
@@ -79,6 +120,7 @@ const PrimaryDetail = () => (
 // ---------- 1.2 — Primary buy setup (quantity) ----------
 const PrimaryBuySetup = () => {
   const [qty, setQty] = useState(1);
+  const loop = usePfLoop();
   const max = 1250;
   const price = 100000;
   const total = qty * price;
@@ -96,11 +138,14 @@ const PrimaryBuySetup = () => {
           <QtyStepper value={qty} setValue={setQty} max={max}/>
         </div>
 
+        <PfLoopCard on={loop.on} onToggle={()=>loop.set(!loop.on)} interest={'+' + fmt(qty * 13050) + ' ₮'}/>
+
         <SectionCard eyebrow="Захиалгын мэдээлэл" rows={[
           { l:'Нэрлэсэн үнэ', v:'100,000 ₮' },
           { l:'Тоо ширхэг', v:`${qty} ширхэг` },
           { l:'Хугацаа', v:'12 сар' },
           { l:'Төлөгдөх огноо', v:'2027-05-29' },
+          { l:'Хугацааны эцэст', v: loop.on ? 'Үндсэн дүн дахин авна' : 'Нийт дүн хэтэвчид' },
           { l:'Худалдан авах нийт үнэ', v:`${fmt(total)} ₮`, big: true, tone: C.indigo },
         ]}/>
 
@@ -115,9 +160,9 @@ const PrimaryBuySetup = () => {
   );
 };
 
-// ---------- 1.3 — Primary buy review + OTP ----------
-const PrimaryBuyReview = () => (
-  <Frame label="P1.3 — Primary review + OTP">
+// ---------- 1.3 — Primary buy review + PIN ----------
+const PrimaryBuyReview = () => { const loop = usePfLoop(); return (
+  <Frame label="P1.3 — Primary review + PIN">
     <FlowHeader title="CAPIT 1450 CD" subtitle="Анхдагч зах зээлээс авах · баталгаажуулалт"/>
     <ReviewScaffold
       consentLabel="Би бүтээгдэхүүний нөхцөл, захиалгын мэдээлэлтэй танилцаж зөвшөөрч байна."
@@ -136,6 +181,7 @@ const PrimaryBuyReview = () => (
       <SectionCard eyebrow="Захиалгын мэдээлэл" rows={[
         { l:'Ширхэг', v:'1 ширхэг' },
         { l:'Худалдан авах үнэ', v:'100,000.00 ₮' },
+        { l:'Дахин автоматаар авах', v: loop.on ? 'Асаалттай' : 'Асаалтгүй', tone: loop.on ? C.indigo : undefined },
       ]}/>
       <SectionCard eyebrow="Төлбөр / өгөөжийн тооцоо" rows={[
         { l:'Бодогдох хүү', v:'14,500.00 ₮', tone: C.green },
@@ -144,24 +190,46 @@ const PrimaryBuyReview = () => (
         { l:'Бодит өгөөж', v:'13.05%', tone: C.indigo },
         { l:'Бэлэн мөнгөний үлдэгдэл', v:'635.89 MNT' },
       ]}/>
+      {loop.on && (
+        <div style={{ background: C.indigoSoft, borderRadius: 16, padding:'14px 16px', display:'flex', gap: 11, alignItems:'flex-start' }}>
+          <div style={{ flexShrink: 0, marginTop: 1 }}><PfLoopIcon c={C.indigo}/></div>
+          <div style={{ fontSize: 12, color: C.text, lineHeight: 1.55, fontWeight: 600 }}>
+            <b style={{ color: C.ink }}>2027-05-29</b>-нд үндсэн 100,000 ₮ ижил бүтээгдэхүүнд дахин орж, 13,050 ₮ хүү хэтэвчид орно. Давталтыг хүссэн үедээ зогсоож болно.
+          </div>
+        </div>
+      )}
     </ReviewScaffold>
   </Frame>
+); };
+
+// ---------- 1.3b — Primary buy · PIN confirm (own step) ----------
+const PrimaryBuyPin = () => (
+  <PinConfirm
+    label="P1.3b — Primary · PIN"
+    subtitle="CAPIT 1450 CD худалдан авалтыг баталгаажуулна уу."
+    amount="100,000.00 ₮"
+    amountLabel="Худалдан авах дүн"
+    ctaLabel="Худалдан авах"
+  />
 );
 
 // ---------- 1.4 — Primary buy success ----------
-const PrimaryBuySuccess = () => (
+const PrimaryBuySuccess = () => { const loop = usePfLoop(); return (
   <SuccessScreen
     label="P1.4 — Primary success"
     title="Худалдан авалт амжилттай хийгдлээ"
-    subtitle="Та анхдагч зах зээлээс бүтээгдэхүүн амжилттай худалдан авлаа."
+    subtitle={loop.on
+      ? 'Бүтээгдэхүүн авлаа. Хугацаа дуусахад үндсэн дүн ижил бүтээгдэхүүнд дахин автоматаар орно.'
+      : 'Та анхдагч зах зээлээс бүтээгдэхүүн амжилттай худалдан авлаа.'}
     rows={[
       { l:'Бүтээгдэхүүн', v:'CAPIT 1450 CD' },
       { l:'Ширхэг', v:'1 ширхэг' },
       { l:'Худалдан авсан дүн', v:'100,000 MNT' },
       { l:'Төлөгдөх огноо', v:'2027-05-29' },
-      { l:'Хугацааны эцэст авах дүн', v:'113,050 MNT', big: true, tone: C.green },
+      { l:'Дахин автоматаар авах', v: loop.on ? 'Асаалттай · үндсэн дүн' : 'Асаалтгүй', tone: loop.on ? C.indigo : undefined },
+      { l: loop.on ? 'Хүү хэтэвчид орно' : 'Хугацааны эцэст авах дүн', v: loop.on ? '13,050 MNT' : '113,050 MNT', big: true, tone: C.green },
     ]}
     primaryCta="Миний багц харах"
     secondaryCta="Нүүр рүү буцах"
   />
-);
+); };

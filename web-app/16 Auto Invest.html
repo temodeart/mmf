@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Автомат хөрөнгө оруулалт — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_status.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx?v=f3"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../auto_invest_web.jsx"></script>
+<style>
+  body { background: radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%), radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%), var(--bg); min-height:100vh; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:#DADEEA; border-radius:99px; border:3px solid transparent; background-clip:content-box; }
+  a { color: var(--indigo); }
+  a:hover { color: #3B32C8; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { T, WebSidebar, WebTopbar, WebFooter, WebPageHeader, WebButton, WebDisclaimer } = window;
+const { useAiwPlan, AIW_STORE, AiwIcon, AiwNote, AiwRow, aiwCard, aiwMnt, aiwNext, aiwPast, aiwBest, aiwPerYear, aiwMarketLabel, aiwTermLabel, aiwStrategyLabel, aiwMinTicket,
+        AiwSetupModal, AiwPinModal, AiwSuccessModal, AiwEditModal } = window;
+const MONO = "'JetBrains Mono',monospace";
+
+/* ── Empty state — what it is, how it works, then the CTA ── */
+const AutoEmpty = ({ onStart }) => (
+  <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+    <div style={{ borderRadius:24, padding:'34px 36px', background:`linear-gradient(120deg, ${T.navy} 0%, ${T.indigo} 100%)`, color:'#fff', display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,340px),1fr))', gap:36, alignItems:'center' }}>
+      <div>
+        <AiwIcon size={56} r={16} light/>
+        <div style={{ fontSize:26, fontWeight:800, marginTop:18, letterSpacing:'-0.02em' }}>Хөрөнгө чинь өөрөө ажиллана</div>
+        <div style={{ fontSize:13.5, opacity:.78, marginTop:10, lineHeight:1.6, maxWidth:520, fontWeight:500 }}>Та дүн, давтамжаа нэг удаа тохируулна. Бид таны шалгуурт нийцсэн хамгийн өндөр өгөөжтэй бүтээгдэхүүнийг автоматаар худалдан авна — хүссэн үедээ зогсоох боломжтой.</div>
+        <div style={{ marginTop:22, display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+          <button onClick={onStart} style={{ height:52, padding:'0 24px', borderRadius:14, border:'none', background:'#fff', color:T.ink, fontSize:15, fontWeight:800, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', gap:9 }}>
+            Төлөвлөгөө үүсгэх
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke={T.ink} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          <span style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,.7)' }}>Тохиргоо 4 алхамтай · шимтгэлгүй</span>
+        </div>
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+        {[
+          ['1', 'Юу авахаа сонгоно', 'Бүтээгдэхүүний төрөл, дээд хугацаа. Зөвхөн Анхдагч зах.'],
+          ['2', 'Дүн, давтамжаа сонгоно', 'Жишээ нь: сар бүрийн 25-нд ₮500,000.'],
+          ['3', 'Бид гүйцэтгэнэ', 'Сонгосон зарчмаар хамгийн тохирохыг авч, мэдэгдэнэ.'],
+        ].map(([n, t, d]) => (
+          <div key={n} style={{ display:'flex', gap:14, alignItems:'flex-start', background:'rgba(255,255,255,.09)', border:'1px solid rgba(255,255,255,.14)', borderRadius:16, padding:'14px 16px' }}>
+            <div style={{ width:28, height:28, borderRadius:9, background:'rgba(255,255,255,.16)', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:13, flexShrink:0 }}>{n}</div>
+            <div>
+              <div style={{ fontSize:13.5, fontWeight:800 }}>{t}</div>
+              <div style={{ fontSize:12, opacity:.72, marginTop:3, lineHeight:1.5 }}>{d}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:16 }}>
+      {[
+        ['Онцгой тохиолдол бүрт дүрэм', 'Тохирох бүтээгдэхүүн олдохгүй, нэгж үнэд хүрэхгүй, үлдэгдэл хүрэлцэхгүй — гүйцэтгэл бүрийн үр дүнг та тохиргооноос шийднэ.'],
+        ['Таны хяналт хэвээр', 'Хүссэн үедээ түр зогсоох, дүн/давтамж засах, цуцлах. Худалдан авсан хөрөнгө багцад хэвээр байна.'],
+        ['Мэдэгдэл ба тайлан', 'Гүйцэтгэл бүрийн өмнө болон дараа мэдэгдэл. Түүх нь Хэтэвч, Гүйлгээний түүхэд бүртгэгдэнэ.'],
+      ].map(([t, d]) => (
+        <div key={t} style={{ ...aiwCard, padding:'18px 20px' }}>
+          <div style={{ fontSize:13.5, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>{t}</div>
+          <div style={{ fontSize:12.5, color:T.muted, marginTop:7, lineHeight:1.6, fontWeight:500 }}>{d}</div>
+        </div>
+      ))}
+    </div>
+
+    <WebDisclaimer>Хөрөнгө оруулалт эрсдэлтэй. Өнгөрсөн өгөөж ирээдүйн үр дүнг баталгаажуулахгүй.</WebDisclaimer>
+  </div>
+);
+
+/* ── Additional plans a returning user already runs (mirrors the mobile
+   AI_PLANS demo set) so Автомат хөрөнгө оруулалт lands on a real list. ── */
+const AIW_PLANS = [
+  { id:'p2', name:'Урт хугацаа', type:'Итгэлцэл',  term:12, units:2, freq:'Сар бүр',     day:'1',  status:'active', invested:24000000, runs:12, holdings:3 },
+  { id:'p3', name:'Туршилт',     type:'Сертификат', term:6,  units:1, freq:'7 хоног бүр', day:'—', status:'paused', invested:1200000,  runs:12, holdings:1 },
+];
+const aiwPlanCfg = (p) => window.aiwNormalize({
+  ...window.AIW_DEFAULT, name:p.name, types:[p.type], term:p.term, maxTerm:p.term,
+  units:p.units, amount: p.units * (p.type === 'Итгэлцэл' ? 1000000 : 100000),
+  freq:p.freq, day:p.day, picked:null, order:null,
+});
+const AIW_STATUS = { active:['Идэвхтэй', T.pos, T.posSoft], paused:['Түр зогссон', T.warn, T.warnSoft], cancelled:['Цуцлагдсан', T.muted2, '#F1F2F7'] };
+
+/* ── Plans list — the Автомат хөрөнгө оруулалт landing ── */
+const AutoPlanRow = ({ name, cfg, status, onOpen, live }) => {
+  const [l, fg, bg] = AIW_STATUS[status] || AIW_STATUS.active;
+  const monthly = Math.round(cfg.amount * aiwPerYear(cfg.freq) / 12);
+  return (
+    <button onClick={onOpen} className="aiw-plan-row" style={{ width:'100%', textAlign:'left', fontFamily:'inherit', cursor:'pointer', background:T.surface, border:`1px solid ${T.line2}`, borderRadius:18, padding:'18px 20px', display:'flex', alignItems:'center', gap:16, opacity: status === 'paused' ? .92 : 1 }}>
+      <AiwIcon size={44}/>
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:9, flexWrap:'wrap' }}>
+          <span style={{ fontSize:15.5, fontWeight:800, color:T.ink, letterSpacing:'-0.02em' }}>{name}</span>
+          {live && <span style={{ fontSize:10, fontWeight:800, color:T.indigo, background:T.indigoSoft, padding:'3px 8px', borderRadius:999 }}>Миний</span>}
+        </div>
+        <div className="num" style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:4, fontFamily:MONO }}>{cfg.types[0]} · {window.aiwTermOf(cfg)} сар · {aiwMnt(cfg.amount)} · {cfg.freq}</div>
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:20, flexShrink:0 }}>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize:10.5, color:T.muted, fontWeight:700 }}>Сард</div>
+          <div className="num" style={{ fontSize:13.5, fontWeight:800, color:T.ink, marginTop:3, fontFamily:MONO, whiteSpace:'nowrap' }}>{aiwMnt(monthly)}</div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize:10.5, color:T.muted, fontWeight:700 }}>Дараагийн</div>
+          <div className="num" style={{ fontSize:13.5, fontWeight:800, color: status === 'active' ? T.ink : T.muted2, marginTop:3, fontFamily:MONO, whiteSpace:'nowrap' }}>{status === 'active' ? aiwNext(cfg) : 'Зогссон'}</div>
+        </div>
+        <span style={{ fontSize:11, fontWeight:800, color:fg, background:bg, padding:'6px 12px', borderRadius:999, whiteSpace:'nowrap' }}>{l}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke={T.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+    </button>
+  );
+};
+
+const AutoPlansList = ({ onOpen, onNew }) => {
+  const s = useAiwPlan();
+  const mine = { id:'mine', live:true, name:(s.cfg.name && s.cfg.name.trim()) || window.aiwAutoName(s.cfg), cfg:s.cfg, status: s.state.cancelled ? 'cancelled' : s.state.paused ? 'paused' : 'active' };
+  const others = AIW_PLANS.map(p => ({ id:p.id, plan:p, name:p.name, cfg:aiwPlanCfg(p), status:p.status }));
+  const all = [mine, ...others];
+  const active = all.filter(p => p.status === 'active');
+  const monthly = active.reduce((a, p) => a + p.cfg.amount * aiwPerYear(p.cfg.freq) / 12, 0);
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:18 }}>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:14 }}>
+        {[
+          ['Идэвхтэй төлөвлөгөө', active.length + ' / ' + all.length],
+          ['Сард нийт хасагдах', aiwMnt(Math.round(monthly))],
+          ['Жилд нийт', aiwMnt(Math.round(monthly * 12))],
+        ].map(([l, v]) => (
+          <div key={l} style={{ ...aiwCard, padding:'16px 18px' }}>
+            <div style={{ fontSize:11.5, color:T.muted, fontWeight:700 }}>{l}</div>
+            <div className="num" style={{ fontSize:20, fontWeight:800, color:T.ink, marginTop:6, letterSpacing:'-0.02em', fontFamily:MONO }}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+        {all.map(p => <AutoPlanRow key={p.id} name={p.name} cfg={p.cfg} status={p.status} live={p.live} onOpen={()=>onOpen(p)}/>)}
+      </div>
+      <button onClick={onNew} style={{ height:60, borderRadius:16, background:'transparent', border:`1.5px dashed ${T.line}`, cursor:'pointer', fontFamily:'inherit', display:'flex', alignItems:'center', justifyContent:'center', gap:9, fontWeight:700, fontSize:13.5, color:T.indigo }}>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke={T.indigo} strokeWidth="2.4" strokeLinecap="round"/></svg>
+        Шинэ төлөвлөгөө нэмэх
+      </button>
+      <div style={{ fontSize:12, color:T.muted, fontWeight:600, lineHeight:1.6 }}>Төлөвлөгөө тус бүр өөрийн бүтээгдэхүүн, хугацаа, эрэмбэтэй байна. Мөр дээр дарж дэлгэрэнгүй, гүйцэтгэлийн түүхийг харна.</div>
+    </div>
+  );
+};
+
+/* ── Active plan — summary, history, rules, actions ── */
+const AutoActive = ({ onEdit, onNew, onBack, plan }) => {
+  const s = useAiwPlan();
+  const wrapRef = React.useRef(null);
+  const [narrow, setNarrow] = useState(false);
+  const [rec, setRec] = useState(null);
+  React.useEffect(() => {
+    const el = wrapRef.current; if (!el || !window.ResizeObserver) return;
+    const ro = new ResizeObserver(es => setNarrow(es[0].contentRect.width < 1000));
+    ro.observe(el); return () => ro.disconnect();
+  }, []);
+  const ro = !!plan;                       // a saved plan other than "mine"
+  const cfg = ro ? plan.cfg : s.cfg;
+  const paused = ro ? plan.status === 'paused' : s.state.paused;
+  const cancelled = ro ? plan.status === 'cancelled' : s.state.cancelled;
+  const first = aiwBest(cfg);
+  const rows = [
+    first
+      ? { kind:'ok',   p: first.ticker + ' · ' + (first.m === 'primary' ? 'Анхдагч зах' : 'Хоёрдогч зах'), d:'Өнөөдөр', sub: aiwMnt(cfg.amount), v: first.y + '%' }
+      : cfg.accumulate
+        ? { kind:'hold', p:'Хуримтлагдлаа · нэгж үнэд хүрээгүй', d:'Өнөөдөр', sub: aiwMnt(cfg.amount) + ' хэтэвчинд', v:'' }
+        : { kind:'skip', p:'Алгассан · нэгж үнэд хүрээгүй', d:'Өнөөдөр', sub:'', v:'' },
+    { kind:'skip', p:'Алгассан · тохирох бүтээгдэхүүн олдсонгүй', d: aiwPast(cfg), sub:'', v:'' },
+  ];
+  const statusTone = cancelled ? [T.muted2, '#F1F2F7', 'Цуцлагдсан'] : paused ? [T.warn, T.warnSoft, 'Түр зогссон'] : [T.pos, T.posSoft, 'Идэвхтэй'];
+  return (
+    <div ref={wrapRef} style={{ display:'grid', gridTemplateColumns: narrow ? 'minmax(0,1fr)' : 'minmax(0,1fr) minmax(0,340px)', gap:20, alignItems:'start' }}>
+      <div style={{ display:'flex', flexDirection:'column', gap:20, minWidth:0 }}>
+        {/* plan summary */}
+        <div style={{ ...aiwCard, padding:'22px 24px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:16, flexWrap:'wrap' }}>
+            <AiwIcon size={48}/>
+            <div style={{ flex:1, minWidth:200 }}>
+              <div style={{ fontSize:17, fontWeight:800, color:T.ink, letterSpacing:'-0.02em' }}>{ro ? plan.name : ((cfg.name && cfg.name.trim()) || window.aiwAutoName(cfg))}</div>
+              <div className="num" style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:4, fontFamily:MONO }}>{aiwMnt(cfg.amount)} · {cfg.freq}{cfg.freq === 'Сар бүр' ? ' · сарын ' + cfg.day + '-нд' : ''}</div>
+            </div>
+            <span style={{ fontSize:11, fontWeight:800, color:statusTone[0], background:statusTone[1], padding:'6px 12px', borderRadius:999 }}>{statusTone[2]}</span>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(150px,1fr))', gap:12, marginTop:18 }}>
+            {[
+              ['Дараагийн гүйцэтгэл', cancelled ? '—' : paused ? 'Зогссон' : aiwNext(cfg)],
+              ['Жилийн нийт', aiwMnt(cfg.amount * aiwPerYear(cfg.freq))],
+              ['Эрэмбэд байгаа', (cfg.picked && cfg.picked.length ? cfg.picked.filter(t => window.aiwPool(cfg).some(p => p.ticker === t)).length : window.aiwPool(cfg).length) + ' бүтээгдэхүүн'],
+            ].map(([l, v], i) => (
+              <div key={i} style={{ background:T.field, border:`1px solid ${T.line2}`, borderRadius:12, padding:'12px 14px' }}>
+                <div style={{ fontSize:11, color:T.muted, fontWeight:700 }}>{l}</div>
+                <div className="num" style={{ fontSize:13.5, fontWeight:800, color: i === 0 && (paused || cancelled) ? T.muted2 : T.ink, marginTop:4, fontFamily:MONO }}>{v}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ marginTop:6 }}>
+            <AiwRow l="Зах зээл" v="Зөвхөн Анхдагч зах"/>
+            <AiwRow l="Бүтээгдэхүүн" v={cfg.types.join(', ') + ' · ' + window.aiwTermOf(cfg) + ' сар'}/>
+            <AiwRow l="Нэгж" v={(cfg.units || 1) + ' × ' + aiwMnt(window.aiwUnitPrice(cfg))}/>
+            <AiwRow l="Гүйцэтгэх" v={window.aiwDayLabel(cfg)} strong/>
+            <AiwRow l="Дуусах" v={window.aiwEndLabel(cfg)}/>
+            <AiwRow l="Хуримтлуулах" v={cfg.accumulate ? 'Тийм — нэгж үнэд хүрэх хүртэл' : 'Үгүй — гүйцэтгэл алгасана'}/>
+            <AiwRow l="Хугацаа дуусахад" v={cfg.reinvest !== false ? 'Дахин автоматаар авна' : 'Хэтэвчинд орно'}/>
+          </div>
+          {cancelled ? (
+            <div style={{ marginTop:16, display:'flex', gap:12, alignItems:'center', flexWrap:'wrap' }}>
+              <AiwNote>Төлөвлөгөө цуцлагдлаа. Худалдан авсан хөрөнгө багцад хэвээр байна.</AiwNote>
+              <WebButton variant="primary" size="sm" onClick={onNew}>Шинэ төлөвлөгөө</WebButton>
+            </div>
+          ) : (
+            <div style={{ display:'flex', gap:10, marginTop:18, flexWrap:'wrap' }}>
+              {ro ? (
+                <AiwNote>Энэ төлөвлөгөөг харах хэлбэрээр үзүүлж байна. Өөрчлөлт зөвхөн өөрийн төлөвлөгөөнд хийгдэнэ.</AiwNote>
+              ) : (
+                <React.Fragment>
+                  <WebButton variant={paused ? 'primary' : 'ghost'} size="sm" onClick={()=>AIW_STORE.put({ paused: !paused })}>{paused ? 'Үргэлжлүүлэх' : 'Түр зогсоох'}</WebButton>
+                  <WebButton variant="ghost" size="sm" onClick={onEdit}>Засах</WebButton>
+                </React.Fragment>
+              )}
+            </div>
+          )}
+          {paused && !cancelled && <div style={{ marginTop:14 }}><AiwNote tone="warn">Төлөвлөгөө зогссон байна. Үргэлжлүүлэх хүртэл худалдан авалт хийгдэхгүй.</AiwNote></div>}
+        </div>
+
+        {/* execution history */}
+        <div style={{ ...aiwCard, overflow:'hidden' }}>
+          <div style={{ padding:'16px 20px', borderBottom:`1px solid ${T.line2}`, display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, flexWrap:'wrap' }}>
+            <div style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Гүйцэтгэлийн түүх</div>
+            <a href="13 Transaction History.html" style={{ fontSize:12.5, fontWeight:700, color:T.indigo, textDecoration:'none' }}>Гүйлгээний түүх →</a>
+          </div>
+          <div style={{ overflowX:'auto' }}>
+          <table style={{ width:'100%', minWidth:520, borderCollapse:'collapse' }}>
+            <thead>
+              <tr>
+                {['Гүйцэтгэл', 'Огноо', 'Дүн', 'Өгөөж'].map((h, i) => (
+                  <th key={h} style={{ fontSize:11, fontWeight:700, letterSpacing:'.05em', color:T.muted, textTransform:'uppercase', padding:'11px 20px', background:T.field, borderBottom:`1px solid ${T.line2}`, textAlign: i > 1 ? 'right' : 'left', whiteSpace:'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, i) => (
+                <tr key={i} onClick={()=>setRec(r)} tabIndex={0} onKeyDown={(e)=>{ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRec(r); } }} style={{ cursor:'pointer' }}>
+                  <td style={{ padding:'0 20px', height:58, fontSize:13, fontWeight:600, color: r.kind === 'skip' ? T.muted : T.text, borderBottom:`1px solid ${T.line2}` }}>
+                    <span style={{ display:'inline-flex', alignItems:'center', gap:10 }}>
+                      <span style={{ width:30, height:30, borderRadius:9, flexShrink:0, background: r.kind === 'ok' ? T.posSoft : r.kind === 'hold' ? T.indigoSoft : '#F4F5F9', display:'inline-flex', alignItems:'center', justifyContent:'center' }}>
+                        {r.kind === 'ok'
+                          ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke={T.pos} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          : r.kind === 'hold'
+                            ? <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 7v5l3 2" stroke={T.indigo} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="12" cy="12" r="9" stroke={T.indigo} strokeWidth="2"/></svg>
+                            : <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14" stroke={T.muted2} strokeWidth="2.4" strokeLinecap="round"/></svg>}
+                      </span>
+                      {r.p}
+                    </span>
+                  </td>
+                  <td style={{ padding:'0 20px', fontSize:12.5, fontWeight:600, color:T.muted, borderBottom:`1px solid ${T.line2}`, whiteSpace:'nowrap' }}>{r.d}</td>
+                  <td className="num" style={{ padding:'0 20px', fontSize:12.5, fontWeight:700, color:T.ink, textAlign:'right', borderBottom:`1px solid ${T.line2}`, fontFamily:MONO, whiteSpace:'nowrap' }}>{r.sub || '—'}</td>
+                  <td className="num" style={{ padding:'0 20px', fontSize:13, fontWeight:800, color: r.v ? T.pos : T.muted2, textAlign:'right', borderBottom:`1px solid ${T.line2}`, fontFamily:MONO }}>{r.v || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+          <div style={{ padding:'13px 20px', fontSize:11.5, color:T.muted, fontWeight:600 }}>Мөр дээр дарж дэлгэрэнгүйг үзнэ. Худалдан авалт бүр таны багцад нэмэгдэж, Хэтэвч хуудсанд «АВТО» тэмдэглэгээтэй харагдана.</div>
+        </div>
+      </div>
+
+      {/* right rail */}
+      <div style={{ display:'flex', flexDirection:'column', gap:16, minWidth:0 }}>
+        <div style={{ ...aiwCard, padding:'18px 20px' }}>
+          <div style={{ fontSize:13.5, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Төлбөрийн эх үүсвэр</div>
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:14, padding:'12px 14px', borderRadius:12, background:T.indigoSoft, border:`1px solid ${T.indigoBorder}` }}>
+            <div style={{ width:36, height:36, borderRadius:10, background:T.surface, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="3" stroke={T.indigo} strokeWidth="2"/><path d="M16 12.5h2" stroke={T.indigo} strokeWidth="2.4" strokeLinecap="round"/></svg>
+            </div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:12.5, fontWeight:800, color:T.ink }}>Хэтэвчний үлдэгдэл</div>
+              <div className="num" style={{ fontSize:11.5, color:T.muted, fontWeight:600, marginTop:2, fontFamily:MONO }}>₮ 12,000,000</div>
+            </div>
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:10, padding:'12px 14px', borderRadius:12, background:T.field, border:`1px solid ${T.line2}` }}>
+            <div style={{ width:34, height:24, borderRadius:6, background:'#0E5F2E', color:'#fff', fontSize:8, fontWeight:800, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>ХБ</div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:12.5, fontWeight:700, color:T.ink }}>Хаан Банк •••• 4512</div>
+              <div style={{ fontSize:10.5, color:T.muted, marginTop:1 }}>Автомат хасалт · шаардлагатай</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ ...aiwCard, padding:'18px 20px' }}>
+          <div style={{ fontSize:13.5, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Онцгой тохиолдолд</div>
+          <div style={{ marginTop:6 }}>
+            {[
+              ['Тохирох бүтээгдэхүүн олдоогүй', 'Тэр өдрийг алгасана — картаас мөнгө хасахгүй. Дараагийн хуваарьт дахин оролдоно.'],
+              ['Нэгж үнэд хүрэхгүй', cfg.accumulate ? 'Хуримтлуулж, хүрэлцсэн үед худалдан авна.' : 'Тухайн гүйцэтгэлийг алгасана.'],
+              ['Картаас хасалт амжилтгүй', 'Гүйцэтгэл алгасаж, мэдэгдэл илгээнэ. Төлөвлөгөө цуцлагдахгүй.'],
+            ].map(([t, d], i) => (
+              <div key={i} style={{ padding:'12px 0', borderTop: i ? `1px solid ${T.line2}` : 'none' }}>
+                <div style={{ fontSize:12.5, fontWeight:700, color:T.ink }}>{t}</div>
+                <div style={{ fontSize:11.5, color:T.muted, marginTop:3, lineHeight:1.5 }}>{d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <WebDisclaimer>Хөрөнгө оруулалт эрсдэлтэй. Өнгөрсөн өгөөж ирээдүйн үр дүнг баталгаажуулахгүй.</WebDisclaimer>
+      </div>
+      {rec && (
+        <WebModal open onClose={()=>setRec(null)} title={rec.kind === 'ok' ? rec.p : 'Гүйцэтгэгдээгүй'} ticker={rec.d}
+          footer={<WebButton full variant="primary" onClick={()=>setRec(null)}>Хаах</WebButton>}>
+          <div style={{ ...aiwCard, padding:'2px 16px 4px' }}>
+            {(rec.kind === 'ok' ? [
+              ['Гаргагч', (window.AIW_MARKET.find(x => rec.p.indexOf(x.ticker) === 0) || {}).issuer || '—'],
+              ['Төрөл', cfg.types.join(', ')],
+              ['Зах зээл', 'Анхдагч зах'],
+              ['Өгөөж', rec.v || '—'],
+              ['Төлсөн дүн', rec.sub || '—'],
+              ['Хугацаа дуусахад', cfg.reinvest !== false ? 'Дахин автоматаар авна' : 'Хэтэвчинд орно'],
+            ] : rec.kind === 'hold' ? [
+              ['Шалтгаан', 'Нэгж үнэд хүрээгүй'],
+              ['Хуримтлагдсан', rec.sub || '—'],
+              ['Дараагийн алхам', 'Хүрэлцсэн үед автоматаар худалдан авна'],
+            ] : [
+              ['Шалтгаан', rec.p],
+              ['Төлөгдсөн дүн', '₮ 0'],
+              ['Үлдэгдэл', 'Хэтэвчинд хэвээр үлдсэн'],
+            ]).map(([l, v]) => <AiwRow key={l} l={l} v={v}/>)}
+          </div>
+        </WebModal>
+      )}
+    </div>
+  );
+};
+
+const AutoInvestPage = () => {
+  const s = useAiwPlan();
+  const [setup, setSetup] = useState(false);
+  const [pin, setPin] = useState(false);
+  const [done, setDone] = useState(false);
+  const [edit, setEdit] = useState(false);
+  const [open, setOpen] = useState(null);   // null = plans list, else the picked plan
+  const live = s.live;
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebar activePath="/auto"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Автомат хөрөнгө оруулалт" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+          <div style={{ maxWidth:1100, margin:'0 auto' }}>
+            {live && open && (
+              <button onClick={()=>setOpen(null)} style={{ display:'inline-flex', alignItems:'center', gap:7, background:'none', border:'none', color:T.muted, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit', padding:'6px 4px', marginBottom:10 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke={T.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                Төлөвлөгөөнүүд рүү буцах
+              </button>
+            )}
+            <WebPageHeader
+              title={live && open ? open.name : 'Автомат хөрөнгө оруулалт'}
+              subtitle={!live ? 'Нэг удаа тохируулаад, дараа нь зөвхөн хянана'
+                : open ? 'Тогтмол хуваариар шалгуурт нийцсэн бүтээгдэхүүнийг автоматаар худалдан авах'
+                : 'Ажиллаж байгаа төлөвлөгөөнүүд — мөр дээр дарж дэлгэрэнгүйг харна'}
+              right={live ? <WebButton variant="ghost" onClick={()=>setSetup(true)}>Шинэ төлөвлөгөө</WebButton> : null}/>
+            {!live
+              ? <AutoEmpty onStart={()=>setSetup(true)}/>
+              : open
+                ? <AutoActive plan={open.live ? null : open} onEdit={()=>setEdit(true)} onNew={()=>setSetup(true)} onBack={()=>setOpen(null)}/>
+                : <AutoPlansList onOpen={setOpen} onNew={()=>setSetup(true)}/>}
+          </div>
+        </main>
+        <WebFooter/>
+      </div>
+
+      <AiwSetupModal open={setup} onClose={()=>setSetup(false)} onDone={()=>{ setSetup(false); setPin(true); }}/>
+      <AiwPinModal open={pin} onClose={()=>setPin(false)} onDone={()=>{ AIW_STORE.put({ active:true, paused:false, cancelled:false }); setPin(false); setDone(true); }}/>
+      <AiwSuccessModal open={done} onClose={()=>setDone(false)}/>
+      <AiwEditModal open={edit} onClose={()=>setEdit(false)}/>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<AutoInvestPage/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

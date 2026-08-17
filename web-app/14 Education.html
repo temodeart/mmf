@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Суралцах — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+const { T, WebButton, WebSidebar, WebTopbar, WebFooter, WebDisclaimer } = window;
+
+/* ── Education dataset — mirrors Dashboard's EDU_CARDS (same key/kind/tagline/
+   gradient), extended with the actual template body. Two templates share one
+   family (category pill · title · meta · prose), matching the News article
+   layout — kept in sync with 08 News.html's ArticlePage visual language. ── */
+const EDU = {
+  trust: {
+    kind:'video', tagline:'Шинэхэн хөрөнгө оруулагчдад', duration:'3:20',
+    title:'Итгэлцэл (Trust) гэж юу вэ?',
+    c1:'#6D4FD0', c2:'#9333EA',
+    body: [
+      'Итгэлцэл гэдэг нь ББСБ эсвэл санхүүгийн байгууллага хөрөнгө оруулагчдаас цуглуулсан мөнгөөр зээл, төслийг санхүүжүүлж, олсон өгөөжөө хөрөнгө оруулагчидтайгаа хуваалцдаг бүтээгдэхүүн юм.',
+      'Та итгэлцлийн нэгжийг тогтоосон нэрлэсэн үнээр худалдаж авч, гэрээнд заасан хугацаа өнгөрсний дараа үндсэн дүн болон хуримтлагдсан үр шимээ хамт хүлээн авна.',
+      'Хугацаанаас өмнө мөнгөө гаргах шаардлагатай бол хоёрдогч зах зээл дээр өөрийн эзэмшлийг бусад хэрэглэгчид зарж болно — энэ тохиолдолд зарах үнэ, өгөөж өөрчлөгдөж болохыг анхаарна уу.',
+    ],
+  },
+  mmf: {
+    kind:'article', tagline:'Үндсэн ойлголт', readMin:4,
+    title:'Мөнгөний зах зээлийн сан гэж юу вэ?',
+    c1:'#2D6BFF', c2:'#0EA5E9',
+    body: [
+      'Мөнгөний зах зээлийн сан нь богино хугацаат, харьцангуй тогтвортой санхүүгийн хэрэгслүүд (хадгаламжийн сертификат, итгэлцэл, нэхэмжлэх, арилжааны бичиг) рүү хөрөнгө оруулах боломж олгодог платформ юм.',
+      'Ердийн банкны хадгаламжтай харьцуулахад эдгээр хэрэгслүүд ихэвчлэн өндөр өгөөжтэй байдаг ч, гаргагчийн эрсдэл, зах зээлийн нөхцөлөөс шалтгаалан өгөөж хувьсаж болно.',
+      'Та манай платформ дээр төрөл бүрийн бүтээгдэхүүнээс сонгож, хугацаа, дүнгээ өөрөө тохируулан хөрөнгө оруулалтаа хийх боломжтой.',
+    ],
+  },
+  market: {
+    kind:'article', tagline:'Хэрхэн ялгах вэ', readMin:3,
+    title:'Анхдагч ба хоёрдогч зах зээл',
+    c1:'#0E9F6E', c2:'#0891B2',
+    body: [
+      'Анхдагч зах зээл гэдэг нь гаргагч байгууллагаас шинэ бүтээгдэхүүнийг анх удаа нэрлэсэн үнээр нь худалдаж авах явц юм — манай "Арилжаа" хэсгийн шинээр зарлагдсан бүтээгдэхүүнүүд эндээс эхэлдэг.',
+      'Хоёрдогч зах зээл нь аль хэдийн эзэмшигчтэй болсон бүтээгдэхүүнийг өөр хэрэглэгч рүү дахин худалдах явц — жишээ нь, хугацаанаас өмнө мөнгөө гаргах хэрэгтэй үедээ өөрийн байршуулалтыг "Зарах" боломжоор бусдад санал болгож болно.',
+      'Хоёр тохиолдолд ч захиалга нь эсрэг талын захиалгатай нийцсэний дараа биелдэг тул "Нөхцөл биелтэл хүчинтэй" гэсэн нөхцөл үргэлж хамаарна.',
+    ],
+  },
+};
+
+const _bytes = (kind) => kind === 'video'
+  ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/></svg>
+  : <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5z" stroke="currentColor" strokeWidth="2.4" strokeLinejoin="round"/></svg>;
+
+const EduPage = () => {
+  const initialId = (() => {
+    if (typeof location === 'undefined') return 'mmf';
+    const m = /(?:\?|&)id=([^&]+)/.exec(location.search);
+    return (m && EDU[m[1]]) ? m[1] : 'mmf';
+  })();
+  const [id] = useState(initialId);
+  const item = EDU[id];
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebar activePath="/dashboard"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Суралцах" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+
+          <a href="04 Dashboard.html" style={{ display:'inline-flex', alignItems:'center', gap:7, background:'none', border:'none', color:T.muted, fontWeight:700, fontSize:13, textDecoration:'none', padding:'6px 4px', marginBottom:18 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke={T.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Нүүр рүү буцах
+          </a>
+
+          <article style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:24, padding:'32px 36px', maxWidth:760 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+              <span style={{ fontSize:11, fontWeight:700, color:item.c1, background:`${item.c1}14`, padding:'4px 11px', borderRadius:99 }}>Суралцах</span>
+              <span style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:11, fontWeight:700, color:T.muted, background:T.line2, padding:'4px 11px', borderRadius:99 }}>
+                {_bytes(item.kind)}{item.kind==='video' ? item.duration : item.readMin+' мин унших'}
+              </span>
+            </div>
+
+            <h1 style={{ fontSize:26, fontWeight:800, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.3, margin:'16px 0 8px' }}>{item.title}</h1>
+            <div style={{ fontSize:13, color:T.muted, fontWeight:600, marginBottom:22, paddingBottom:20, borderBottom:`1px solid ${T.line2}` }}>{item.tagline}</div>
+
+            {item.kind === 'video' && (
+              <div style={{ borderRadius:16, overflow:'hidden', position:'relative', aspectRatio:'16/9', background:`linear-gradient(150deg, ${item.c1}, ${item.c2})`, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:24 }}>
+                <div style={{ position:'absolute', left:-30, bottom:-30, width:120, height:120, borderRadius:'50%', background:'rgba(255,255,255,.12)' }}/>
+                <div style={{ position:'absolute', right:22, top:22, width:34, height:34, borderRadius:'50%', border:'2px solid rgba(255,255,255,.3)' }}/>
+                <div style={{ width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,.95)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 12px 30px -10px rgba(0,0,0,.4)' }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill={item.c1}/></svg>
+                </div>
+                <span style={{ position:'absolute', left:16, bottom:14, fontSize:11, fontWeight:700, color:'#fff', background:'rgba(0,0,0,.3)', padding:'4px 10px', borderRadius:99 }}>{item.duration}</span>
+                <span style={{ position:'absolute', right:16, bottom:14, fontFamily:'monospace', fontSize:10.5, color:'rgba(255,255,255,.6)' }}>// видео байршуулах</span>
+              </div>
+            )}
+
+            {item.body.map((p,i) => <p key={i} style={{ fontSize:14.5, color:T.text, lineHeight:1.75, margin: i? '16px 0 0':'0' }}>{p}</p>)}
+
+            <div style={{ marginTop:22 }}>
+              <WebDisclaimer>Өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно.</WebDisclaimer>
+            </div>
+
+            <div style={{ marginTop:26 }}>
+              <a href="02 Trade Screen.html" style={{ textDecoration:'none' }}>
+                <WebButton variant="primary">
+                  Бүтээгдэхүүн үзэх
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </WebButton>
+              </a>
+            </div>
+          </article>
+
+        </main>
+        <WebFooter/>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<EduPage/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

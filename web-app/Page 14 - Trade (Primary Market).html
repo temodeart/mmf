@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Арилжаа — Money Market Fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#F4F6FA;
+    --surface:#FFFFFF;
+    --navy:#050B1F;
+    --indigo:#4F46E5;
+    --indigo-soft:#EEF0FE;
+    --indigo-border:#DDDAFB;
+    --blue:#2D6BFF;
+    --blue-soft:#E7EEFF;
+    --orange:#FF6B2C;
+    --orange-soft:#FFEDE2;
+
+    /* ---- semantic (web, per brief) ---- */
+    --pos:#0E9F6E;        --pos-soft:#E3F5EE;   --pos-border:#BFE9D8;
+    --neg:#DC2626;        --neg-soft:#FDECEC;   --neg-border:#F5C9C9;
+    --warn:#B7791F;       --warn-soft:#FFF3D6;  --warn-border:#FFE9C4;
+    --warn-surface:#FFFBF2;
+
+    --ink:#0B1020;
+    --text:#2A3052;
+    --muted:#6B7191;
+    --muted2:#9099B5;
+    --line:#E7E9F2;
+    --line2:#EFF1F8;
+    --field:#FAFBFE;
+    --radius:20px;
+    --radius-lg:24px;
+    --shadow-sm:0 2px 8px -4px rgba(15,20,55,.10);
+    --shadow-card:0 8px 24px -16px rgba(15,20,55,.30);
+    --shadow-pop:0 24px 60px -24px rgba(15,20,55,.42);
+    --ring:0 0 0 4px var(--indigo-soft);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Manrope',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height:100vh; color:var(--ink);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  .num{ font-variant-numeric:tabular-nums; letter-spacing:-0.01em; }
+  .mono{ font-family:'JetBrains Mono',monospace; font-variant-numeric:tabular-nums; }
+  button{ font-family:inherit; cursor:pointer; }
+  a{ color:inherit; }
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background:#DADEEA; border-radius:99px; border:3px solid transparent; background-clip:content-box; }
+
+  /* focus ring */
+  a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+    outline:none; box-shadow:var(--ring); border-radius:12px;
+  }
+
+  /* ---------- shell ---------- */
+  .shell{ display:flex; min-height:100vh; }
+
+  /* ---------- sidebar ---------- */
+  .sidebar{
+    width:268px; flex-shrink:0;
+    background:rgba(255,255,255,.72); backdrop-filter:blur(14px);
+    border-right:1px solid var(--line);
+    display:flex; flex-direction:column; padding:26px 18px;
+    position:sticky; top:0; height:100vh;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; padding:0 8px 4px; }
+  .brand .mark{ width:42px; height:42px; flex-shrink:0; }
+  .brand .wm{ font-weight:800; font-size:17px; line-height:1.05; letter-spacing:-0.02em; }
+  .brand .wm span{ color:var(--muted2); font-weight:600; }
+
+  .nav-label{ font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--muted2); padding:26px 12px 10px; text-transform:uppercase; }
+  .nav{ display:flex; flex-direction:column; gap:4px; }
+  .nav-item{
+    display:flex; align-items:center; gap:13px;
+    padding:12px 14px; border-radius:14px;
+    font-size:14.5px; font-weight:600; color:var(--text);
+    text-decoration:none; border:1px solid transparent;
+    transition:background .15s,color .15s;
+  }
+  .nav-item svg{ flex-shrink:0; }
+  .nav-item .chev{ margin-left:auto; opacity:.5; transition:transform .2s; }
+  .nav-item:hover{ background:var(--line2); }
+  .nav-item.active{ background:var(--indigo-soft); color:var(--indigo); border-color:var(--indigo-border); }
+  .nav-item.active svg [stroke]{ stroke:var(--indigo); }
+  .subnav{ display:flex; flex-direction:column; gap:2px; margin:2px 0 2px 30px; padding-left:14px; border-left:1.5px solid var(--line); }
+  .subnav a{ font-size:13.5px; font-weight:600; color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:10px; transition:background .15s,color .15s; }
+  .subnav a:hover{ background:var(--line2); color:var(--text); }
+  .subnav a.active{ color:var(--indigo); font-weight:700; }
+  .sidebar-foot{ margin-top:auto; padding:14px 12px 2px; }
+  .sidebar-foot .ver{ font-size:11px; color:var(--muted2); font-weight:600; }
+
+  /* ---------- main ---------- */
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+  .topbar{
+    height:72px; display:flex; align-items:center; justify-content:space-between;
+    padding:0 36px; border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.6); backdrop-filter:blur(10px);
+    position:sticky; top:0; z-index:20;
+  }
+  .topbar .pt{ font-size:18px; font-weight:800; letter-spacing:-0.02em; }
+  .topbar-right{ display:flex; align-items:center; gap:14px; }
+  .icon-btn{ width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; position:relative; }
+  .icon-btn .ndot{ position:absolute; top:9px; right:10px; width:7px; height:7px; border-radius:99px; background:var(--orange); border:1.5px solid #fff; }
+  .user{ display:flex; align-items:center; gap:11px; padding:6px 14px 6px 6px; border-radius:999px; border:1px solid var(--line); background:#fff; }
+  .user .av{ width:34px; height:34px; border-radius:999px; background:linear-gradient(135deg,var(--blue),var(--indigo)); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+  .user .nm{ font-size:13.5px; font-weight:700; color:var(--ink); line-height:1.1; }
+  .user .em{ font-size:11px; font-weight:600; color:var(--muted2); margin-top:1px; }
+
+  .content{ padding:30px 36px 56px; max-width:1560px; width:100%; }
+
+  .page-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; margin-bottom:22px; flex-wrap:wrap; }
+  .page-title{ font-size:30px; font-weight:800; letter-spacing:-0.03em; color:var(--navy); margin:0; }
+  .page-sub{ margin-top:8px; font-size:13.5px; font-weight:600; color:var(--muted); }
+
+  /* segmented market toggle */
+  .seg{ display:inline-flex; background:#fff; border:1px solid var(--line); border-radius:14px; padding:4px; gap:4px; }
+  .seg button{ height:38px; padding:0 18px; border:none; background:transparent; border-radius:10px; font-size:13.5px; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:8px; transition:all .15s; }
+  .seg button .ct{ font-size:11px; font-weight:700; padding:1px 7px; border-radius:99px; background:var(--line2); color:var(--muted); }
+  .seg button.active{ background:var(--indigo); color:#fff; box-shadow:0 6px 16px -8px rgba(79,70,229,.6); }
+  .seg button.active .ct{ background:rgba(255,255,255,.22); color:#fff; }
+
+  /* filter chips */
+  .filters{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+  .chip{ height:38px; padding:0 16px; border-radius:99px; border:1px solid var(--line); background:#fff; font-size:13px; font-weight:700; color:var(--text); display:inline-flex; align-items:center; gap:8px; transition:all .15s; }
+  .chip .dot{ width:8px; height:8px; border-radius:99px; }
+  .chip:hover{ border-color:var(--muted2); }
+  .chip.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .filters .spacer{ flex:1; }
+  .sortbtn{ height:38px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:#fff; font-size:13px; font-weight:600; color:var(--muted); display:inline-flex; align-items:center; gap:8px; }
+
+  /* ---------- layout ---------- */
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 384px; gap:22px; align-items:start; }
+
+  /* ---------- market grid ---------- */
+  .mkt-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+  .mcard{
+    background:var(--surface); border:1px solid var(--line2); border-radius:var(--radius);
+    box-shadow:var(--shadow-sm); padding:20px; display:flex; flex-direction:column;
+    cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s;
+  }
+  .mcard:hover{ border-color:var(--indigo-border); box-shadow:var(--shadow-card); transform:translateY(-2px); }
+  .mcard.sel{ border-color:var(--indigo); box-shadow:0 0 0 3px var(--indigo-soft), var(--shadow-card); }
+  .mcard .top{ display:flex; align-items:flex-start; gap:12px; }
+  .mcard .logo{ width:44px; height:44px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:16px; letter-spacing:-0.02em; }
+  .mcard .bk{ flex:1; min-width:0; }
+  .mcard .bk .nm{ font-size:14.5px; font-weight:800; color:var(--ink); letter-spacing:-0.01em; line-height:1.25; }
+  .mcard .bk .tk{ font-size:11px; font-weight:600; color:var(--muted2); margin-top:3px; }
+  .badge{ display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:99px; font-size:10.5px; font-weight:700; letter-spacing:.01em; flex-shrink:0; }
+  .badge::before{ content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+  .badge.new{ background:var(--pos-soft); color:var(--pos); }
+  .badge.active{ background:var(--warn-soft); color:var(--warn); }
+  .badge.sell{ background:var(--neg-soft); color:var(--neg); }
+  .badge.buy{ background:var(--pos-soft); color:var(--pos); }
+  .badge.info{ background:var(--indigo-soft); color:var(--indigo); }
+
+  .mcard .rate{ margin-top:18px; display:flex; align-items:baseline; gap:7px; }
+  .mcard .rate .v{ font-family:'JetBrains Mono',monospace; font-size:34px; font-weight:700; color:var(--ink); letter-spacing:-0.02em; font-variant-numeric:tabular-nums; }
+  .mcard .rate .u{ font-size:14px; font-weight:700; color:var(--pos); }
+  .mcard .rate .lab{ font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-left:auto; }
+
+  .specs{ margin-top:16px; border-top:1px solid var(--line2); padding-top:14px; display:flex; flex-direction:column; gap:10px; }
+  .specs .row{ display:flex; align-items:center; justify-content:space-between; }
+  .specs .k{ font-size:12.5px; font-weight:600; color:var(--muted); }
+  .specs .v{ font-size:13px; font-weight:700; color:var(--text); font-variant-numeric:tabular-nums; }
+  .avail{ margin-top:14px; }
+  .avail .track{ height:6px; border-radius:99px; background:var(--line2); overflow:hidden; }
+  .avail .fill{ height:100%; border-radius:99px; background:var(--indigo); }
+  .avail .lab{ display:flex; justify-content:space-between; margin-top:7px; font-size:11px; font-weight:600; color:var(--muted); }
+  .avail .lab b{ color:var(--text); font-weight:700; }
+
+  .mcard .cta{ margin-top:16px; height:46px; border-radius:13px; border:none; background:var(--pos); color:#fff; font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 20px -10px rgba(14,159,110,.6); transition:filter .15s; }
+  .mcard .cta:hover{ filter:brightness(1.06); }
+
+  /* ---------- secondary table ---------- */
+  .card{ background:var(--surface); border:1px solid var(--line2); border-radius:var(--radius); box-shadow:var(--shadow-sm); }
+  .card-pad{ padding:6px 6px 12px; }
+  table{ width:100%; border-collapse:collapse; }
+  thead th{
+    text-align:left; font-size:11px; font-weight:700; letter-spacing:.05em;
+    color:var(--muted); text-transform:uppercase; padding:15px 16px;
+    background:#FAFBFE; border-bottom:1px solid var(--line2); user-select:none;
+  }
+  thead th.r{ text-align:right; }
+  thead th.sortable{ cursor:pointer; }
+  thead th .ar{ opacity:.45; margin-left:4px; }
+  tbody tr{ border-bottom:1px solid var(--line2); cursor:pointer; transition:background .12s; }
+  tbody tr:last-child{ border-bottom:none; }
+  tbody tr:hover{ background:#FAFBFE; }
+  tbody tr.sel{ background:var(--indigo-soft); }
+  tbody td{ padding:15px 16px; font-size:13.5px; font-weight:600; color:var(--text); }
+  tbody td.r{ text-align:right; font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink); }
+  tbody td .bn{ display:flex; align-items:center; gap:11px; }
+  tbody td .lg{ width:32px; height:32px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:12px; flex-shrink:0; }
+  tbody td .nm{ font-weight:700; color:var(--ink); font-size:13.5px; }
+  tbody td .tk{ font-size:10.5px; color:var(--muted2); font-weight:600; margin-top:1px; font-family:'JetBrains Mono',monospace; }
+  .type-pill{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; }
+  .type-pill::before{ content:''; width:7px; height:7px; border-radius:50%; background:currentColor; }
+  .type-pill.buy{ color:var(--pos); }
+  .type-pill.sell{ color:var(--neg); }
+
+  .table-foot{ display:flex; align-items:center; justify-content:space-between; padding:14px 12px 4px; }
+  .pager{ display:flex; gap:8px; align-items:center; }
+  .pager button{ min-width:40px; height:40px; padding:0 8px; border-radius:11px; border:1px solid var(--line); background:#fff; color:var(--muted); font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; }
+  .pager button.active{ background:var(--indigo); color:#fff; border-color:var(--indigo); }
+  .pager button:disabled{ opacity:.45; cursor:default; }
+  .per{ font-size:12.5px; font-weight:600; color:var(--muted); }
+
+  /* ---------- order ticket rail ---------- */
+  .rail{ position:sticky; top:96px; display:flex; flex-direction:column; gap:16px; }
+  .ticket{ background:var(--surface); border:1px solid var(--line2); border-radius:var(--radius-lg); box-shadow:var(--shadow-sm); overflow:hidden; }
+  .ticket .hd{ padding:18px 20px 0; }
+  .ticket .hd .t{ font-size:15px; font-weight:800; letter-spacing:-0.01em; }
+  .bs{ display:flex; gap:6px; background:var(--field); border:1px solid var(--line); border-radius:13px; padding:5px; margin:14px 20px 0; }
+  .bs button{ flex:1; height:42px; border:none; background:transparent; border-radius:9px; font-size:14px; font-weight:700; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:7px; transition:all .15s; }
+  .bs button .d{ width:8px; height:8px; border-radius:99px; background:currentColor; }
+  .bs button.buy.on{ background:var(--pos); color:#fff; box-shadow:0 6px 16px -8px rgba(14,159,110,.6); }
+  .bs button.sell.on{ background:var(--neg); color:#fff; box-shadow:0 6px 16px -8px rgba(220,38,38,.6); }
+
+  .tk-body{ padding:18px 20px 20px; }
+  .sel-inst{ border:1px solid var(--line); border-radius:14px; padding:14px; background:var(--field); }
+  .sel-inst .top{ display:flex; align-items:center; gap:11px; }
+  .sel-inst .lg{ width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; flex-shrink:0; }
+  .sel-inst .nm{ font-size:13.5px; font-weight:800; color:var(--ink); line-height:1.2; }
+  .sel-inst .tk{ font-size:10.5px; font-weight:600; color:var(--muted2); margin-top:2px; font-family:'JetBrains Mono',monospace; }
+  .sel-inst .grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line2); }
+  .sel-inst .grid .k{ font-size:11px; font-weight:600; color:var(--muted); }
+  .sel-inst .grid .v{ font-size:14px; font-weight:800; color:var(--ink); margin-top:3px; font-family:'JetBrains Mono',monospace; }
+  .sel-inst .grid .v.pos{ color:var(--pos); }
+
+  .empty-inst{ border:1.5px dashed var(--line); border-radius:14px; padding:26px 18px; text-align:center; }
+  .empty-inst .ic{ width:46px; height:46px; border-radius:13px; background:var(--indigo-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; }
+  .empty-inst .h{ font-size:13.5px; font-weight:800; color:var(--ink); }
+  .empty-inst .p{ font-size:12px; color:var(--muted); margin-top:5px; line-height:1.45; }
+
+  .field-group{ margin-top:16px; }
+  .field-label{ font-size:12px; font-weight:700; color:var(--text); margin-bottom:8px; display:flex; justify-content:space-between; }
+  .field-label .hint{ color:var(--muted); font-weight:600; }
+  .stepper{ display:flex; align-items:center; border:1.5px solid var(--line); border-radius:13px; background:var(--field); overflow:hidden; transition:border-color .15s, box-shadow .15s, background .15s; }
+  .stepper:focus-within{ border-color:var(--indigo); background:#fff; box-shadow:var(--ring); }
+  .stepper button{ width:48px; height:50px; border:none; background:transparent; font-size:20px; font-weight:700; color:var(--muted); flex-shrink:0; }
+  .stepper button:hover{ color:var(--ink); }
+  .stepper input{ flex:1; min-width:0; border:none; background:transparent; text-align:center; font-family:'JetBrains Mono',monospace; font-size:18px; font-weight:700; color:var(--ink); outline:none; -moz-appearance:textfield; }
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+
+  .quick{ display:flex; gap:7px; margin-top:10px; }
+  .quick button{ flex:1; height:32px; border-radius:9px; border:1px solid var(--line); background:#fff; font-size:11.5px; font-weight:700; color:var(--muted); }
+  .quick button:hover{ border-color:var(--indigo); color:var(--indigo); }
+
+  .summary{ margin-top:16px; border-top:1px solid var(--line2); padding-top:14px; display:flex; flex-direction:column; gap:10px; }
+  .summary .row{ display:flex; align-items:center; justify-content:space-between; }
+  .summary .k{ font-size:12.5px; font-weight:600; color:var(--muted); }
+  .summary .v{ font-size:13px; font-weight:700; color:var(--text); font-family:'JetBrains Mono',monospace; }
+  .summary .row.total .k{ color:var(--ink); font-weight:800; font-size:13.5px; }
+  .summary .row.total .v{ color:var(--ink); font-weight:800; font-size:16px; }
+
+  .balance-line{ margin-top:14px; display:flex; align-items:center; justify-content:space-between; padding:11px 13px; border-radius:11px; background:var(--indigo-soft); }
+  .balance-line .k{ font-size:12px; font-weight:700; color:var(--indigo); }
+  .balance-line .v{ font-size:13px; font-weight:800; color:var(--indigo); font-family:'JetBrains Mono',monospace; }
+  .balance-line.short{ background:var(--neg-soft); }
+  .balance-line.short .k,.balance-line.short .v{ color:var(--neg); }
+
+  .submit{ margin-top:16px; width:100%; height:52px; border:none; border-radius:14px; background:var(--indigo); color:#fff; font-size:15px; font-weight:700; letter-spacing:-0.01em; box-shadow:0 10px 26px -10px rgba(79,70,229,.55); transition:filter .15s; }
+  .submit:hover:not(:disabled){ filter:brightness(1.05); }
+  .submit:disabled{ background:#E3E5EF; color:var(--muted2); box-shadow:none; cursor:not-allowed; }
+  .helper{ margin-top:9px; font-size:11.5px; font-weight:600; color:var(--muted); text-align:center; line-height:1.4; }
+
+  /* disclaimer */
+  .disclaimer{ display:flex; gap:11px; padding:13px 15px; border-radius:13px; background:var(--warn-surface); border:1px solid var(--warn-border); }
+  .disclaimer svg{ flex-shrink:0; margin-top:1px; }
+  .disclaimer p{ margin:0; font-size:11.5px; font-weight:600; color:#8A6516; line-height:1.5; }
+
+  /* ---------- modal ---------- */
+  .scrim{ position:fixed; inset:0; background:rgba(8,11,25,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; z-index:60; padding:24px; }
+  .scrim.show{ display:flex; }
+  .modal{ width:480px; max-width:100%; max-height:92vh; overflow:auto; background:#fff; border-radius:24px; box-shadow:var(--shadow-pop); display:flex; flex-direction:column; }
+  .modal .mhd{ padding:22px 24px; border-bottom:1px solid var(--line2); display:flex; align-items:center; gap:13px; position:sticky; top:0; background:#fff; z-index:2; }
+  .modal .mhd .lg{ width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px; flex-shrink:0; }
+  .modal .mhd .nm{ font-size:15px; font-weight:800; color:var(--ink); line-height:1.2; }
+  .modal .mhd .tk{ font-size:11px; font-weight:600; color:var(--muted2); margin-top:3px; font-family:'JetBrains Mono',monospace; }
+  .modal .mhd .x{ margin-left:auto; width:38px; height:38px; border-radius:10px; border:1px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:center; color:var(--muted); flex-shrink:0; }
+  .modal .mbody{ padding:20px 24px 4px; }
+
+  .msec{ margin-bottom:18px; }
+  .msec .eyebrow{ font-size:10.5px; font-weight:700; letter-spacing:.12em; color:var(--muted2); text-transform:uppercase; margin-bottom:10px; }
+  .msec .drow{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line2); }
+  .msec .drow:last-child{ border-bottom:none; }
+  .msec .drow .k{ font-size:13px; font-weight:600; color:var(--muted); }
+  .msec .drow .v{ font-size:13.5px; font-weight:700; color:var(--ink); font-family:'JetBrains Mono',monospace; }
+  .msec .drow .v.pos{ color:var(--pos); }
+  .msec .drow.big .k{ color:var(--ink); font-weight:800; }
+  .msec .drow.big .v{ font-size:16px; font-weight:800; }
+
+  .otp-row{ display:flex; gap:10px; margin-top:8px; }
+  .otp-row input{ flex:1; height:54px; border:1.5px solid var(--line); border-radius:13px; background:var(--field); text-align:center; font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--ink); outline:none; transition:all .15s; }
+  .otp-row input:focus{ border-color:var(--indigo); background:#fff; box-shadow:var(--ring); }
+  .otp-meta{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; font-size:12px; font-weight:600; color:var(--muted); }
+  .otp-meta a{ color:var(--indigo); font-weight:700; text-decoration:none; }
+  .mfoot{ padding:8px 24px 24px; position:sticky; bottom:0; background:#fff; }
+  .mfoot .submit{ margin-top:0; }
+
+  @media (max-width:1240px){
+    .layout{ grid-template-columns:1fr; }
+    .rail{ position:static; }
+    .mkt-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  }
+  @media (max-width:760px){ .mkt-grid{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 48 48" fill="none">
+        <path d="M9.6 11.4V28.6L0 34.4V0h9.9L24 8.4 38.1 0H48v5.6L24 20 9.6 11.4z" fill="#FF6B2C"/>
+        <path d="M38.4 36.6V19.4L48 13.6V48h-9.9L24 39.6 9.9 48H0v-5.6L24 28l14.4 8.6z" fill="#2D6BFF"/>
+      </svg>
+      <div class="wm">Money Market<br/><span>Fund</span></div>
+    </div>
+
+    <div class="nav-label">Үндсэн цэс</div>
+    <nav class="nav">
+      <a class="nav-item" href="Page 13 - Dashboard (New Style).html">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.6" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.6" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.6" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.6" stroke="currentColor" stroke-width="1.8"/></svg>
+        Миний самбар
+      </a>
+      <a class="nav-item active" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 7h11l-3-3M17 17H6l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Арилжаа
+        <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" style="transform:rotate(180deg)"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <div class="subnav">
+        <a class="active" href="#">Хадгаламжийн сертификат</a>
+        <a href="#">Итгэлцэл</a>
+        <a href="#">Нэхэмжлэх</a>
+        <a href="#">Арилжааны бичиг</a>
+      </div>
+      <a class="nav-item" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="13" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18M16 14.5h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Хэтэвч
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 3l8 4v5c0 4.5-3 7.5-8 9-5-1.5-8-4.5-8-9V7l8-4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Зээл
+      </a>
+      <a class="nav-item" href="#">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h8M8 13h8M8 17h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Мэдээ мэдээлэл
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="ver mono">v2 · 2026.06.23</div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="pt">Арилжаа</div>
+      <div class="topbar-right">
+        <button class="icon-btn" aria-label="Мэдэгдэл"><span class="ndot"></span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z" stroke="#2A3052" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 20a2 2 0 004 0" stroke="#2A3052" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" aria-label="Тохиргоо">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="#2A3052" stroke-width="1.8"/><path d="M12 2.5v3M12 18.5v3M21.5 12h-3M5.5 12h-3M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1M18.7 18.7l-2.1-2.1M7.4 7.4L5.3 5.3" stroke="#2A3052" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <div class="user">
+          <div class="av">ТБ</div>
+          <div>
+            <div class="nm">Тэмүүжин Батбаяр</div>
+            <div class="em mono">temuujin.batb@gmail.com</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="#9099B5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Анхдагч зах зээл</h1>
+          <div class="page-sub">ББСБ болон банкуудын шинээр зарласан бүтээгдэхүүн</div>
+        </div>
+        <div class="seg" id="mktSeg">
+          <button class="active" data-mkt="primary">Анхдагч <span class="ct">12</span></button>
+          <button data-mkt="secondary">Хоёрдогч <span class="ct">7</span></button>
+        </div>
+      </div>
+
+      <div class="filters" id="filters">
+        <button class="chip active" data-f="all">Бүгд</button>
+        <button class="chip" data-f="cd"><span class="dot" style="background:#2D6BFF"></span>Хадгаламжийн сертификат</button>
+        <button class="chip" data-f="trust"><span class="dot" style="background:#4F46E5"></span>Итгэлцэл</button>
+        <button class="chip" data-f="inv"><span class="dot" style="background:#0E9F6E"></span>Нэхэмжлэх</button>
+        <button class="chip" data-f="cp"><span class="dot" style="background:#FF6B2C"></span>Арилжааны бичиг</button>
+        <span class="spacer"></span>
+        <button class="sortbtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M7 4v16M7 20l-3-3M7 4l3 3M17 20V4M17 4l-3 3M17 20l3-3" stroke="#9099B5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Өгөөжөөр эрэмбэлэх
+        </button>
+      </div>
+
+      <div class="layout">
+        <!-- LEFT: market -->
+        <div>
+          <div class="mkt-grid" id="mktGrid"></div>
+          <div class="card" id="secTable" style="display:none; margin-top:0">
+            <div class="card-pad">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Гаргагч</th>
+                    <th>Төрөл</th>
+                    <th class="r sortable">Үлдэгдэл хугацаа <span class="ar">↓</span></th>
+                    <th class="r sortable">Үр шим / Хүү <span class="ar">↕</span></th>
+                    <th class="r">Нэгж үнэ</th>
+                    <th class="r">Тоо</th>
+                  </tr>
+                </thead>
+                <tbody id="secBody"></tbody>
+              </table>
+              <div class="table-foot">
+                <div class="per">Нийт <b>7</b> бичлэг · 1–7</div>
+                <div class="pager">
+                  <button disabled>‹</button>
+                  <button class="active">1</button>
+                  <button disabled>›</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="disclaimer" style="margin-top:18px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3l9-16z" stroke="#B7791F" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="#B7791F" stroke-width="1.9" stroke-linecap="round"/></svg>
+            <p>Өгөөж нь зах зээлийн нөхцөл болон бүтээгдэхүүний нөхцөлөөс хамааран өөрчлөгдөж болно. Энэ нь баталгаат өгөөж биш болохыг анхаарна уу.</p>
+          </div>
+        </div>
+
+        <!-- RIGHT: order ticket -->
+        <div class="rail">
+          <div class="ticket">
+            <div class="hd"><div class="t">Захиалга</div></div>
+            <div class="bs" id="bsToggle">
+              <button class="buy on" data-side="buy"><span class="d"></span>Авах</button>
+              <button class="sell" data-side="sell"><span class="d"></span>Зарах</button>
+            </div>
+            <div class="tk-body">
+              <div id="selWrap"></div>
+
+              <div class="field-group">
+                <div class="field-label">Тоо ширхэг <span class="hint" id="maxHint">боломжит: —</span></div>
+                <div class="stepper">
+                  <button type="button" id="qMinus">−</button>
+                  <input type="number" id="qty" value="0" min="0" inputmode="numeric"/>
+                  <button type="button" id="qPlus">+</button>
+                </div>
+                <div class="quick">
+                  <button data-q="1">1</button>
+                  <button data-q="5">5</button>
+                  <button data-q="10">10</button>
+                  <button data-q="max">Бүгд</button>
+                </div>
+              </div>
+
+              <div class="summary">
+                <div class="row"><span class="k">Нэгж үнэ</span><span class="v" id="sUnit">—</span></div>
+                <div class="row"><span class="k">Шимтгэл (0.1%)</span><span class="v" id="sFee">—</span></div>
+                <div class="row total"><span class="k">Нийт төлбөр</span><span class="v" id="sTotal">₮0</span></div>
+              </div>
+
+              <div class="balance-line" id="balLine">
+                <span class="k">Боломжит үлдэгдэл</span>
+                <span class="v" id="balVal">₮2,450,000</span>
+              </div>
+
+              <button class="submit" id="continueBtn" disabled>Үргэлжлүүлэх</button>
+              <div class="helper" id="helper">Эхлэхийн тулд бүтээгдэхүүн сонгоно уу.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div class="scrim" id="scrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="mhd">
+      <div class="lg" id="mLogo">D</div>
+      <div>
+        <div class="nm" id="mTitle">—</div>
+        <div class="tk" id="mTicker">—</div>
+      </div>
+      <button class="x" id="mClose" aria-label="Хаах">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="mbody">
+      <div class="msec">
+        <div class="eyebrow">Нөхцөл</div>
+        <div class="drow"><span class="k">Төрөл</span><span class="v" id="mType">—</span></div>
+        <div class="drow"><span class="k">Үр шим / Хүү</span><span class="v pos" id="mRate">—</span></div>
+        <div class="drow"><span class="k">Хугацаа</span><span class="v" id="mTerm">—</span></div>
+        <div class="drow"><span class="k">Дуусах огноо</span><span class="v" id="mMaturity">—</span></div>
+      </div>
+      <div class="msec">
+        <div class="eyebrow">Зардал</div>
+        <div class="drow"><span class="k">Нэгж үнэ</span><span class="v" id="mUnit">—</span></div>
+        <div class="drow"><span class="k">Тоо ширхэг</span><span class="v" id="mQty">—</span></div>
+        <div class="drow"><span class="k">Шимтгэл (0.1%)</span><span class="v" id="mFee">—</span></div>
+        <div class="drow big"><span class="k">Нийт төлбөр</span><span class="v" id="mTotal">—</span></div>
+      </div>
+      <div class="msec">
+        <div class="eyebrow">Хүлээгдэж буй өгөөж</div>
+        <div class="drow"><span class="k">Хугацааны эцэст</span><span class="v" id="mGross">—</span></div>
+        <div class="drow big"><span class="k">Цэвэр өгөөж</span><span class="v pos" id="mNet">—</span></div>
+      </div>
+      <div class="msec">
+        <div class="eyebrow">Баталгаажуулалт</div>
+        <div style="font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.5;margin-bottom:4px">
+          Бид таны бүртгэлтэй дугаар <b style="color:var(--text)">+976 •••• 4127</b> руу 6 оронтой код илгээлээ.
+        </div>
+        <div class="otp-row" id="otpRow">
+          <input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/>
+          <input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/><input maxlength="1" inputmode="numeric"/>
+        </div>
+        <div class="otp-meta"><span>Код 04:32 хүчинтэй</span><a href="#">Дахин илгээх</a></div>
+      </div>
+      <div class="disclaimer" style="margin-bottom:8px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 16H3l9-16z" stroke="#B7791F" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 10v4M12 16.5v.5" stroke="#B7791F" stroke-width="1.9" stroke-linecap="round"/></svg>
+        <p>Захиалга нь нөхцөл биелтэл хүчинтэй. Баталгаажуулсны дараа цуцлах боломжгүй.</p>
+      </div>
+    </div>
+    <div class="mfoot">
+      <button class="submit" id="confirmBtn" disabled>Захиалга баталгаажуулах</button>
+      <div class="helper" id="mHelper">Баталгаажуулахын тулд 6 оронтой кодоо оруулна уу.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const fmt = n => '₮' + Math.round(n).toLocaleString('en-US');
+  const TYPES = {
+    cd:    { label:'Хадгаламжийн сертификат', short:'ХС',  c1:'#2D6BFF', c2:'#4F46E5' },
+    trust: { label:'Итгэлцэл',                short:'ИТ',  c1:'#4F46E5', c2:'#7C3AED' },
+    inv:   { label:'Нэхэмжлэх',               short:'НЭ',  c1:'#0E9F6E', c2:'#0891B2' },
+    cp:    { label:'Арилжааны бичиг',         short:'АБ',  c1:'#FF6B2C', c2:'#DC2626' },
+  };
+  const MKT = [
+    { id:'dari',  bank:'Дарь Финанс ББСБ',      type:'trust', rate:23.0, unit:100000,  term:272, ticker:'DARI 2300 IT 270227', mat:'2027-02-27', avail:840,  total:1000, badge:'new' },
+    { id:'hotol', bank:'Хөтөлномгон ББСБ',      type:'trust', rate:22.0, unit:100000,  term:365, ticker:'HOTL 2200 IT 270618', mat:'2027-06-18', avail:1200, total:2000, badge:'new' },
+    { id:'micro', bank:'Микро Кредит ББСБ',     type:'trust', rate:21.5, unit:100000,  term:180, ticker:'MCRO 2150 IT 261220', mat:'2026-12-20', avail:430,  total:1500, badge:'active' },
+    { id:'capit', bank:'Капитрон банк',          type:'cd',    rate:14.5, unit:1000000, term:240, ticker:'CAPIT 1450 CD 270218',mat:'2027-02-18', avail:95,   total:300,  badge:'active' },
+    { id:'bogd',  bank:'Богд банк',              type:'cd',    rate:13.8, unit:1000000, term:180, ticker:'BOGD 1380 CD 261220', mat:'2026-12-20', avail:210,  total:400,  badge:null },
+    { id:'tdb',   bank:'Тээвэр хөгжлийн банк',   type:'inv',   rate:19.0, unit:500000,  term:90,  ticker:'TDBM 1900 IN 260921', mat:'2026-09-21', avail:60,   total:120,  badge:'new' },
+  ];
+  const SEC = [
+    { id:'s1', bank:'Дарь Финанс ББСБ',  type:'trust', rate:22.4, unit:101800, left:'248 хоног', qty:120, side:'sell', ticker:'DARI 2300 IT 270227' },
+    { id:'s2', bank:'Капитрон банк',      type:'cd',    rate:14.2, unit:1012000,left:'226 хоног', qty:18,  side:'sell', ticker:'CAPIT 1450 CD 270218' },
+    { id:'s3', bank:'Микро Кредит ББСБ', type:'trust', rate:21.8, unit:100900, left:'162 хоног', qty:75,  side:'buy',  ticker:'MCRO 2150 IT 261220' },
+    { id:'s4', bank:'Тээвэр хөгжлийн банк',type:'inv', rate:18.6, unit:503400, left:'78 хоног',  qty:40,  side:'sell', ticker:'TDBM 1900 IN 260921' },
+    { id:'s5', bank:'Богд банк',          type:'cd',    rate:13.6, unit:1008500,left:'168 хоног', qty:32,  side:'buy',  ticker:'BOGD 1380 CD 261220' },
+    { id:'s6', bank:'Хөтөлномгон ББСБ',   type:'trust', rate:21.9, unit:101200, left:'351 хоног', qty:210, side:'sell', ticker:'HOTL 2200 IT 270618' },
+    { id:'s7', bank:'Дарь Финанс ББСБ',  type:'trust', rate:22.1, unit:101500, left:'248 хоног', qty:55,  side:'buy',  ticker:'DARI 2300 IT 270227' },
+  ];
+
+  const BAL = 2450000;
+  const state = { side:'buy', sel:null, qty:0, filter:'all', mkt:'primary' };
+
+  const initials = s => s.replace('ББСБ','').replace('банк','').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  const grad = t => `linear-gradient(135deg, ${TYPES[t].c1}, ${TYPES[t].c2})`;
+
+  // ---------- render market grid ----------
+  const grid = document.getElementById('mktGrid');
+  function renderGrid(){
+    const list = MKT.filter(m => state.filter==='all' || m.type===state.filter);
+    grid.innerHTML = list.map(m => {
+      const pct = Math.round(m.avail/m.total*100);
+      const badge = m.badge==='new' ? '<span class="badge new">Шинэ</span>'
+                  : m.badge==='active' ? '<span class="badge active">Идэвхтэй</span>' : '';
+      return `<div class="mcard${state.sel&&state.sel.id===m.id?' sel':''}" data-id="${m.id}">
+        <div class="top">
+          <div class="logo" style="background:${grad(m.type)}">${initials(m.bank)}</div>
+          <div class="bk"><div class="nm">${m.bank}</div><div class="tk mono">${m.ticker}</div></div>
+          ${badge}
+        </div>
+        <div class="rate">
+          <span class="v">${m.rate.toFixed(1)}</span><span class="u">%</span>
+          <span class="lab">${TYPES[m.type].label}</span>
+        </div>
+        <div class="specs">
+          <div class="row"><span class="k">Нэрлэсэн үнэ</span><span class="v">${fmt(m.unit)}</span></div>
+          <div class="row"><span class="k">Хугацаа</span><span class="v">${m.term} хоног</span></div>
+        </div>
+        <div class="avail">
+          <div class="track"><div class="fill" style="width:${pct}%"></div></div>
+          <div class="lab"><span>Үлдсэн ширхэг</span><span><b>${m.avail.toLocaleString('en-US')}</b> / ${m.total.toLocaleString('en-US')}</span></div>
+        </div>
+        <button class="cta" data-buy="${m.id}">Авах</button>
+      </div>`;
+    }).join('');
+  }
+
+  // ---------- render secondary table ----------
+  const secBody = document.getElementById('secBody');
+  function renderSec(){
+    const list = SEC.filter(m => state.filter==='all' || m.type===state.filter);
+    secBody.innerHTML = list.map(m => `<tr data-id="${m.id}" data-sec="1">
+      <td><div class="bn"><div class="lg" style="background:${grad(m.type)}">${initials(m.bank)}</div><div><div class="nm">${m.bank}</div><div class="tk">${m.ticker}</div></div></div></td>
+      <td><span class="type-pill ${m.side}">${m.side==='buy'?'Авах':'Зарах'}</span></td>
+      <td class="r">${m.left}</td>
+      <td class="r" style="color:var(--pos)">${m.rate.toFixed(1)}%</td>
+      <td class="r">${fmt(m.unit)}</td>
+      <td class="r">${m.qty}</td>
+    </tr>`).join('');
+  }
+
+  // ---------- order ticket ----------
+  const selWrap = document.getElementById('selWrap');
+  const qtyInput = document.getElementById('qty');
+  const maxHint = document.getElementById('maxHint');
+  const continueBtn = document.getElementById('continueBtn');
+  const helper = document.getElementById('helper');
+
+  function maxQty(){
+    if(!state.sel) return 0;
+    if(state.side==='buy'){
+      const perUnit = state.sel.unit * 1.001;
+      return Math.min(state.sel.avail||999, Math.floor(BAL/perUnit));
+    }
+    return state.sel.owned || 0;
+  }
+
+  function renderSel(){
+    if(!state.sel){
+      selWrap.innerHTML = `<div class="empty-inst">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M7 7h11l-3-3M17 17H6l3 3" stroke="#4F46E5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="h">Бүтээгдэхүүн сонгоно уу</div>
+        <div class="p">Зүүн талын картаас бүтээгдэхүүн дээр дарж захиалгаа эхлүүлнэ.</div>
+      </div>`;
+      maxHint.textContent = 'боломжит: —';
+      return;
+    }
+    const m = state.sel;
+    selWrap.innerHTML = `<div class="sel-inst">
+      <div class="top">
+        <div class="lg" style="background:${grad(m.type)}">${initials(m.bank)}</div>
+        <div><div class="nm">${m.bank}</div><div class="tk">${m.ticker}</div></div>
+      </div>
+      <div class="grid">
+        <div><div class="k">Үр шим / Хүү</div><div class="v pos">${m.rate.toFixed(1)}%</div></div>
+        <div><div class="k">Хугацаа</div><div class="v">${m.term||'—'}${m.term?' хоног':''}</div></div>
+        <div><div class="k">Нэрлэсэн үнэ</div><div class="v">${fmt(m.unit)}</div></div>
+        <div><div class="k">Төрөл</div><div class="v" style="font-size:12px;font-family:Manrope">${TYPES[m.type].label}</div></div>
+      </div>
+    </div>`;
+    maxHint.textContent = 'боломжит: ' + maxQty().toLocaleString('en-US');
+  }
+
+  function calc(){
+    const m = state.sel; const q = state.qty;
+    const unit = m? m.unit : 0;
+    const sub = unit*q;
+    const fee = sub*0.001;
+    const total = sub+fee;
+    document.getElementById('sUnit').textContent = m? fmt(unit) : '—';
+    document.getElementById('sFee').textContent = q>0? fmt(fee) : '—';
+    document.getElementById('sTotal').textContent = fmt(total);
+    return { unit, sub, fee, total };
+  }
+
+  function updateTicket(){
+    renderSel();
+    qtyInput.value = state.qty;
+    const { total } = calc();
+    const bal = document.getElementById('balLine');
+    const short = state.side==='buy' && total>BAL;
+    bal.classList.toggle('short', short);
+    document.getElementById('balVal').textContent = short ? '−'+fmt(total-BAL) : fmt(BAL);
+    bal.querySelector('.k').textContent = short ? 'Дутагдаж буй дүн' : 'Боломжит үлдэгдэл';
+
+    let ok = true, msg = '';
+    if(!state.sel){ ok=false; msg='Эхлэхийн тулд бүтээгдэхүүн сонгоно уу.'; }
+    else if(state.qty<=0){ ok=false; msg='Тоо ширхэгээ оруулна уу.'; }
+    else if(short){ ok=false; msg='Үлдэгдэл хүрэлцэхгүй байна. Хэтэвчээ цэнэглэнэ үү.'; }
+    else if(state.side==='buy' && state.sel.avail && state.qty>state.sel.avail){ ok=false; msg='Үлдсэн ширхэгээс хэтэрсэн байна.'; }
+    else { msg = (state.side==='buy'?'Авах':'Зарах')+' захиалгыг үргэлжлүүлнэ.'; }
+    continueBtn.disabled = !ok;
+    helper.textContent = msg;
+  }
+
+  function selectInstrument(m){
+    state.sel = m;
+    if(state.qty===0) state.qty = 1;
+    renderGrid();
+    updateTicket();
+    document.querySelector('.rail').scrollIntoView ? null : null;
+  }
+
+  // ---------- events ----------
+  grid.addEventListener('click', e=>{
+    const card = e.target.closest('.mcard'); if(!card) return;
+    const m = MKT.find(x=>x.id===card.dataset.id);
+    selectInstrument(m);
+    if(e.target.closest('[data-buy]')){ state.side='buy'; syncSide(); }
+  });
+  secBody.addEventListener('click', e=>{
+    const tr = e.target.closest('tr'); if(!tr) return;
+    const m = SEC.find(x=>x.id===tr.dataset.id);
+    state.side = m.side;
+    syncSide();
+    selectInstrument(m);
+    [...secBody.children].forEach(r=>r.classList.toggle('sel', r===tr));
+  });
+
+  function syncSide(){
+    document.querySelectorAll('#bsToggle button').forEach(b=>{
+      b.classList.toggle('on', b.dataset.side===state.side);
+    });
+  }
+  document.getElementById('bsToggle').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    state.side = b.dataset.side; syncSide(); updateTicket();
+  });
+
+  document.getElementById('qMinus').onclick = ()=>{ state.qty=Math.max(0,state.qty-1); updateTicket(); };
+  document.getElementById('qPlus').onclick = ()=>{ state.qty=state.qty+1; updateTicket(); };
+  qtyInput.addEventListener('input', ()=>{ state.qty=Math.max(0,parseInt(qtyInput.value||'0',10)); updateTicket(); });
+  document.querySelectorAll('.quick button').forEach(b=>{
+    b.onclick = ()=>{ state.qty = b.dataset.q==='max'? maxQty() : parseInt(b.dataset.q,10); updateTicket(); };
+  });
+
+  // filters
+  document.getElementById('filters').addEventListener('click', e=>{
+    const c = e.target.closest('.chip'); if(!c) return;
+    state.filter = c.dataset.f;
+    document.querySelectorAll('#filters .chip').forEach(x=>x.classList.toggle('active', x===c));
+    renderGrid(); renderSec();
+  });
+
+  // market toggle
+  document.getElementById('mktSeg').addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    state.mkt = b.dataset.mkt;
+    document.querySelectorAll('#mktSeg button').forEach(x=>x.classList.toggle('active', x===b));
+    const prim = state.mkt==='primary';
+    document.getElementById('mktGrid').style.display = prim?'grid':'none';
+    document.getElementById('secTable').style.display = prim?'none':'block';
+    document.querySelector('.page-title').textContent = prim?'Анхдагч зах зээл':'Хоёрдогч зах зээл';
+    document.querySelector('.page-sub').textContent = prim?'ББСБ болон банкуудын шинээр зарласан бүтээгдэхүүн':'Бусад хэрэглэгчдийн зарж буй бүтээгдэхүүн';
+  });
+
+  // ---------- modal ----------
+  const scrim = document.getElementById('scrim');
+  function openModal(){
+    const m=state.sel; if(!m) return;
+    const { unit, fee, total } = calc();
+    const gross = unit*state.qty*(1+m.rate/100*((m.term||365)/365));
+    const net = gross-total;
+    document.getElementById('mLogo').textContent = initials(m.bank);
+    document.getElementById('mLogo').style.background = grad(m.type);
+    document.getElementById('mTitle').textContent = m.bank;
+    document.getElementById('mTicker').textContent = m.ticker;
+    document.getElementById('mType').textContent = (state.side==='buy'?'Авах · ':'Зарах · ')+TYPES[m.type].label;
+    document.getElementById('mRate').textContent = m.rate.toFixed(1)+'%';
+    document.getElementById('mTerm').textContent = (m.term||'—')+(m.term?' хоног':'');
+    document.getElementById('mMaturity').textContent = m.mat||'—';
+    document.getElementById('mUnit').textContent = fmt(unit);
+    document.getElementById('mQty').textContent = state.qty.toLocaleString('en-US')+' ширхэг';
+    document.getElementById('mFee').textContent = fmt(fee);
+    document.getElementById('mTotal').textContent = fmt(total);
+    document.getElementById('mGross').textContent = fmt(gross);
+    document.getElementById('mNet').textContent = '+'+fmt(net);
+    document.querySelectorAll('#otpRow input').forEach(i=>i.value='');
+    document.getElementById('confirmBtn').disabled = true;
+    document.getElementById('mHelper').textContent = 'Баталгаажуулахын тулд 6 оронтой кодоо оруулна уу.';
+    scrim.classList.add('show');
+    setTimeout(()=>document.querySelector('#otpRow input').focus(),60);
+  }
+  function closeModal(){ scrim.classList.remove('show'); }
+  continueBtn.onclick = openModal;
+  document.getElementById('mClose').onclick = closeModal;
+  scrim.addEventListener('click', e=>{ if(e.target===scrim) closeModal(); });
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+  // OTP behavior
+  const otps = [...document.querySelectorAll('#otpRow input')];
+  function otpCheck(){
+    const filled = otps.every(i=>i.value.length===1);
+    document.getElementById('confirmBtn').disabled = !filled;
+    document.getElementById('mHelper').textContent = filled ? 'Код хүлээн авлаа. Захиалгаа баталгаажуулна уу.' : 'Баталгаажуулахын тулд 6 оронтой кодоо оруулна уу.';
+  }
+  otps.forEach((inp,i)=>{
+    inp.addEventListener('input', ()=>{ inp.value=inp.value.replace(/\D/g,'').slice(0,1); if(inp.value&&otps[i+1]) otps[i+1].focus(); otpCheck(); });
+    inp.addEventListener('keydown', e=>{ if(e.key==='Backspace'&&!inp.value&&otps[i-1]){ otps[i-1].focus(); } });
+  });
+  document.getElementById('confirmBtn').onclick = ()=>{
+    const btn=document.getElementById('confirmBtn');
+    btn.textContent='Баталгаажуулж байна…'; btn.disabled=true;
+    setTimeout(()=>{ btn.textContent='Захиалга амжилттай ✓'; btn.style.background='var(--pos)';
+      setTimeout(()=>{ closeModal(); btn.textContent='Захиалга баталгаажуулах'; btn.style.background=''; state.qty=0; updateTicket(); },1100);
+    },900);
+  };
+
+  // init
+  renderGrid(); renderSec(); updateTicket(); syncSide();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Нүүр — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_status.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx?v=f3"></script>
+<script type="text/babel" src="../holdings_summary.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<script type="text/babel" src="../order_modal.jsx?v=f3"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+
+  /* preview-only state switcher — not part of the shipped screen */
+  .scn-switch { position: fixed; top: 18px; right: 22px; z-index: 90; display: flex; align-items: center; gap: 10px; background: rgba(11,16,32,.92); backdrop-filter: blur(6px); border-radius: 14px; padding: 8px 10px 8px 14px; box-shadow: 0 10px 30px -10px rgba(0,0,0,.45); }
+  .scn-switch__label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #A8AFC9; }
+  .scn-btn { border: none; background: transparent; color: #C4C9DE; font-size: 12.5px; font-weight: 700; padding: 7px 12px; border-radius: 9px; cursor: pointer; font-family: inherit; }
+  .scn-btn.active { background: #4F46E5; color: #fff; }
+
+  /* card hover states (inline styles can't express :hover) */
+  .hover-card { transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease; }
+  .holding-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -18px rgba(15,20,55,.34); border-color: #DDE1EE; }
+  .product-card { transition: transform .18s ease, box-shadow .18s ease; }
+  .product-card:hover { transform: translateY(-3px); box-shadow: 0 20px 42px -22px rgba(15,20,55,.42); }
+  .product-card:hover .product-cta { gap: 10px; }
+  .product-cta { transition: gap .18s ease; }
+  .edu-card { transition: transform .18s ease, box-shadow .18s ease; }
+  .edu-card:hover { transform: translateY(-3px); box-shadow: 0 20px 42px -22px rgba(15,20,55,.4); }
+  .news-item { transition: background .14s ease; border-radius: 12px; }
+  .news-item:hover { background: #F6F7FB; }
+  .wallet-qa { transition: background .14s ease, border-color .14s ease; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+const {
+  T, WebBadge, WebButton, WebSkeletonBlock, WebEmptyState,
+  WebSegmentedControl, WebUnderlineTabs, WebDataTable,
+  WebSidebar, WebTopbar, WebPageHeader, OrderStatusBadge, WebConfirmDialog,
+} = window;
+const { ConfirmOrderModal } = window;
+const _mnt = n => window.formatMNT(n);
+
+/* ── Type palette + labels (shared with Trade/Wallet) ──────────── */
+const TC = { cd:{c1:'#2D6BFF',c2:'#4F46E5'}, trust:{c1:'#4F46E5',c2:'#7C3AED'}, inv:{c1:'#0E9F6E',c2:'#0891B2'}, cp:{c1:'#FF6B2C',c2:'#DC2626'} };
+const TL = { cd:'Хадгаламжийн сертификат', trust:'Итгэлцэл', inv:'Нэхэмжлэх', cp:'Арилжааны бичиг' };
+const init = s => s.replace('ББСБ','').replace(/банк/i,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+/* F3 · discount-% sell semantics apply only to Арилжааны бичиг (matches F2's trade config) */
+const SELL_DISCOUNT_TYPES = { cp:true };
+
+/* ── МИНИЙ БҮТЭЭГДЭХҮҮН — holdings (mobile Wallet model: mixed types, status).
+   unit × qty = value; onsale is DERIVED from the orders list (a matching
+   active sell order), never hardcoded, so cancelling always reverts it. ── */
+const HOLDINGS_FULL = [
+  { id:'h1', issuer:'Капитрон Банк',        type:'cd',    ticker:'CAPIT 1450 CD 270218', ab:'CD', unit:1025000, qty:8,  value:8200000,  rate:15.5, mat:'2027-02-18', matDays:278, term:365, status:'' },
+  { id:'h2', issuer:'Голден Хилл Партнерс', type:'trust', ticker:'GOLDH 2300 IT 270914', ab:'ИТ', unit:1000000, qty:12, value:12000000, rate:25.6, mat:'2027-09-14', matDays:327, term:365, status:'' },
+  { id:'h3', issuer:'Кредитекс СТМ ББСБ',   type:'trust', ticker:'MSTRT 2400 IT 260711', ab:'ИТ', unit:1300000, qty:5,  value:6500000,  rate:21.3, mat:'2026-07-11', matDays:5,   term:180, status:'soon' },
+  { id:'h4', issuer:'Мерит Финанс ББСБ',    type:'inv',   ticker:'INV 0820 11 260820',   ab:'НЭ', unit:4300000, qty:1,  value:4300000,  rate:18.0, mat:'2026-08-20', matDays:45,  term:90,  status:'' },
+  { id:'h5', issuer:'Эм Си Эс Холдинг',     type:'cp',    ticker:'NEXT 7500 CP 260715',  ab:'АБ', unit:3800000, qty:1,  value:3800000,  rate:7.5,  mat:'2026-07-15', matDays:12,  term:60,  status:'' },
+];
+
+/* ── sell math — mirrors trade_flow.jsx's calcOrder style: fee 0.1%,
+   buyer's annualized real yield from (payout-at-maturity − sale price). ── */
+function sellCalc(h, qty, priceInput, isDiscount) {
+  const salePrice = isDiscount ? Math.round(h.unit * (1 - priceInput/100)) : Math.max(0, Math.round(priceInput || 0));
+  const gross = salePrice * qty;
+  const fee = Math.round(gross * 0.001);
+  const proceeds = gross - fee;
+  const grossInterestUnit = h.unit * (h.rate/100) * (h.term/360);
+  const taxUnit = grossInterestUnit * 0.10;
+  const payoutUnit = h.unit + grossInterestUnit - taxUnit;
+  const buyerYield = salePrice > 0 && h.matDays > 0 ? ((payoutUnit - salePrice) / salePrice) * (360/h.matDays) * 100 : 0;
+  return { salePrice, gross, fee, total: proceeds, proceeds, payoutUnit, buyerYield };
+}
+
+/* ── 4 INVESTMENT PRODUCTS — the visual focal point (route to trade) ── */
+const PRODUCTS = [
+  { type:'cd',    t:'Хадгаламжийн сертификат', n:'12 нээлттэй', y:'11.8 – 14.5%' },
+  { type:'trust', t:'Итгэлцэл',                n:'8 нээлттэй',  y:'19.5 – 23.0%' },
+  { type:'inv',   t:'Нэхэмжлэх',               n:'5 нээлттэй',  y:'17.0 – 21.0%' },
+  { type:'cp',    t:'Арилжааны бичиг',         n:'2 нээлттэй',  y:'6.5 – 8.0%'   },
+];
+
+/* ── EDUCATION carousel (mobile spec) ── */
+const EDU_CARDS = [
+  { key:'trust',  kind:'video',   t:'Итгэлцэл (Trust) гэж юу вэ?',        meta:'3:20',        tagline:'Шинэхэн хөрөнгө оруулагчдад', c1:'#6D4FD0', c2:'#9333EA' },
+  { key:'mmf',    kind:'article', t:'Мөнгөний зах зээлийн сан гэж юу вэ?', meta:'4 мин унших', tagline:'Үндсэн ойлголт',              c1:'#2D6BFF', c2:'#0EA5E9' },
+  { key:'market', kind:'article', t:'Анхдагч ба хоёрдогч зах зээл',        meta:'3 мин унших', tagline:'Хэрхэн ялгах вэ',             c1:'#0E9F6E', c2:'#0891B2' },
+];
+
+const NEWS = [
+  { id:'n1', cat:'Зах зээл',     title:'ТБ: Хүүгийн хэмжээ тогтвортой хэвээр байна',         src:'Монцамэ', date: new Date(Date.now() - 2*3600000)   },
+  { id:'n2', cat:'Бүтээгдэхүүн', title:'Дарь Финанс ББСБ шинэ итгэлцэл гаргалаа',             src:'MMF',     date: new Date(Date.now() - 14*3600000)  },
+  { id:'n3', cat:'Зохицуулалт',  title:'СЗХ 2026 оны хагас жилийн тайланг нийтэллээ',         src:'СЗХ',     date: new Date(Date.now() - 2*86400000)  },
+  { id:'n4', cat:'Эдийн засаг',  title:'Монголбанк: Инфляц 7.2%-д хүрч буй дохио илэрхийлэв', src:'МБ',      date: new Date(Date.now() - 5*86400000)  },
+];
+const CAT_COLOR = { 'Зах зээл':T.blue, 'Бүтээгдэхүүн':T.pos, 'Зохицуулалт':T.warn, 'Эдийн засаг':T.indigo };
+
+const ORDERS_FULL = [
+  { id:'o1', bank:'Дарь Финанс ББСБ',  type:'trust', ticker:'DARI 2300 IT 270227',  side:'buy',  qty:5, total:500500,   status:'new',       date:'2026-06-01' },
+  { id:'o2', bank:'Хөтөлномгон ББСБ',  type:'trust', ticker:'HOTL 2200 IT 270618',  side:'buy',  qty:3, total:300300,   status:'pending',   date:'2026-05-15' },
+  { id:'o3', bank:'Капитрон банк',      type:'cd',    ticker:'CAPIT 1450 CD 270218', side:'buy',  qty:1, total:1001000,  status:'active',    date:'2026-04-10' },
+  { id:'o4', bank:'Голден Хилл',        type:'trust', ticker:'GOLDH 2300 IT 270914', side:'sell', qty:2, total:2400000,  status:'active',    date:'2026-06-18' },
+  { id:'o5', bank:'Анлок ББСБ',         type:'trust', ticker:'ANLK 2450 IT 270701',  side:'buy',  qty:2, total:200400,   status:'cancelled', date:'2026-03-22' },
+  { id:'o6', bank:'Мерит Финанс ББСБ',  type:'inv',   ticker:'INV 0820 11 260305',   side:'buy',  qty:1, total:4100000,  status:'filled',    date:'2026-03-05' },
+];
+
+const CHART_DATA_FULL = [
+  { label:'2026.01', value:1920000 }, { label:'2026.02', value:1880000 },
+  { label:'2026.03', value:2100000 }, { label:'2026.04', value:2250000 },
+  { label:'2026.05', value:2180000 }, { label:'2026.06', value:2450000 },
+];
+
+const WALLET_BAL = { full:12000000, partial:3250000, empty:0 };
+
+/* ══════════════════════════════════════════════════════════════════
+   МИНИЙ БҮТЭЭГДЭХҮҮН — a holding rendered as a product card
+   logo + product name (sized per update rules) + value + rate +
+   term progress + status (incl. Зарагдаж байгаа).
+   ══════════════════════════════════════════════════════════════════ */
+const HoldingCard = ({ h, onSell }) => {
+  const tc = TC[h.type] || TC.trust;
+  const pct = Math.max(3, Math.min(100, Math.round(((h.term - h.matDays) / h.term) * 100)));
+  const badge = h.status === 'onsale'
+    ? { t:'Зарагдаж байна', fg:T.warn, bg:T.warnSoft }
+    : h.status === 'soon'
+    ? { t:'Удахгүй өгөөж · ' + h.matDays + ' хоног', fg:T.pos, bg:T.posSoft }
+    : { t:'Идэвхтэй', fg:T.muted, bg:'#F4F5F9' };
+  return (
+    <div className="holding-card hover-card" style={{
+      display:'flex', flexDirection:'column', gap:14, padding:18,
+      background:T.surface, border:`1px solid ${T.line2}`, borderRadius:18, minWidth:0,
+    }}>
+      <div style={{ display:'flex', alignItems:'flex-start', gap:12, minWidth:0 }}>
+        <div style={{ width:42, height:42, borderRadius:12, background:`${tc.c1}18`, color:tc.c1, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:13, flexShrink:0 }}>{h.ab}</div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div className="truncate" title={h.issuer} style={{ fontSize:14.5, fontWeight:700, color:T.ink, letterSpacing:'-0.01em', lineHeight:1.25 }}>{h.issuer}</div>
+          <div className="truncate" style={{ fontSize:11, color:T.muted, fontWeight:600, marginTop:4 }}>
+            <span style={{ fontFamily:"'JetBrains Mono',monospace", color:T.text }}>{h.ticker.split(' ').slice(0,2).join(' ')}</span> · {TL[h.type]}
+          </div>
+        </div>
+        <div style={{ textAlign:'right', flexShrink:0 }}>
+          <div className="num" style={{ fontSize:15, fontWeight:800, color:T.ink, fontFamily:"'JetBrains Mono',monospace", fontVariantNumeric:'tabular-nums' }}>{formatMNT(h.value)}</div>
+          <div className="num" style={{ fontSize:12, fontWeight:700, color:T.pos, marginTop:2, fontFamily:"'JetBrains Mono',monospace" }}>{formatRate(h.rate)}</div>
+        </div>
+      </div>
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, flexWrap:'wrap', rowGap:6 }}>
+        <span style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'4px 10px', borderRadius:999, background:badge.bg, color:badge.fg, fontSize:11, fontWeight:700, whiteSpace:'nowrap' }}>
+          <span style={{ width:6, height:6, borderRadius:99, background:badge.fg }}/>{badge.t}
+        </span>
+        <span className="num" style={{ fontSize:11, color:T.muted, fontWeight:600, fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>Дуусах {formatDate(h.mat)}</span>
+      </div>
+      <div>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', gap:8, fontSize:11, color:T.muted, fontWeight:600, marginBottom:6 }}>
+          <span style={{ whiteSpace:'nowrap' }}>Хугацааны явц</span>
+          <span className="num" style={{ fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{h.matDays} хоног үлдсэн</span>
+        </div>
+        <div style={{ height:6, borderRadius:999, background:'#F0F2F8', overflow:'hidden' }}>
+          <div style={{ width:pct+'%', height:'100%', borderRadius:999, background:`linear-gradient(90deg, ${T.indigo}, ${T.blue})` }}/>
+        </div>
+      </div>
+      <div style={{ display:'flex', gap:8, marginTop:2 }}>
+        <a href="06 Wallet.html" style={{ flex:1, height:38, borderRadius:11, border:`1px solid ${T.line}`, background:T.surface, color:T.text, textDecoration:'none', fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', justifyContent:'center' }}>Дэлгэрэнгүй</a>
+        {h.status !== 'onsale' && (
+          <button onClick={() => onSell(h)} style={{ flex:1, height:38, borderRadius:11, border:`1.5px solid ${T.warn}`, background:'#fff', color:T.warn, fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>Зарах</button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ── 4 INVESTMENT PRODUCTS — aurora-blur focal cards (mobile Home grid) ── */
+const ProductCard = ({ p }) => {
+  const tc = TC[p.type];
+  return (
+    <a href="02 Trade Screen.html" className="product-card" style={{
+      textDecoration:'none', display:'flex', flexDirection:'column',
+      background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, padding:12, minWidth:0,
+    }}>
+      {/* soft aurora hero */}
+      <div style={{ height:132, borderRadius:15, position:'relative', overflow:'hidden', background:'linear-gradient(160deg, #FCFCFE 0%, #F3F5FC 100%)' }}>
+        <div style={{ position:'absolute', width:150, height:150, borderRadius:'50%', filter:'blur(34px)', background:tc.c1, opacity:.40, top:-34, left:-24 }}/>
+        <div style={{ position:'absolute', width:132, height:132, borderRadius:'50%', filter:'blur(38px)', background:tc.c2, opacity:.32, bottom:-40, right:-18 }}/>
+        <div style={{ position:'absolute', width:84, height:84, borderRadius:'50%', filter:'blur(26px)', background:'#fff', opacity:.62, top:34, right:42 }}/>
+        <span style={{ position:'absolute', left:14, top:14, display:'inline-flex', alignItems:'center', gap:6, padding:'5px 10px', borderRadius:999, background:'rgba(255,255,255,.72)', backdropFilter:'blur(4px)', fontSize:11, fontWeight:700, color:T.text }}>
+          <span style={{ width:7, height:7, borderRadius:99, background:tc.c1 }}/>{p.n}
+        </span>
+      </div>
+      <div style={{ padding:'14px 6px 6px' }}>
+        <div style={{ fontSize:16, fontWeight:800, color:T.ink, letterSpacing:'-0.01em', lineHeight:1.25, minHeight:40, textWrap:'pretty' }}>{p.t}</div>
+        <div className="num" style={{ fontSize:13, color:T.muted, fontWeight:600, marginTop:8 }}>
+          <span style={{ color:T.pos, fontWeight:800, fontFamily:"'JetBrains Mono',monospace" }}>{p.y}</span> өгөөж
+        </div>
+        <div className="product-cta" style={{ marginTop:14, display:'inline-flex', alignItems:'center', gap:6, fontSize:13, fontWeight:800, color:T.indigo }}>
+          Худалдаж авах
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke={T.indigo} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+      </div>
+    </a>
+  );
+};
+
+/* ── EDUCATION card (mobile spec — video / article, distinct gradient) ── */
+const EduCard = ({ c }) => (
+  <a href={'14 Education.html?id=' + c.key} className="edu-card" style={{
+    textDecoration:'none', display:'flex', flexDirection:'column', minWidth:0,
+    background:T.surface, borderRadius:18, overflow:'hidden', border:`1px solid ${T.line2}`,
+  }}>
+    <div style={{ height:118, background:`linear-gradient(150deg, ${c.c1}, ${c.c2})`, position:'relative', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <div style={{ position:'absolute', left:-18, bottom:-18, width:72, height:72, borderRadius:'50%', background:'rgba(255,255,255,.14)' }}/>
+      <div style={{ position:'absolute', right:16, top:16, width:28, height:28, borderRadius:'50%', border:'2px solid rgba(255,255,255,.3)' }}/>
+      {c.kind === 'video' ? (
+        <div style={{ width:52, height:52, borderRadius:'50%', background:'rgba(255,255,255,.95)', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 8px 20px -8px rgba(0,0,0,.4)' }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill={c.c1}/></svg>
+        </div>
+      ) : (
+        <div style={{ width:52, height:52, borderRadius:15, background:'rgba(255,255,255,.18)', border:'1px solid rgba(255,255,255,.3)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 5.5A2 2 0 016 4h5v15H6a2 2 0 01-2-2V5.5zM20 5.5A2 2 0 0018 4h-5v15h5a2 2 0 002-2V5.5z" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round"/></svg>
+        </div>
+      )}
+      <span style={{ position:'absolute', left:14, top:14, display:'inline-flex', alignItems:'center', gap:5, fontSize:10.5, fontWeight:800, color:'#fff', background:'rgba(0,0,0,.24)', padding:'4px 9px', borderRadius:999 }}>
+        {c.kind === 'video'
+          ? <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="#fff"/></svg>
+          : <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5z" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round"/></svg>}
+        {c.meta}
+      </span>
+    </div>
+    <div style={{ padding:15, flex:1, display:'flex', flexDirection:'column' }}>
+      <div style={{ fontSize:14, fontWeight:800, color:T.ink, lineHeight:1.3, letterSpacing:'-0.01em', minHeight:36, textWrap:'pretty' }}>{c.t}</div>
+      <div style={{ fontSize:11.5, color:T.muted, fontWeight:600, marginTop:6 }}>{c.tagline}</div>
+      <div style={{ marginTop:12, display:'inline-flex', alignItems:'center', gap:6, fontSize:12.5, fontWeight:800, color:c.c1 }}>
+        {c.kind === 'video' ? 'Үзэх' : 'Унших'}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke={c.c1} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+    </div>
+  </a>
+);
+
+/* ── Right rail · wallet balance mini-card + quick actions ── */
+const WalletMiniCard = ({ balance }) => {
+  const zero = balance === 0;
+  return (
+    <div style={{ background:`linear-gradient(135deg, ${T.navy} 0%, #1B2140 100%)`, borderRadius:20, padding:'22px 22px 20px', color:'#fff', position:'relative', overflow:'hidden' }}>
+      <div style={{ position:'absolute', right:-46, top:-46, width:170, height:170, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,107,44,.35), transparent 70%)' }}/>
+      <div style={{ position:'relative' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ fontSize:11.5, fontWeight:700, opacity:.68, letterSpacing:'.06em', textTransform:'uppercase' }}>Хэтэвчний үлдэгдэл</div>
+          <span style={{ background:'rgba(255,255,255,.12)', padding:'3px 9px', borderRadius:999, fontSize:10.5, fontWeight:700 }}>MNT</span>
+        </div>
+        <div className="num" style={{ fontSize:32, fontWeight:800, letterSpacing:'-0.02em', marginTop:10, fontFamily:"'JetBrains Mono',monospace" }}>{formatMNT(balance)}</div>
+        <div className="num" style={{ fontSize:11, opacity:.55, fontWeight:600, marginTop:6, fontFamily:"'JetBrains Mono',monospace" }}>№ 200001281 · Хаан Банк ••••450</div>
+        <div style={{ display:'flex', gap:10, marginTop:18 }}>
+          <a href="06 Wallet.html" className="wallet-qa" style={{ flex:1, height:44, borderRadius:12, background:'#fff', color:T.ink, textDecoration:'none', fontWeight:800, fontSize:13, display:'flex', alignItems:'center', justifyContent:'center', gap:7 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke={T.pos} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Орлого
+          </a>
+          <a href={zero ? undefined : '06 Wallet.html'} className="wallet-qa" aria-disabled={zero} style={{ flex:1, height:44, borderRadius:12, background:'rgba(255,255,255,.10)', color: zero?'rgba(255,255,255,.4)':'#fff', border:'1px solid rgba(255,255,255,.22)', textDecoration:'none', fontWeight:700, fontSize:13, display:'flex', alignItems:'center', justifyContent:'center', gap:7, pointerEvents: zero?'none':'auto' }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7 7 7-7" stroke={zero?'rgba(255,255,255,.4)':'#fff'} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Зарлага
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── F-12 · repayment / monthly-flow chart — real empty state, never bare axis
+   (moved into the wallet context per F0 map). ── */
+const FlowChart = ({ data, nextMaturity }) => {
+  const [hi, setHi] = useState(null);
+  if (!data || data.length < 2) return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:10, textAlign:'center', padding:'20px 6px' }}>
+      <div style={{ width:48, height:48, borderRadius:13, background:T.line2, display:'flex', alignItems:'center', justifyContent:'center' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 20l4-4 4 2 4-8 4 4" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </div>
+      <div style={{ fontSize:13.5, fontWeight:700, color:T.ink }}>{nextMaturity ? 'Түүх хуримтлагдаж байна' : 'Хөдөлгөөн алга'}</div>
+      <div style={{ fontSize:12, color:T.muted, maxWidth:230, lineHeight:1.5 }}>
+        {nextMaturity ? 'Гүйлгээ хуримтлагдмагц энд урсгал харагдана.' : 'Хэтэвчээ цэнэглэж, хөрөнгө оруулж эхлэхэд энд харагдана.'}
+      </div>
+      {nextMaturity && (
+        <div style={{ display:'inline-flex', alignItems:'center', gap:7, marginTop:2, padding:'6px 12px', borderRadius:99, background:T.indigoSoft, fontSize:11.5, fontWeight:700, color:T.indigo }}>
+          <span style={{ width:6, height:6, borderRadius:99, background:T.indigo }}/>
+          Дараагийн төлөлт: <span className="num" style={{ fontFamily:"'JetBrains Mono',monospace" }}>{formatDate(nextMaturity)}</span>
+        </div>
+      )}
+    </div>
+  );
+  /* Bars, not a bare sparkline: each month's interest income is a readable
+     amount. Headline = this month + MoM delta; hover any bar for its ₮ value. */
+  const MONO = "'JetBrains Mono',monospace";
+  const vals = data.map(d => d.value);
+  const max = Math.max(...vals);
+  const idx = hi != null ? hi : data.length-1;
+  const shownVal = data[idx].value;
+  const prevVal = idx > 0 ? vals[idx-1] : null;
+  const delta = prevVal ? (shownVal-prevVal)/prevVal*100 : null;
+  const up = delta != null && delta >= 0;
+  const active = hi != null ? data[hi] : null;
+  const avg = Math.round(vals.reduce((s,v)=>s+v,0)/vals.length);
+  const H = 104;
+  return (
+    <div>
+      <div style={{ display:'flex', alignItems:'baseline', gap:9, flexWrap:'wrap' }}>
+        <span className="num" style={{ fontSize:24, fontWeight:800, color:T.ink, fontFamily:MONO, letterSpacing:'-0.02em' }}>{formatMNT(shownVal)}</span>
+        {delta != null && (
+          <span style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:11.5, fontWeight:700, color: up?T.pos:T.neg, background: up?T.posSoft:T.negSoft, padding:'3px 8px', borderRadius:99 }}>
+            {up ? '▲' : '▼'} {Math.abs(delta).toFixed(1)}%
+          </span>
+        )}
+        <span style={{ fontSize:11.5, color:T.muted, fontWeight:600 }}>{active ? active.label : 'өнгөрсөн сараас'}</span>
+      </div>
+      <div style={{ position:'relative', marginTop:12 }}>
+        <div style={{ display:'flex', justifyContent:'flex-end', fontSize:10, fontWeight:700, color:T.muted2, fontFamily:MONO, marginBottom:4 }}>
+          <span style={{ display:'inline-flex', alignItems:'center', gap:5 }}><span style={{ width:14, borderTop:'1px dashed #A8AFC6' }}/>дундаж {formatMNT(avg)}</span>
+        </div>
+        <div style={{ position:'relative' }}>
+        <div style={{ position:'absolute', left:0, right:0, top:H*(1-avg/max), borderTop:'1px dashed #A8AFC6', pointerEvents:'none' }}/>
+        <div style={{ display:'flex', alignItems:'flex-end', gap:8, height:H }} onMouseLeave={()=>setHi(null)}>
+          {data.map((d,i) => {
+            const on = hi===i, isCur = i===data.length-1;
+            return (
+              <div key={d.label} onMouseEnter={()=>setHi(i)} style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'flex-end', height:'100%', cursor:'pointer' }}>
+                <div style={{ height:`${Math.max((d.value/max)*100, 6)}%`, borderRadius:'6px 6px 2px 2px', background: on||isCur ? T.indigo : T.indigoSoft, border:`1px solid ${on||isCur ? T.indigo : T.indigoBorder}`, transition:'background .15s' }}/>
+              </div>
+            );
+          })}
+        </div>
+        </div>
+      </div>
+      <div style={{ display:'flex', gap:8, marginTop:7, paddingTop:8, borderTop:`1px solid ${T.line2}` }}>
+        {data.map((d,i) => <span key={d.label} style={{ flex:1, textAlign:'center', fontSize:10.5, fontWeight: hi===i||i===data.length-1 ? 800 : 600, color: hi===i||i===data.length-1 ? T.ink : T.muted, fontFamily:MONO }}>{d.label.slice(5)}</span>)}
+      </div>
+    </div>
+  );
+};
+
+/* ── Right rail · upcoming maturities ── */
+const UpcomingPayments = ({ holdings }) => {
+  const rows = holdings.slice().sort((a,b)=>a.matDays-b.matDays).slice(0,3);
+  if (!rows.length) return null;
+  return (
+    <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+      <div style={{ padding:'16px 20px', borderBottom:`1px solid ${T.line2}`, fontSize:14.5, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Удахгүй төлөгдөх</div>
+      <div style={{ padding:'6px 12px 10px' }}>
+        {rows.map(h => {
+          const tc = TC[h.type]||TC.trust;
+          const soon = h.matDays <= 14;
+          return (
+            <div key={h.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'11px 8px' }}>
+              <div style={{ width:34, height:34, borderRadius:9, background:`${tc.c1}18`, color:tc.c1, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:800, fontSize:11, flexShrink:0 }}>{h.ab}</div>
+              <div style={{ flex:1, minWidth:0 }}>
+                <div className="truncate" style={{ fontSize:12.5, fontWeight:700, color:T.ink }}>{h.issuer}</div>
+                <div className="num" style={{ fontSize:11, color:T.muted, fontWeight:600, marginTop:2, fontFamily:"'JetBrains Mono',monospace" }}>{formatDate(h.mat)}</div>
+              </div>
+              <span className="num" style={{ fontSize:11.5, fontWeight:700, color: soon?T.warn:T.muted, background: soon?T.warnSoft:'#F4F5F9', padding:'4px 9px', borderRadius:999, whiteSpace:'nowrap', flexShrink:0 }}>{h.matDays} хоног</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/* ── F-08 · first-time onboarding card (replaces holdings when all ₮0) ── */
+const ONBOARD_STEPS = [
+  { n:1, title:'Хэтэвч цэнэглэх',      body:'Дансаа баталгаажуулж, хэтэвчээ цэнэглээрэй.',                  icon:<path d="M4 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" stroke="currentColor" strokeWidth="1.8"/>, href:'06 Wallet.html' },
+  { n:2, title:'Бүтээгдэхүүн сонгох',  body:'Хадгаламжийн сертификат, Итгэлцэл гэх мэт багцаас сонгоно уу.', icon:<path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>, href:'02 Trade Screen.html' },
+  { n:3, title:'Эхний захиалгаа хийх', body:'Хүссэн хэмжээгээрээ анхны хөрөнгө оруулалтаа хийнэ үү.',        icon:<path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>, href:'02 Trade Screen.html' },
+];
+const OnboardingCard = () => (
+  <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, padding:22 }}>
+    <div style={{ fontSize:16, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Эхлэхэд бэлэн үү?</div>
+    <div style={{ fontSize:13, color:T.muted, fontWeight:600, marginTop:4, marginBottom:16 }}>Гурван энгийн алхмаар анхны хөрөнгө оруулалтаа хийнэ үү.</div>
+    <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+      {ONBOARD_STEPS.map((s,i) => (
+        <a key={s.n} href={s.href} className="news-item" style={{ display:'flex', alignItems:'center', gap:14, padding:'14px 12px', textDecoration:'none', borderTop:i?`1px solid ${T.line2}`:'none' }}>
+          <div style={{ width:38, height:38, borderRadius:11, background:T.indigoSoft, color:T.indigo, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none">{s.icon}</svg>
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:T.ink }}>{s.n}. {s.title}</div>
+            <div style={{ fontSize:12, color:T.muted, fontWeight:500, marginTop:2, lineHeight:1.4 }}>{s.body}</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0 }}><path d="M9 6l6 6-6 6" stroke={T.muted2} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </a>
+      ))}
+    </div>
+  </div>
+);
+
+/* ── Section header ── */
+const SectionHead = ({ title, sub, action, onAction }) => (
+  <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:16, marginBottom:14 }}>
+    <div style={{ minWidth:0 }}>
+      <div style={{ fontSize:18, fontWeight:800, color:T.ink, letterSpacing:'-0.02em' }}>{title}</div>
+      {sub && <div style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:3 }}>{sub}</div>}
+    </div>
+    {action && <a href={onAction} style={{ fontSize:13, fontWeight:700, color:T.indigo, textDecoration:'none', flexShrink:0, whiteSpace:'nowrap' }}>{action} →</a>}
+  </div>
+);
+
+/* ── Orders — compact list, F-14 underline tabs, cancel action ── */
+const IssuerCell = ({ r }) => {
+  const tc = TC[r.type]||TC.trust;
+  return (
+    <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+      <div style={{ width:32, height:32, borderRadius:9, background:`linear-gradient(135deg,${tc.c1},${tc.c2})`, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:800, fontSize:12, flexShrink:0 }}>{init(r.bank)}</div>
+      <div style={{ minWidth:0 }}>
+        <div className="truncate" title={r.bank} style={{ fontWeight:700, color:T.ink, fontSize:13, lineHeight:1.2 }}>{r.bank}</div>
+        <div className="truncate" style={{ fontSize:10.5, color:T.muted2, fontFamily:"'JetBrains Mono',monospace" }}>{r.ticker}</div>
+      </div>
+    </div>
+  );
+};
+
+const ORDER_TABS = [
+  { key:'all',       label:'Бүгд' },
+  { key:'active',    label:'Идэвхтэй' },
+  { key:'cancelled', label:'Цуцлагдсан' },
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   F3 · SELL SHEET — starts from a holding, never from the market page.
+   qty owned + qty to sell (clamped) + price/discount-% per vertical →
+   live "Таны гарт орох дүн" + buyer's computed yield → onContinue.
+   ══════════════════════════════════════════════════════════════════ */
+const _sRow = ({ l, v, tone, big }) => (
+  <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:12, padding:big?'11px 0':'8px 0', borderBottom:`1px solid ${T.line2}` }}>
+    <span style={{ fontSize:big?14:12.5, fontWeight:big?800:600, color:big?T.ink:T.muted, whiteSpace:'nowrap' }}>{l}</span>
+    <span className="num" style={{ fontSize:big?15:13, fontWeight:big?800:700, color:tone||T.ink, fontFamily:"'JetBrains Mono',monospace", textAlign:'right' }}>{v}</span>
+  </div>
+);
+
+const SellSheet = ({ holding, onClose, onContinue }) => {
+  const [qty, setQty]   = useState(1);
+  const [qtyErr, setQtyErr] = useState('');
+  const [price, setPrice] = useState(0);
+  const [discount, setDiscount] = useState(2);
+  useEffect(() => { if (holding) { setQty(1); setQtyErr(''); setPrice(holding.unit); setDiscount(2); } }, [holding && holding.id]);
+  if (!holding) return null;
+
+  const isDiscount = !!SELL_DISCOUNT_TYPES[holding.type];
+  const setQtyClamped = (v) => {
+    if (v === '' ) { setQty(''); setQtyErr(''); return; }
+    const n = parseInt(v, 10);
+    if (isNaN(n)) { setQty(''); return; }
+    if (n < 1) { setQty(n); setQtyErr('Хамгийн багадаа 1 ширхэг сонгоно уу.'); }
+    else if (n > holding.qty) { setQty(n); setQtyErr(`Танд ${holding.qty} ширхэг байна — түүнээс дээш зарах боломжгүй.`); }
+    else { setQty(n); setQtyErr(''); }
+  };
+  const qtyNum = typeof qty === 'number' && !isNaN(qty) ? qty : 0;
+  const calc = sellCalc(holding, Math.max(qtyNum,0), isDiscount ? discount : price, isDiscount);
+  const canContinue = qtyNum >= 1 && qtyNum <= holding.qty && calc.salePrice > 0;
+
+  return (
+    <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:60, background:'rgba(5,11,31,.4)', display:'flex', justifyContent:'flex-end' }}>
+      <div onClick={e => e.stopPropagation()} style={{ width:'min(468px, 94vw)', height:'100%', background:T.bg, boxShadow:'-24px 0 60px -24px rgba(15,20,55,.4)', display:'flex', flexDirection:'column', minWidth:0 }}>
+        {/* header */}
+        <div style={{ flexShrink:0, height:64, display:'flex', alignItems:'center', justifyContent:'space-between', gap:12, padding:'0 20px', background:T.surface, borderBottom:`1px solid ${T.line}` }}>
+          <div style={{ minWidth:0 }}>
+            <div className="truncate" style={{ fontSize:15, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>{holding.issuer}</div>
+            <div className="truncate" style={{ fontSize:11, fontWeight:600, color:T.muted2, fontFamily:"'JetBrains Mono',monospace", marginTop:2 }}>{holding.ticker} · Зарах захиалга</div>
+          </div>
+          <button onClick={onClose} aria-label="Хаах" style={{ width:38, height:38, borderRadius:11, border:`1px solid ${T.line}`, background:T.surface, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke={T.ink} strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
+        </div>
+
+        <div style={{ flex:1, overflowY:'auto', minHeight:0, padding:20, display:'flex', flexDirection:'column', gap:16 }}>
+          {/* holding summary */}
+          <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:16, padding:16 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,minmax(0,1fr))', gap:12 }}>
+              {[['Нэрлэсэн үнэ', _mnt(holding.unit)], ['Эзэмшиж буй', holding.qty+' ширхэг'], ['Үлдсэн хугацаа', holding.matDays+' хоног']].map(([k,v]) => (
+                <div key={k} style={{ minWidth:0 }}>
+                  <div style={{ fontSize:10.5, color:T.muted, fontWeight:600 }}>{k}</div>
+                  <div className="num truncate" style={{ fontSize:13, fontWeight:800, color:T.ink, marginTop:3, fontFamily:"'JetBrains Mono',monospace" }}>{v}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* qty to sell */}
+          <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:16, padding:16 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:T.text, marginBottom:8, display:'flex', justifyContent:'space-between' }}>
+              <span>Зарах тоо ширхэг</span><span style={{ color:T.muted, fontWeight:600 }}>эзэмшиж буй: {holding.qty}</span>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', border:`1.5px solid ${qtyErr?T.neg:T.line}`, borderRadius:13, background:T.field, overflow:'hidden' }}>
+              <button onClick={() => setQtyClamped(String(Math.max(1, qtyNum-1)))} style={{ width:48, height:50, border:'none', background:'transparent', fontSize:20, fontWeight:700, color:T.muted, cursor:'pointer', flexShrink:0, fontFamily:'inherit' }}>−</button>
+              <input type="number" value={qty} onChange={e => setQtyClamped(e.target.value)} style={{ flex:1, minWidth:0, border:'none', background:'transparent', textAlign:'center', fontFamily:"'JetBrains Mono',monospace", fontSize:18, fontWeight:700, color:T.ink, outline:'none' }}/>
+              <button onClick={() => setQtyClamped(String(Math.min(holding.qty, qtyNum+1)))} style={{ width:48, height:50, border:'none', background:'transparent', fontSize:20, fontWeight:700, color:T.muted, cursor:'pointer', flexShrink:0, fontFamily:'inherit' }}>+</button>
+            </div>
+            {qtyErr && <div style={{ fontSize:12, color:T.neg, fontWeight:600, marginTop:8 }}>{qtyErr}</div>}
+            <div style={{ display:'flex', gap:7, marginTop:10 }}>
+              {[1, Math.max(1,Math.ceil(holding.qty/2)), holding.qty].filter((v,i,a)=>a.indexOf(v)===i).map(q => <button key={q} onClick={() => setQtyClamped(String(q))} style={{ flex:1, height:32, borderRadius:9, border:`1px solid ${T.line}`, background:T.surface, fontSize:11.5, fontWeight:700, color:T.muted, cursor:'pointer', fontFamily:'inherit' }}>{q===holding.qty?'Бүгд':q}</button>)}
+            </div>
+          </div>
+
+          {/* price or discount-% — per vertical semantics */}
+          <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:16, padding:16 }}>
+            <div style={{ fontSize:12, fontWeight:700, color:T.text, marginBottom:8 }}>{isDiscount ? 'Хямдруулалтын хувь' : 'Нэгжийн зарах үнэ'}</div>
+            {isDiscount ? (
+              <div style={{ display:'flex', alignItems:'center', border:`1.5px solid ${T.line}`, borderRadius:13, background:T.field, padding:'0 8px 0 16px' }}>
+                <input type="number" value={discount} min={0} max={20} step={0.5} onChange={e => setDiscount(Math.max(0, Math.min(20, parseFloat(e.target.value||'0'))))} style={{ flex:1, minWidth:0, height:48, border:'none', background:'transparent', fontFamily:"'JetBrains Mono',monospace", fontSize:17, fontWeight:700, color:T.ink, outline:'none' }}/>
+                <span style={{ fontSize:16, fontWeight:800, color:T.muted, paddingRight:8 }}>%</span>
+              </div>
+            ) : (
+              <div style={{ display:'flex', alignItems:'center', border:`1.5px solid ${T.line}`, borderRadius:13, background:T.field, padding:'0 16px' }}>
+                <span style={{ fontSize:16, fontWeight:800, color:T.muted, paddingRight:8 }}>₮</span>
+                <input type="number" value={price} onChange={e => setPrice(Math.max(0, parseInt(e.target.value||'0',10)))} style={{ flex:1, minWidth:0, height:48, border:'none', background:'transparent', fontFamily:"'JetBrains Mono',monospace", fontSize:17, fontWeight:700, color:T.ink, outline:'none' }}/>
+              </div>
+            )}
+            <div style={{ fontSize:11, color:T.muted2, fontWeight:600, marginTop:8 }}>Зарах үнэ: <b style={{ color:T.text, fontFamily:"'JetBrains Mono',monospace" }}>{_mnt(calc.salePrice)}</b> / нэгж</div>
+          </div>
+
+          {/* live preview */}
+          <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:16, padding:'6px 16px 12px' }}>
+            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', color:T.muted2, textTransform:'uppercase', margin:'12px 0 6px' }}>Захиалгын тооцоо</div>
+            {_sRow({ l:'Нийт зарах дүн', v:_mnt(calc.gross) })}
+            {_sRow({ l:'Шимтгэл (0.1%)', v:'−'+_mnt(calc.fee) })}
+            {_sRow({ l:'Таны гарт орох дүн', v:_mnt(calc.total), big:true, tone:T.pos })}
+          </div>
+          <div style={{ background:T.indigoSoft, border:`1px solid ${T.indigoBorder}`, borderRadius:16, padding:'6px 16px 12px' }}>
+            <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', color:T.indigo, textTransform:'uppercase', margin:'12px 0 6px' }}>Худалдан авагчийн тооцоо</div>
+            {_sRow({ l:'Хугацааны эцэст авах (нэгж)', v:_mnt(calc.payoutUnit) })}
+            {_sRow({ l:'Жилийн бодит өгөөж', v:calc.buyerYield.toFixed(2)+'%', big:true, tone:T.indigo })}
+          </div>
+
+          <div style={{ background:T.warnSurface, borderRadius:14, padding:14, border:`1px solid ${T.warnBorder}`, display:'flex', gap:10 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink:0, marginTop:1 }}><path d="M12 8v5M12 17h.01" stroke={T.warn} strokeWidth="2.4" strokeLinecap="round"/><circle cx="12" cy="12" r="9" stroke={T.warn} strokeWidth="2" fill="none"/></svg>
+            <div style={{ fontSize:12, color:'#7A5A1F', lineHeight:1.5 }}>Энэ нь зарах захиалга үүсгэх үйлдэл. Худалдан авагч биелүүлсний дараа төлбөр тооцоо хийгдэнэ. Өгөөж нь зах зээлийн нөхцөлөөс хамааран өөрчлөгдөж болно.</div>
+          </div>
+        </div>
+
+        <div style={{ flexShrink:0, padding:'14px 20px', background:T.surface, borderTop:`1px solid ${T.line2}` }}>
+          <WebButton variant="neg" full disabled={!canContinue} reason={!canContinue ? (qtyErr || 'Зарах үнээ оруулна уу.') : undefined}
+            onClick={() => onContinue({ holding, qty:qtyNum, calc })}>Зарах захиалга үргэлжлүүлэх</WebButton>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ══════════════════════════════════════════════════════════════════ */
+const Home = () => {
+  const [loading, setLoading]   = useState(true);
+  // full | empty | partial — ?state= wins (portal deep-link), then the session's last choice
+  const [scenario, setScenario] = useState(() => {
+    const q = new URLSearchParams(location.search).get('state');
+    if (q === 'empty' || q === 'partial' || q === 'full') {
+      try { sessionStorage.setItem('mmf_web_state', q); } catch (e) {}
+      // A brand-new user owns nothing — drop any auto-invest plan a previous
+      // review session left in storage.
+      if (q === 'empty') { try { localStorage.removeItem('mmf_auto_plan_v1'); localStorage.removeItem('mmf_my_listings_v1'); } catch (e) {} }
+      return q;
+    }
+    try { const s = sessionStorage.getItem('mmf_web_state'); if (s) return s; } catch (e) {}
+    return 'full';
+  });
+  const [orderTab, setOrderTab] = useState('all');
+  const [orders, setOrders]     = useState(ORDERS_FULL);
+  const [sellTarget, setSellTarget] = useState(null);   // holding being sold
+  const [sellOrder, setSellOrder]   = useState(null);   // { inst, side, qty, calc } → confirm modal
+  const [sellOpen, setSellOpen]     = useState(false);
+  const [cancelTarget, setCancelTarget] = useState(null); // order pending cancel-confirm
+
+  useEffect(() => { const t = setTimeout(() => setLoading(false), 800); return () => clearTimeout(t); }, []);
+
+  // reset data whenever the preview scenario flips
+  useEffect(() => {
+    setOrders(scenario==='full' ? ORDERS_FULL : scenario==='partial' ? ORDERS_FULL.slice(0,2) : []);
+    setOrderTab('all');
+  }, [scenario]);
+
+  const baseHoldings = scenario==='full' ? HOLDINGS_FULL : scenario==='partial' ? HOLDINGS_FULL.slice(0,2) : [];
+  // F3 · зарагдаж байна is DERIVED from an active sell order for that ticker —
+  // cancelling the order always reverts the holding, never a separate flag to drift out of sync.
+  const onsaleTickers = new Set(orders.filter(o => o.side==='sell' && (o.status==='new'||o.status==='active'||o.status==='pending')).map(o => o.ticker));
+  const HOLDINGS = baseHoldings.map(h => onsaleTickers.has(h.ticker) ? { ...h, status:'onsale' } : h);
+  const CHART_DATA = scenario==='full' ? CHART_DATA_FULL : scenario==='partial' ? CHART_DATA_FULL.slice(-1) : [];
+  const balance    = WALLET_BAL[scenario];
+  const allZero    = HOLDINGS.length === 0;
+  const nextMaturity = HOLDINGS.length ? HOLDINGS.slice().sort((a,b)=>new Date(a.mat)-new Date(b.mat))[0].mat : null;
+  const onSaleCount = HOLDINGS.filter(h=>h.status==='onsale').length;
+
+  const requestCancel = (order) => setCancelTarget(order);
+  const confirmCancel = () => {
+    if (!cancelTarget) return;
+    setOrders(os => os.map(o => o.id===cancelTarget.id ? { ...o, status:'cancelled' } : o));
+    if (window.MMFListings) window.MMFListings.setStatus(cancelTarget.id, 'cancelled');
+    setCancelTarget(null);
+  };
+
+  const filteredOrders = orderTab==='all' ? orders : orderTab==='active' ? orders.filter(o=>o.status==='new'||o.status==='active'||o.status==='pending') : orders.filter(o=>o.status===orderTab);
+  const orderCounts = { all:orders.length, active:orders.filter(o=>o.status==='new'||o.status==='active'||o.status==='pending').length, cancelled:orders.filter(o=>o.status==='cancelled').length };
+
+  // F3 · sell flow: holding → sheet → R3 confirm modal (sell variant) → PIN → success
+  const openSell = (h) => setSellTarget(h);
+  const continueSell = ({ holding, qty, calc }) => {
+    const inst = { bank:holding.issuer, ticker:holding.ticker, type:holding.type, unit:calc.salePrice, rate:holding.rate, term:holding.matDays, mat:holding.mat };
+    setSellOrder({ inst, qty, calc: { fee:calc.fee, total:calc.total } });
+    setSellOpen(true);
+  };
+  const onSellConfirmed = () => {
+    if (!sellOrder) return;
+    const today = new Date().toISOString().slice(0,10);
+    const id = 'sl'+Date.now();
+    const newOrder = { id, bank:sellOrder.inst.bank, type:sellOrder.inst.type, ticker:sellOrder.inst.ticker, side:'sell', qty:sellOrder.qty, total:sellOrder.calc.total, status:'new', date:today };
+    setOrders(os => [newOrder, ...os]);
+    if (window.MMFListings) window.MMFListings.add(newOrder);
+  };
+  const closeSell = () => { setSellOpen(false); setSellOrder(null); setSellTarget(null); };
+
+  const ORDER_COLS = [
+    { key:'bank',  label:'Бүтээгдэхүүн', width:'30%', render: r => <IssuerCell r={r}/> },
+    { key:'side',  label:'Тал', render: r => <WebBadge tone={r.side==='buy'?'buy':'sell'}>{r.side==='buy'?'Авах':'Зарах'}</WebBadge> },
+    { key:'qty',   label:'Тоо', align:'right', mono:true, render: r => <span className="num">{r.qty} ширхэг</span> },
+    { key:'total', label:'Нийт дүн', align:'right', mono:true, render: r => <span className="num" style={{ fontWeight:800, color:T.ink }}>{formatMNT(r.total)}</span> },
+    { key:'status',label:'Статус', render: r => <OrderStatusBadge status={r.status}/> },
+    { key:'date',  label:'Огноо', align:'right', mono:true, render: r => <span className="num" style={{ color:T.muted }}>{formatDate(r.date)}</span> },
+    { key:'act',   label:'', align:'right', render: r => (
+        (r.status==='new'||r.status==='active'||r.status==='pending')
+          ? <button onClick={()=>requestCancel(r)} style={{ height:32, padding:'0 12px', borderRadius:9, border:`1px solid ${T.line}`, background:T.surface, color:T.neg, fontSize:12, fontWeight:700, cursor:'pointer', fontFamily:'inherit', whiteSpace:'nowrap' }}>Цуцлах</button>
+          : <span style={{ fontSize:12, color:T.muted2 }}>—</span>
+      ) },
+  ];
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      {/* preview-only state switcher */}
+      <div className="scn-switch">
+        <span className="scn-switch__label">Төлөв</span>
+        <button className={'scn-btn'+(scenario==='full'?' active':'')} onClick={()=>setScenario('full')}>Бүрэн</button>
+        <button className={'scn-btn'+(scenario==='empty'?' active':'')} onClick={()=>setScenario('empty')}>Эхний удаа</button>
+        <button className={'scn-btn'+(scenario==='partial'?' active':'')} onClick={()=>setScenario('partial')}>Хэсэгчилсэн</button>
+      </div>
+
+      <WebSidebar activePath="/dashboard"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Нүүр" notifCount={2}/>
+        <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+        <main id="mmf-main" tabIndex={-1} style={{ padding:'30px 36px 56px', maxWidth:1560, width:'100%', minWidth:0, outline:'none' }}>
+
+          <WebPageHeader title="Сайн байна уу, Тэмүүжин" subtitle={`Өнөөдөр ${formatDateTime(new Date())}`}/>
+
+          {/* ── Main composition — F-01 fluid grid, 340px rail, min-width:0 ── */}
+          <div style={{ display:'grid', gridTemplateColumns:'minmax(0,1fr) 340px', gap:24, alignItems:'start' }}>
+
+            {/* ═════ LEFT column ═════ */}
+            <div style={{ minWidth:0, display:'flex', flexDirection:'column', gap:32 }}>
+
+              {/* МИНИЙ БҮТЭЭГДЭХҮҮН (or F-08 first-time onboarding) */}
+              <section id="products-section" style={{ minWidth:0, scrollMarginTop:88 }}>
+                {/* The summary card carries its own title, count and total, so the
+                    section head would only repeat it — show it for the empty state. */}
+                {allZero && <SectionHead title="Миний бүтээгдэхүүн"/>}
+                {loading ? (
+                  <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+                    <WebSkeletonBlock variant="card" style={{ height:236 }}/>
+                    <WebSkeletonBlock variant="card" style={{ height:262 }}/>
+                  </div>
+                ) : allZero ? (
+                  <OnboardingCard/>
+                ) : (
+                  /* Summary only — the dashboard answers "how much, in what",
+                     never product-by-product. Per-position cards + the sell flow
+                     live on 17 My Products (see-all link in the card footer). */
+                  <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+                    <window.HoldingsSummaryCard holdings={HOLDINGS} note={onSaleCount ? `${onSaleCount} зарагдаж байна` : null}/>
+                    <window.MonthlyFlowChart data={window.FLOW_DATA}/>
+                  </div>
+                )}
+              </section>
+
+              {/* 4 INVESTMENT PRODUCTS — the visual focal point */}
+              <section style={{ minWidth:0 }}>
+                <SectionHead title="Хөрөнгө оруулах" sub="Дөрвөн төрлийн бүтээгдэхүүнээс сонгож худалдан авах" action="Бүгд" onAction="02 Trade Screen.html"/>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(236px,1fr))', gap:16 }}>
+                  {PRODUCTS.map(p => <ProductCard key={p.type} p={p}/>)}
+                </div>
+              </section>
+
+              {/* EDUCATION — visually distinct band */}
+              <section style={{ minWidth:0, background:'linear-gradient(180deg, #F3F1FF 0%, rgba(255,255,255,0) 100%)', border:`1px solid ${T.line2}`, borderRadius:24, padding:'22px 22px 24px' }}>
+                <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:16, marginBottom:16 }}>
+                  <div>
+                    <div style={{ display:'inline-flex', alignItems:'center', gap:8, fontSize:18, fontWeight:800, color:T.ink, letterSpacing:'-0.02em' }}>
+                      <span style={{ width:24, height:24, borderRadius:8, background:`linear-gradient(135deg, ${T.indigo}, ${T.blue})`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 7l9-4 9 4-9 4-9-4z" stroke="#fff" strokeWidth="2" strokeLinejoin="round"/><path d="M7 9.5V14c0 1.5 2.2 2.5 5 2.5s5-1 5-2.5V9.5" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
+                      </span>
+                      Суралцах
+                    </div>
+                    <div style={{ fontSize:12.5, color:T.muted, fontWeight:600, marginTop:5 }}>Хөрөнгө оруулалтаа богино видео, нийтлэлээр ойлгоё</div>
+                  </div>
+                  <a href="08 News.html" style={{ fontSize:13, fontWeight:700, color:T.indigo, textDecoration:'none', flexShrink:0, whiteSpace:'nowrap' }}>Бүгд →</a>
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))', gap:16 }}>
+                  {EDU_CARDS.map(c => <EduCard key={c.key} c={c}/>)}
+                </div>
+              </section>
+
+            </div>
+
+            {/* ═════ RIGHT rail ═════ */}
+            <aside style={{ minWidth:0, display:'flex', flexDirection:'column', gap:20 }}>
+              <WalletMiniCard balance={balance}/>
+
+              {/* F-12 · flow / repayment chart in wallet context */}
+              <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, padding:'18px 18px 14px' }}>
+                <div style={{ fontSize:14.5, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Сарын хүүгийн орлого</div>
+                <div style={{ fontSize:11.5, color:T.muted, fontWeight:600, margin:'3px 0 12px' }}>Байршуулалтаас хуримтлагдсан хүү · сүүлийн 6 сар</div>
+                {loading ? <WebSkeletonBlock variant="card" style={{ height:150 }}/> : <FlowChart data={CHART_DATA} nextMaturity={nextMaturity}/>}
+              </div>
+
+              {!allZero && <UpcomingPayments holdings={HOLDINGS}/>}
+
+              {/* News teasers */}
+              <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', borderBottom:`1px solid ${T.line2}` }}>
+                  <div style={{ fontSize:14.5, fontWeight:800, color:T.ink, letterSpacing:'-0.01em' }}>Мэдээ мэдээлэл</div>
+                  <a href="08 News.html" style={{ fontSize:12.5, fontWeight:700, color:T.indigo, textDecoration:'none' }}>Бүгд</a>
+                </div>
+                <div style={{ padding:'8px 12px 12px' }}>
+                  {loading
+                    ? [0,1,2].map(i => (
+                        <div key={i} style={{ padding:'12px 8px', display:'flex', flexDirection:'column', gap:8 }}>
+                          <WebSkeletonBlock variant="text" width="30%"/><WebSkeletonBlock variant="title" width="88%"/>
+                        </div>
+                      ))
+                    : NEWS.map(item => {
+                        const cc = CAT_COLOR[item.cat] || T.muted;
+                        return (
+                          <a key={item.id} href="08 News.html" className="news-item" style={{ display:'block', padding:'12px 8px', textDecoration:'none' }}>
+                            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:7, gap:10 }}>
+                              <span style={{ fontSize:10.5, fontWeight:700, color:cc, background:`${cc}1A`, padding:'2px 8px', borderRadius:99 }}>{item.cat}</span>
+                              <span className="num" style={{ fontSize:10.5, color:T.muted2, fontWeight:600, fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }}>{formatRelative(item.date)}</span>
+                            </div>
+                            <div title={item.title} style={{ fontSize:13, fontWeight:700, color:T.ink, lineHeight:1.4, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{item.title}</div>
+                            <div style={{ fontSize:11, color:T.muted, fontWeight:600, marginTop:5 }}>{item.src}</div>
+                          </a>
+                        );
+                      })
+                  }
+                </div>
+              </div>
+            </aside>
+          </div>
+
+          {/* ── Миний захиалгууд — F-14 underline tabs + cancel ── */}
+          <section id="orders-section" style={{ marginTop:32, scrollMarginTop:88 }}>
+            <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, overflow:'hidden', minWidth:0 }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 20px 0', gap:12, flexWrap:'wrap' }}>
+                <div style={{ fontSize:16, fontWeight:800, color:T.ink, letterSpacing:'-0.02em' }}>Миний захиалгууд</div>
+                <a href="06 Wallet.html" style={{ fontSize:13, fontWeight:700, color:T.indigo, textDecoration:'none' }}>Бүгдийг харах →</a>
+              </div>
+              <div style={{ padding:'14px 20px 0' }}>
+                <WebUnderlineTabs tabs={ORDER_TABS.map(t => ({ ...t, count: loading?undefined:orderCounts[t.key] }))} value={orderTab} onChange={setOrderTab}/>
+              </div>
+              <WebDataTable
+                columns={ORDER_COLS}
+                rows={loading ? [] : filteredOrders}
+                loading={loading}
+                emptyTitle={allZero ? 'Захиалга байхгүй байна' : 'Энэ төлөвт захиалга алга'}
+                emptyBody={allZero ? 'Та одоогоор ямар нэг захиалга өгөөгүй байна. Бүтээгдэхүүн сонгоно уу.' : 'Шүүлтүүрээ өөрчлөөд дахин үзнэ үү.'}
+                emptyAction={allZero ? { label:'Эхний захиалгаа хийх →', onClick:()=>{ window.location.href='02 Trade Screen.html'; } } : undefined}
+              />
+            </div>
+          </section>
+
+        </main>
+      </div>
+
+      {/* F3 · sell sheet — starts from the holding, never the market page */}
+      {sellTarget && !sellOpen && <SellSheet holding={sellTarget} onClose={()=>setSellTarget(null)} onContinue={continueSell}/>}
+
+      {/* R3 confirm modal — sell variant (side='sell'), same PIN + trading-states parity as F2 */}
+      <ConfirmOrderModal
+        open={sellOpen} onClose={closeSell}
+        instrument={sellOrder?sellOrder.inst:null} qty={sellOrder?sellOrder.qty:0} side="sell" calc={sellOrder?sellOrder.calc:{}}
+        balance={Infinity} onConfirmed={onSellConfirmed}/>
+
+      {/* cancel-listing confirm */}
+      <WebConfirmDialog
+        open={!!cancelTarget}
+        title="Захиалга цуцлах уу?"
+        body={cancelTarget ? (cancelTarget.ticker + ' — ' + (cancelTarget.side==='sell'?'зарах':'авах') + ' захиалгыг цуцлана уу? ' + (cancelTarget.side==='sell'?'Бүтээгдэхүүн хоёрдогч зах зээлээс хасагдаж, багцад дахин "Идэвхтэй" төлөвөөр харагдана.':'Захиалга цуцлагдана.')) : ''}
+        confirmLabel="Тийм, цуцлах" cancelLabel="Болих" tone="neg"
+        onConfirm={confirmCancel} onCancel={()=>setCancelTarget(null)}/>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Home/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

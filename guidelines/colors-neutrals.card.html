@@ -1,0 +1,22 @@
+<!-- @dsCard group="Colors" viewport="700x170" name="Neutrals & ink" subtitle="Page wash → surface → ink ramp" -->
+<!DOCTYPE html>
+<html lang="mn"><head><meta charset="UTF-8"/><link rel="stylesheet" href="../styles.css"/>
+<style>
+  body{margin:0;background:var(--surface);padding:22px;}
+  .row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .sw{border-radius:12px;overflow:hidden;border:1px solid var(--line-2);}
+  .chip{height:60px;}
+  .meta{padding:8px 10px;}
+  .nm{font-size:11px;font-weight:800;color:var(--ink);}
+  .hex{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:2px;}
+</style></head>
+<body>
+<div class="row">
+  <div class="sw"><div class="chip" style="background:var(--bg)"></div><div class="meta"><div class="nm">bg</div><div class="hex">#F4F6FA</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--surface)"></div><div class="meta"><div class="nm">surface</div><div class="hex">#FFFFFF</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--line)"></div><div class="meta"><div class="nm">line</div><div class="hex">#E7E9F2</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--muted-2)"></div><div class="meta"><div class="nm">muted-2</div><div class="hex">#9099B5</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--muted)"></div><div class="meta"><div class="nm">muted</div><div class="hex">#6B7191</div></div></div>
+  <div class="sw"><div class="chip" style="background:var(--ink)"></div><div class="meta"><div class="nm">ink</div><div class="hex">#0B1020</div></div></div>
+</div>
+</body></html>

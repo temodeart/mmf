@@ -7,11 +7,17 @@
 // All copy Mongolian Cyrillic. Mobile-native 390×844. Matches v2 visual system.
 // ============================================================
 
-const { useState: useStateBV } = React;
-const { C: CBV, Frame: FrameBV, StickyBar: StickyBarBV, BigBtn: BigBtnBV } = window;
+const { useState: useStateBV, useEffect: useEffectBV, useRef: useRefBV } = React;
+const { C: CBV, Frame: FrameBV, StickyBar: StickyBarBV, BigBtn: BigBtnBV, SignupStepHeader: StepHeaderBV } = window;
 
 // DAN-verified identity (read-only across this step)
 const DAN_NAME = 'Батболд Тэмүүжин';
+
+// Bank verification now runs right after email verification → it is step 3 of
+// the 9-step KYC flow, using the same step-progress header the rest of the flow uses.
+const BANK_STEP = 3;
+const BANK_TOTAL = 9;
+const BankStep = ({ title }) => <StepHeaderBV step={BANK_STEP} total={BANK_TOTAL} title={title} nextLabel="Нууц үг"/>;
 
 // Mongolian banks — ORIGINAL monogram tiles (not real bank logos)
 const MN_BANKS = [
@@ -25,6 +31,13 @@ const MN_BANKS = [
   { id:'bogd',     name:'Богд банк',                   short:'Богд',     ab:'ББ',   c:'#3B4FB0', code:'0026' },
   { id:'arig',     name:'Ариг банк',                   short:'Ариг',     ab:'АБ',   c:'#1F8A5B', code:'0021' },
 ];
+
+// Shared facts for the micro-deposit verification (mock).
+const VBANK   = MN_BANKS[0];   // Хаан Банк (selected in B1)
+const VMASK   = '•••• 4567';
+const VCODE   = '482715';      // the value printed in гүйлгээний утга
+const VAMOUNT = '10.00';       // the small incoming deposit
+const fmtCd = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 
 // ---- monogram tile ----
 const BankMark = ({ bank, size = 40 }) => (
@@ -160,7 +173,7 @@ const BankVerify = () => {
 
   return (
     <FrameBV label="B1 — Банк данс баталгаажуулах">
-      <BVHeader/>
+      <BankStep title="Данс баталгаажуулах"/>
       <div style={{ flex: 1, overflow:'auto', padding:'2px 24px 18px', display:'flex', flexDirection:'column', gap: 16, position:'relative' }}>
         <div>
           <div style={{ fontSize: 21, fontWeight: 800, color: CBV.ink, letterSpacing:'-0.02em', lineHeight: 1.2 }}>Банкны данс баталгаажуулах</div>
@@ -232,7 +245,7 @@ const BankVerify = () => {
       </div>
 
       <StickyBarBV>
-        <BigBtnBV disabled={!canVerify}>Данс шалгах</BigBtnBV>
+        <BigBtnBV disabled={!canVerify}>Баталгаажуулах гүйлгээ авах</BigBtnBV>
         {!canVerify && (
           <div style={{ fontSize: 11, color: CBV.muted2, fontWeight: 600, textAlign:'center', marginTop: 8 }}>
             Банк сонгож, IBAN дугаараа оруулна уу
@@ -365,24 +378,274 @@ const IbanLookupResult = () => (
   </FrameBV>
 );
 // ============================================================
-const BankChecking = () => (
-  <FrameBV label="B3 — Данс шалгаж байна">
+// B3 — DEPOSIT SENDING (pending state · "Гүйлгээ илгээгдэж байна")
+// The micro-deposit is in transit; can take a few minutes.
+// ============================================================
+const DepositSending = () => (
+  <FrameBV label="B3 — Гүйлгээ илгээж байна">
     <div style={{ height: 44, flexShrink: 0 }}/>
     <div style={{ flex: 1, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center', padding:'0 32px' }}>
       <div style={{ position:'relative', width: 110, height: 110, display:'flex', alignItems:'center', justifyContent:'center' }}>
         <div className="omf-pulse" style={{ position:'absolute', inset:0, borderRadius: 30, background:'rgba(79,70,229,.22)' }}/>
         <div className="omf-pulse omf-pulse-2" style={{ position:'absolute', inset:0, borderRadius: 30, background:'rgba(79,70,229,.18)' }}/>
         <div style={{ position:'relative', width: 80, height: 80, borderRadius: 24, background:`linear-gradient(135deg, ${CBV.indigo}, ${CBV.blue})`, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 14px 30px -10px ${CBV.indigo}99` }}>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" className="omf-spin"><path d="M21 12a9 9 0 11-2.6-6.4" stroke="#fff" strokeWidth="2.4" fill="none" strokeLinecap="round"/><path d="M21 4v5h-5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none"><path d="M12 4v11" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"/><path d="M8 11l4 4 4-4" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 19h14" stroke="#fff" strokeWidth="2.4" strokeLinecap="round"/></svg>
         </div>
       </div>
-      <div style={{ fontSize: 23, fontWeight: 800, color: CBV.ink, marginTop: 28, letterSpacing:'-0.02em' }}>Данс шалгаж байна</div>
-      <div style={{ fontSize: 13.5, color: CBV.muted, marginTop: 12, lineHeight: 1.55, maxWidth: 280 }}>
-        Таны банкны дансны мэдээллийг баталгаажуулж байна.
+      <div style={{ fontSize: 23, fontWeight: 800, color: CBV.ink, marginTop: 28, letterSpacing:'-0.02em' }}>Гүйлгээ илгээгдэж байна</div>
+      <div style={{ fontSize: 13.5, color: CBV.muted, marginTop: 12, lineHeight: 1.55, maxWidth: 290 }}>
+        Бид таны данс руу баталгаажуулах жижиг гүйлгээ илгээж байна. Энэ хэдэн минут зарцуулж магадгүй.
       </div>
+      {/* account chip */}
+      <div style={{ marginTop: 24, display:'flex', alignItems:'center', gap: 10, padding:'10px 14px 10px 10px', borderRadius: 14, background:'#fff', border:`1px solid ${CBV.line2}` }}>
+        <BankMark bank={VBANK} size={28}/>
+        <span style={{ fontSize: 13, fontWeight: 700, color: CBV.ink }}>{VBANK.short}</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: CBV.muted, fontVariantNumeric:'tabular-nums' }}>{VMASK}</span>
+      </div>
+    </div>
+    <div style={{ padding:'0 24px 18px', flexShrink: 0 }}>
+      <div style={{ fontSize: 11.5, color: CBV.muted2, textAlign:'center' }}>Энэ хооронд аппликейшнээс гарахгүй байхыг хүсье.</div>
     </div>
   </FrameBV>
 );
+
+// ============================================================
+// B3b — DEPOSIT INFO (instructions · "жижиг гүйлгээ хийлээ")
+// ============================================================
+const InfoSteps = () => {
+  const steps = [
+    'Банкны аппликейшнаа нээнэ үү',
+    'Бидний илгээсэн жижиг орлогын гүйлгээг олно уу',
+    'Гүйлгээний утга дахь баталгаажуулах кодыг тэмдэглэж аваарай',
+  ];
+  return (
+    <div style={{ marginTop: 16, display:'flex', flexDirection:'column' }}>
+      {steps.map((s, i) => (
+        <div key={i} style={{ display:'flex', gap: 14, alignItems:'center', padding:'9px 0' }}>
+          <div style={{ width: 28, height: 28, borderRadius: 999, flexShrink: 0, background: CBV.indigoSoft, color: CBV.indigo, fontWeight: 800, fontSize: 13, display:'flex', alignItems:'center', justifyContent:'center' }}>{i + 1}</div>
+          <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: CBV.text, lineHeight: 1.4 }}>{s}</div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const DepositInfo = () => (
+  <FrameBV label="B3b — Баталгаажуулах заавар">
+    <BankStep title="Данс баталгаажуулах"/>
+    <div style={{ flex: 1, overflow:'auto', padding:'14px 24px 18px' }}>
+      <div style={{ display:'inline-flex', alignItems:'center', gap: 8, padding:'5px 11px 5px 6px', borderRadius: 999, background: CBV.greenSoft }}>
+        <span style={{ width: 22, height: 22, borderRadius: 999, background: CBV.green, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 800, color: CBV.green, letterSpacing:'0.03em', textTransform:'uppercase' }}>Гүйлгээ илгээгдлээ</span>
+      </div>
+
+      <div style={{ fontSize: 21, fontWeight: 800, color: CBV.ink, marginTop: 14, letterSpacing:'-0.02em', lineHeight: 1.22 }}>
+        Бид таны данс руу баталгаажуулах жижиг гүйлгээ хийлээ
+      </div>
+      <div style={{ fontSize: 13, color: CBV.muted, marginTop: 10, lineHeight: 1.55 }}>
+        Банкны аппаа нээж, ирсэн орлогын <strong style={{ color: CBV.text }}>гүйлгээний дүн</strong> эсвэл <strong style={{ color: CBV.text }}>гүйлгээний утга</strong>-д байгаа баталгаажуулах кодыг оруулна уу.
+      </div>
+
+      {/* account + small amount */}
+      <div style={{ marginTop: 18, background:'#fff', borderRadius: 16, border:`1px solid ${CBV.line2}`, padding:'14px 16px', display:'flex', alignItems:'center', gap: 12 }}>
+        <BankMark bank={VBANK} size={40}/>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: CBV.ink }}>{VBANK.name}</div>
+          <div style={{ fontSize: 12.5, color: CBV.muted, marginTop: 2, fontVariantNumeric:'tabular-nums' }}>{VMASK}</div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, color: CBV.muted2 }}>Жижиг дүн</div>
+          <div style={{ fontSize: 14, fontWeight: 800, color: CBV.green, fontVariantNumeric:'tabular-nums', marginTop: 2 }}>+{VAMOUNT}₮</div>
+        </div>
+      </div>
+
+      <InfoSteps/>
+
+      <div style={{ marginTop: 14, background:'#FAFBFE', borderRadius: 14, border:`1px solid ${CBV.line2}`, padding: 14, display:'flex', gap: 10, alignItems:'flex-start' }}>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="9" stroke={CBV.muted2} strokeWidth="2"/><path d="M12 16v-4M12 8.5h.01" stroke={CBV.muted2} strokeWidth="2" strokeLinecap="round"/></svg>
+        <div style={{ fontSize: 12, color: CBV.muted, lineHeight: 1.5 }}>
+          Гүйлгээ ирэхэд хэдэн минут зарцуулж магадгүй. Баталгаажуулах код бол таны хувийн мэдээлэл тул бусадтай хуваалцахгүй байхыг анхаарна уу.
+        </div>
+      </div>
+    </div>
+    <StickyBarBV>
+      <BigBtnBV>Баталгаажуулах код оруулах</BigBtnBV>
+    </StickyBarBV>
+  </FrameBV>
+);
+
+// ============================================================
+// B4 — CODE ENTRY (OTP-style entry of the гүйлгээний утга value)
+// helper illustration: mock bank statement row with the code highlighted.
+// States: idle · wrong code (attempts left) · resend cooldown · success.
+// ============================================================
+
+// mock bank-statement transaction row — shows where to read the code
+const StatementHint = () => (
+  <div style={{ marginTop: 4 }}>
+    <div style={{ fontSize: 11.5, fontWeight: 700, color: CBV.muted, marginBottom: 8, display:'flex', alignItems:'center', gap: 6 }}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke={CBV.muted2} strokeWidth="2"/><path d="M3 9h18" stroke={CBV.muted2} strokeWidth="2"/></svg>
+      Банкны аппд ингэж харагдана
+    </div>
+    <div style={{ borderRadius: 16, background:'#fff', border:`1px solid ${CBV.line2}`, overflow:'hidden', boxShadow:'0 10px 26px -18px rgba(15,20,55,.3)' }}>
+      <div style={{ display:'flex', alignItems:'center', gap: 12, padding:'13px 14px' }}>
+        <div style={{ width: 38, height: 38, borderRadius: 11, background: CBV.greenSoft, display:'flex', alignItems:'center', justifyContent:'center', flexShrink: 0 }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M17 7L8 16" stroke={CBV.green} strokeWidth="2.2" strokeLinecap="round"/><path d="M15 16H8V9" stroke={CBV.green} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 700, color: CBV.ink }}>Орлого</div>
+          <div style={{ fontSize: 11.5, color: CBV.muted, marginTop: 2 }}>{VBANK.short} · 14:32</div>
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 800, color: CBV.green, fontVariantNumeric:'tabular-nums' }}>+{VAMOUNT}₮</div>
+      </div>
+      <div style={{ height: 1, background: CBV.line2 }}/>
+      <div style={{ padding:'12px 14px', background:'#FAFBFE' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 700, color: CBV.muted2, marginBottom: 8, textTransform:'uppercase', letterSpacing:'0.06em' }}>Гүйлгээний утга</div>
+        <div style={{ display:'flex', alignItems:'center', gap: 8, flexWrap:'wrap' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: CBV.ink2, fontFamily:'JetBrains Mono, monospace' }}>MMF·</span>
+          <span style={{ fontSize: 15, fontWeight: 800, color:'#fff', background: CBV.indigo, padding:'5px 11px', borderRadius: 9, fontFamily:'JetBrains Mono, monospace', letterSpacing:'0.14em', boxShadow:`0 0 0 3px ${CBV.indigoSoft}` }}>{VCODE}</span>
+          <span style={{ fontSize: 11, fontWeight: 800, color: CBV.indigo, display:'inline-flex', alignItems:'center', gap: 3 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M11 6L5 12l6 6" stroke={CBV.indigo} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 12h14" stroke={CBV.indigo} strokeWidth="2.4" strokeLinecap="round"/></svg>
+            энэ код
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// 6-box OTP-style entry (reuses the onboarding OTP look — transparent input overlay)
+const CodeBoxes = ({ value, state, onFocus }) => {
+  const next = value.length;
+  return (
+    <div style={{ position:'relative' }}>
+      <div style={{ display:'flex', gap: 8, pointerEvents:'none' }}>
+        {[0,1,2,3,4,5].map((i) => {
+          const d = value[i] || '';
+          const cursor = state !== 'success' && i === next;
+          const border = state === 'error' ? CBV.red
+            : state === 'success' ? CBV.green
+            : d ? CBV.indigo : cursor ? CBV.indigo : CBV.line;
+          const ring = state === 'error' ? `0 0 0 3px ${CBV.redSoft}`
+            : (cursor && state !== 'success') ? `0 0 0 3px ${CBV.indigoSoft}` : 'none';
+          return (
+            <div key={i} style={{
+              flex: 1, height: 56, borderRadius: 12, background:'#fff',
+              border: `1.5px solid ${border}`, boxShadow: ring,
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize: 24, fontWeight: 700, color: state === 'error' ? CBV.red : CBV.ink,
+              fontVariantNumeric:'tabular-nums', transition:'border-color .15s, box-shadow .15s',
+            }}>{d}</div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const CodeEntry = ({ seed, label = 'B4 — Баталгаажуулах код' }) => {
+  const inputRef = useRefBV(null);
+  const [val, setVal]       = useStateBV(seed?.value ?? '');
+  const [phase, setPhase]   = useStateBV(seed?.phase ?? 'idle');   // idle | error | success
+  const [attempts, setAtt]  = useStateBV(seed?.attempts ?? 3);
+  const [cd, setCd]         = useStateBV(seed?.cd ?? 90);
+  const [resent, setResent] = useStateBV(false);
+
+  // resend cooldown ticker
+  useEffectBV(() => {
+    const t = setInterval(() => setCd(c => (c > 0 ? c - 1 : 0)), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const onInput = (e) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setVal(v);
+    if (phase === 'error' || phase === 'success') setPhase('idle');
+  };
+  const verify = () => {
+    if (val.length < 6 || phase === 'success') return;
+    if (val === VCODE) setPhase('success');
+    else { setPhase('error'); setAtt(a => Math.max(0, a - 1)); setVal(''); }
+  };
+  const resend = () => {
+    if (cd > 0) return;
+    setResent(true); setCd(90);
+    setTimeout(() => setResent(false), 2400);
+  };
+
+  const full    = val.length === 6;
+  const success = phase === 'success';
+  const error   = phase === 'error';
+
+  return (
+    <FrameBV label={label}>
+      <BankStep title="Данс баталгаажуулах"/>
+      <div style={{ flex: 1, overflow:'auto', padding:'14px 24px 18px' }}>
+        <div style={{ fontSize: 21, fontWeight: 800, color: CBV.ink, letterSpacing:'-0.02em', lineHeight: 1.2 }}>Баталгаажуулах код</div>
+        <div style={{ fontSize: 13, color: CBV.muted, marginTop: 9, lineHeight: 1.5 }}>
+          Банкны дансанд ирсэн гүйлгээний утгад байгаа <strong style={{ color: CBV.text }}>6 оронтой кодыг</strong> оруулна уу.
+        </div>
+
+        <div style={{ marginTop: 16 }}><StatementHint/></div>
+
+        {/* OTP-style entry */}
+        <div style={{ marginTop: 22, position:'relative' }} onClick={() => inputRef.current && inputRef.current.focus()}>
+          <input
+            ref={inputRef} value={val} onChange={onInput}
+            inputMode="numeric" maxLength={6} aria-label="Баталгаажуулах код"
+            style={{ position:'absolute', inset: 0, width:'100%', height:'100%', opacity: 0, border:'none', background:'transparent', cursor:'pointer', fontSize: 16, zIndex: 2 }}
+          />
+          <CodeBoxes value={val} state={phase}/>
+        </div>
+
+        {error && (
+          <div style={{ marginTop: 12, display:'flex', alignItems:'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: CBV.red }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke={CBV.red} strokeWidth="2"/><path d="M12 7.5v5.5M12 16.5h.01" stroke={CBV.red} strokeWidth="2.2" strokeLinecap="round"/></svg>
+            Код буруу байна. Үлдсэн оролдлого: {attempts}
+          </div>
+        )}
+        {success && (
+          <div style={{ marginTop: 12, display:'flex', alignItems:'center', gap: 7, fontSize: 12.5, fontWeight: 700, color: CBV.green }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke={CBV.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            Код зөв байна
+          </div>
+        )}
+
+        {/* resend with cooldown */}
+        <div style={{ marginTop: 22, display:'flex', alignItems:'center', justifyContent:'center', gap: 7, fontSize: 12.5 }}>
+          {resent ? (
+            <span style={{ display:'inline-flex', alignItems:'center', gap: 7, color: CBV.indigo, fontWeight: 700 }}>
+              <span className="omf-spin" style={{ width: 13, height: 13, borderRadius: 999, border:`2px solid ${CBV.indigoSoft}`, borderTopColor: CBV.indigo }}/>
+              Гүйлгээ дахин илгээгдэж байна…
+            </span>
+          ) : (
+            <>
+              <span style={{ color: CBV.muted, fontWeight: 600 }}>Гүйлгээ ирээгүй юу?</span>
+              {cd > 0 ? (
+                <span style={{ color: CBV.muted2, fontWeight: 700, fontVariantNumeric:'tabular-nums' }}>Дахин илгээх · {fmtCd(cd)}</span>
+              ) : (
+                <button onClick={resend} style={{ background:'transparent', border:'none', padding: 0, cursor:'pointer', color: CBV.indigo, fontWeight: 800, fontSize: 12.5, fontFamily:'inherit' }}>Гүйлгээ дахин илгээх</button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      <StickyBarBV>
+        {success ? (
+          <BigBtnBV tone={CBV.green}>
+            Үргэлжлүүлэх
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </BigBtnBV>
+        ) : (
+          <BigBtnBV disabled={!full} onClick={verify}>Баталгаажуулах</BigBtnBV>
+        )}
+      </StickyBarBV>
+    </FrameBV>
+  );
+};
 
 // ============================================================
 // B4 — VERIFIED (success + summary)
@@ -473,5 +736,7 @@ const KycComplete = () => {
 };
 
 Object.assign(window, {
-  BankVerify, IbanLookupSheet, IbanLookupResult, BankChecking, BankVerified, KycComplete,
+  BankVerify, IbanLookupSheet, IbanLookupResult,
+  DepositSending, DepositInfo, CodeEntry,
+  BankVerified, KycComplete,
 });

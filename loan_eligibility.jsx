@@ -11,7 +11,7 @@ const { Frame: FrameLE, C: CLE, BackBar: BackBarLE, Dot: DotLE, LogoMark: LogoMa
 const fmtMNT = (n) => n.toLocaleString('en-US');
 
 // ----- shared footer -----
-const LEFooter = ({ children, secondary, dark = false, disabled = false }) => (
+const LEFooter = ({ children, secondary, onSecondary, dark = false, disabled = false }) => (
   <div style={{ padding:'12px 24px 6px', background:'#fff', borderTop:`1px solid ${CLE.line2}`, flexShrink: 0, display:'flex', flexDirection:'column', gap: 8 }}>
     <button disabled={disabled} style={{
       width:'100%', height: 52, borderRadius: 14, border:'none', cursor: disabled ? 'default' : 'pointer',
@@ -23,7 +23,7 @@ const LEFooter = ({ children, secondary, dark = false, disabled = false }) => (
       transition:'background .15s',
     }}>{children}</button>
     {secondary && (
-      <button style={{ width:'100%', height: 48, borderRadius: 14, background:'transparent', color: CLE.muted, border:'none', fontWeight: 700, fontSize: 14, cursor:'pointer' }}>{secondary}</button>
+      <button onClick={onSecondary} data-nodrag={onSecondary ? '' : undefined} style={{ width:'100%', height: 48, borderRadius: 14, background:'transparent', color: CLE.muted, border:'none', fontWeight: 700, fontSize: 14, cursor:'pointer' }}>{secondary}</button>
     )}
   </div>
 );
@@ -35,8 +35,12 @@ const Arrow = ({ c = '#fff' }) => (
 // ============================================================
 // Demo amounts (prototype): user-requested vs decision
 // ============================================================
-const LOAN_REQUESTED = 3000000;   // what the user asks for
-const LOAN_PARTIAL   = 1000000;   // what's offered in the partial case
+const LOAN_REQUESTED = 3000000;
+const LOAN_PARTIAL   = 1000000;
+const LOAN_FEE_PCT   = 0.01;     // 1 % origination fee deducted from disbursement
+const ZMS_FEE        = 4000;     // ЗМС лавлагааны шимтгэл — төлбөр бүр хүсэлт бүр
+const calcFee  = (amt) => Math.max(5000, Math.round(amt * LOAN_FEE_PCT));
+const calcNet  = (amt) => amt - calcFee(amt);
 
 // ============================================================
 // 33 — ENTRY · Зээлийн хүсэлт (user enters the amount they want)
@@ -44,6 +48,10 @@ const LOAN_PARTIAL   = 1000000;   // what's offered in the partial case
 const LoanCheckEntry = () => {
   const [amount, setAmount] = useStateLE(LOAN_REQUESTED);
   const [focused, setFocused] = useStateLE(false);
+  const [term, setTerm] = useStateLE(30);
+  const dailyRate = 0.025 / 30;                       // 2.5% / 30 хоног
+  const interest  = Math.round(amount * dailyRate * term);
+  const dueTotal  = amount + interest;
   const onType = (e) => {
     const digits = e.target.value.replace(/[^0-9]/g, '');
     setAmount(digits === '' ? 0 : parseInt(digits, 10));
@@ -53,8 +61,7 @@ const LoanCheckEntry = () => {
       <BackBarLE title="Зээлийн хүсэлт"/>
       <div style={{ flex: 1, overflow:'auto', padding: '6px 24px 24px' }}>
         <div style={{ display:'inline-flex', alignItems:'center', gap: 6, padding:'5px 12px', borderRadius: 999, background: CLE.indigoSoft, color: CLE.indigo, fontSize: 11.5, fontWeight: 700 }}>
-          <DotLE color={CLE.indigo}/>30 хоногийн богино хугацааны зээл
-        </div>
+          <DotLE color={CLE.indigo}/>Богино хугацааны зээл</div>
 
         <div style={{ fontSize: 24, fontWeight: 800, color: CLE.ink, letterSpacing:'-0.02em', lineHeight: 1.18, marginTop: 16 }}>
           Хүссэн дүнгээ оруулна уу
@@ -87,14 +94,64 @@ const LoanCheckEntry = () => {
           </div>
         </div>
 
-        {/* term locked */}
-        <div style={{ marginTop: 16, background:'#F4F5F9', borderRadius: 14, border:`1.5px solid ${CLE.line}`, padding:'0 16px', height: 52, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: CLE.ink }}>Хугацаа · 30 хоног</span>
-          <span style={{ display:'inline-flex', alignItems:'center', gap: 6, fontSize: 11, fontWeight: 700, color: CLE.muted }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke={CLE.muted} strokeWidth="2" fill="none"/><path d="M8 11V8a4 4 0 018 0v3" stroke={CLE.muted} strokeWidth="2" fill="none"/></svg>
-            Тогтмол
-          </span>
+        {/* live disbursement breakdown */}
+        {amount > 0 && (
+          <div style={{ marginTop:14, background:'#FAFBFE', borderRadius:16, border:`1px solid ${CLE.line2}`, overflow:'hidden' }}>
+            {[
+              { l:'Хүсэж буй дүн',           v:`₮ ${fmtMNT(amount)}` },
+              { l:'Шимтгэл (1%)',             v:`− ₮ ${fmtMNT(calcFee(amount))}`, tone: CLE.red },
+              { l:'Таны хэтэвчинд орох дүн', v:`₮ ${fmtMNT(calcNet(amount))}`, strong:true, tone: CLE.green },
+            ].map((r, i) => (
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', borderTop: i ? `1px solid ${CLE.line2}` : 'none', background: r.strong ? CLE.greenSoft : 'transparent' }}>
+                <span style={{ fontSize:12.5, color:CLE.muted, fontWeight:600 }}>{r.l}</span>
+                <span style={{ fontSize: r.strong ? 14 : 13, fontWeight: r.strong ? 800 : 700, color: r.tone || CLE.ink, fontVariantNumeric:'tabular-nums' }}>{r.v}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={{ marginTop:10, fontSize:11.5, color:CLE.muted, fontWeight:600, textAlign:'center' }}>
+          Гартаа авах дүнгээ тааруулж оруулна уу
         </div>
+
+        {/* term — selectable 7 / 14 / 30 days */}
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontSize: 12, color: CLE.muted, fontWeight: 600, marginBottom: 8 }}>Зээлийн хугацаа</div>
+          <div style={{ display:'flex', gap: 8 }}>
+            {[7, 14, 30].map((d) => {
+              const active = term === d;
+              return (
+                <button key={d} data-nodrag onClick={()=>setTerm(d)} style={{
+                  flex: 1, height: 50, borderRadius: 12, cursor:'pointer',
+                  background: active ? CLE.indigoSoft : '#FAFBFE',
+                  border:`1.5px solid ${active ? CLE.indigo : CLE.line}`,
+                  boxShadow: active ? `0 0 0 3px ${CLE.indigoSoft}` : 'none',
+                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap: 1,
+                  color: active ? CLE.indigo : CLE.muted, transition:'all .12s',
+                }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, fontVariantNumeric:'tabular-nums', letterSpacing:'-0.01em' }}>{d}</span>
+                  <span style={{ fontSize: 10.5, fontWeight: 700 }}>хоног</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* interest + amount due at the end of the chosen term */}
+        {amount > 0 && (
+          <div style={{ marginTop: 12, background:'#fff', borderRadius: 16, border:`1px solid ${CLE.line2}`, overflow:'hidden' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'13px 16px' }}>
+              <span style={{ fontSize: 12.5, color: CLE.muted, fontWeight: 600 }}>Хүү · {term} хоног <span style={{ color: CLE.muted2 }}>(2.5%/сар)</span></span>
+              <span style={{ fontSize: 13.5, color: CLE.ink, fontWeight: 700, fontVariantNumeric:'tabular-nums' }}>₮ {fmtMNT(interest)}</span>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 16px', background:'#FAFBFE', borderTop:`1px solid ${CLE.line2}` }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, color: CLE.ink, fontWeight: 800 }}>Хугацааны эцэст төлөх</div>
+                <div style={{ fontSize: 10.5, color: CLE.muted, marginTop: 2 }}>Үндсэн + хүү</div>
+              </div>
+              <span style={{ fontSize: 18, color: CLE.indigo, fontWeight: 800, fontVariantNumeric:'tabular-nums', letterSpacing:'-0.01em' }}>₮ {fmtMNT(dueTotal)}</span>
+            </div>
+          </div>
+        )}
 
         {/* Fee card */}
         <div style={{ marginTop: 16, background:'#FAFBFE', borderRadius: 16, border:`1px solid ${CLE.line2}`, padding: 16 }}>
@@ -114,6 +171,40 @@ const LoanCheckEntry = () => {
     </FrameLE>
   );
 };
+
+// ============================================================
+// 33B — LOAN ENTRY · Blocked (already borrowed today)
+// ============================================================
+const LoanBlocked = () => (
+  <FrameLE label="33B — Loan · Blocked today">
+    <BackBarLE title="Зээлийн хүсэлт"/>
+    <div style={{ flex:1, overflow:'auto', padding:'6px 24px 24px' }}>
+      <div style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'5px 12px', borderRadius:999, background:CLE.indigoSoft, color:CLE.indigo, fontSize:11.5, fontWeight:700 }}>
+        <DotLE color={CLE.indigo}/>30 хоногийн богино хугацааны зээл
+      </div>
+      <div style={{ fontSize:24, fontWeight:800, color:CLE.ink, letterSpacing:'-0.02em', lineHeight:1.18, marginTop:16 }}>
+        Хүссэн дүнгээ оруулна уу
+      </div>
+      <div style={{ marginTop:20, background:CLE.indigoSoft, borderRadius:18, padding:20, border:`1px solid ${CLE.indigo}22` }}>
+        <div style={{ display:'flex', alignItems:'flex-start', gap:12 }}>
+          <div style={{ width:44, height:44, borderRadius:13, background:'#fff', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="16" rx="3" stroke={CLE.indigo} strokeWidth="2" fill="none"/><path d="M8 3v4M16 3v4M4 10h16" stroke={CLE.indigo} strokeWidth="2" strokeLinecap="round"/></svg>
+          </div>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:14, fontWeight:800, color:CLE.ink, lineHeight:1.3 }}>Та өнөөдөр зээл авсан байна</div>
+            <div style={{ fontSize:12.5, color:CLE.muted, marginTop:6, lineHeight:1.55 }}>
+              Дараагийн хүсэлтийг маргааш <strong style={{ color:CLE.ink, fontVariantNumeric:'tabular-nums' }}>2026.06.13</strong>нд илгээх боломжтой.
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop:14, paddingTop:14, borderTop:`1px solid ${CLE.indigo}22`, fontSize:11.5, color:CLE.muted, lineHeight:1.5 }}>
+          Одоогийн идэвхтэй зээлийг хугацаанд нь эргэн төлснөөр шинэ зээл авах боломж нэмэгдэнэ.
+        </div>
+      </div>
+    </div>
+    <LEFooter disabled>Үргэлжлүүлэх</LEFooter>
+  </FrameLE>
+);
 
 // ============================================================
 // 35 — QPAY PAYMENT
@@ -315,82 +406,102 @@ const LoanResultCard = ({ rows }) => (
 );
 
 // 41A — ACCEPTED · full requested amount approved
-const LoanAccepted = () => (
-  <FrameLE label="41 — Result · Accepted">
-    <BackBarLE title=""/>
-    <div style={{ flex: 1, overflow:'auto', padding: '6px 24px 24px' }}>
-      <div style={{
-        borderRadius: 22, padding: 24, color:'#fff', textAlign:'center',
-        background:`linear-gradient(150deg, ${CLE.green} 0%, #0B8F60 60%, ${CLE.navy3} 140%)`,
-        position:'relative', overflow:'hidden',
-      }}>
-        <div style={{ position:'absolute', right:-40, top:-40, width: 160, height: 160, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,.22), transparent 70%)'}}/>
-        <div style={{ position:'relative' }}>
-          <div style={{ width: 60, height: 60, borderRadius: 999, margin:'0 auto', background:'rgba(255,255,255,.16)', border:'1px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 14, opacity:.85 }}>Зээлийн хүсэлт зөвшөөрөгдлөө</div>
-          <div style={{ fontSize: 36, fontWeight: 800, letterSpacing:'-0.02em', marginTop: 6, fontVariantNumeric:'tabular-nums' }}>₮ {fmtMNT(LOAN_REQUESTED)}</div>
-          <div style={{ fontSize: 12, opacity:.8, marginTop: 4 }}>зөвшөөрсөн дүн</div>
-        </div>
+const CancelModal = ({ onBack, onDecline }) => (
+  <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,.5)', display:'flex', flexDirection:'column', justifyContent:'flex-end', zIndex:10 }}>
+    <div style={{ background:'#fff', borderRadius:'22px 22px 0 0', padding:'24px 24px 32px' }}>
+      <div style={{ width:40, height:4, borderRadius:999, background:CLE.line, margin:'0 auto 22px' }}/>
+      <div style={{ fontSize:19, fontWeight:800, color:CLE.ink, letterSpacing:'-0.01em', lineHeight:1.3 }}>
+        Санал татгалзах уу?
       </div>
-
-      <div style={{ fontSize: 20, fontWeight: 800, color: CLE.ink, marginTop: 20, letterSpacing:'-0.02em', lineHeight: 1.25, textWrap:'pretty' }}>
-        Зээл бүрэн зөвшөөрөгдлөө
+      <div style={{ fontSize:13, color:CLE.muted, marginTop:10, lineHeight:1.6 }}>
+        Татгалзсан тохиолдолд энэ санал байнгын хэлбэрээр цуцлагдана. Шинэ хүсэлт илгээхэд ЗМС лавлагааны шимтгэл{' '}
+        <strong style={{ color:CLE.ink }}>₮ {fmtMNT(ZMS_FEE)}</strong> дахин төлөгдөнө.
       </div>
-      <div style={{ fontSize: 13, color: CLE.muted, marginTop: 8, lineHeight: 1.55 }}>
-        Таны хүссэн дүн бүрэн зөвшөөрөгдлөө. Доорх товчоор зээлээ дансандаа авна уу.
+      <div style={{ marginTop:20, display:'flex', flexDirection:'column', gap:10 }}>
+        <button onClick={onBack} style={{ width:'100%', height:52, borderRadius:14, background:CLE.indigo, color:'#fff', border:'none', fontWeight:700, fontSize:15, cursor:'pointer', boxShadow:'0 8px 22px -8px rgba(79,70,229,.5)' }}>Буцах</button>
+        <button data-nodrag onClick={onDecline} style={{ width:'100%', height:48, borderRadius:14, background:'transparent', color:CLE.red, border:`1.5px solid ${CLE.red}`, fontWeight:700, fontSize:14, cursor:'pointer' }}>Татгалзах</button>
       </div>
-
-      <LoanResultCard rows={[
-        { l:'Хүссэн дүн', v:'₮ ' + fmtMNT(LOAN_REQUESTED) },
-        { l:'Зөвшөөрсөн дүн', v:'₮ ' + fmtMNT(LOAN_REQUESTED), strong:true, tone: CLE.green },
-        { l:'Хүү (2.5% / 30 хоног)', v:'₮ ' + fmtMNT(Math.round(LOAN_REQUESTED * 0.025)) },
-        { l:'Эргэн төлөх огноо', v:'2026.06.28' },
-      ]}/>
     </div>
-    <LEFooter>₮{fmtMNT(LOAN_REQUESTED)} зээл авах <Arrow/></LEFooter>
-  </FrameLE>
+  </div>
 );
+
+const LoanAccepted = ({ onNav }) => {
+  const [showCancel, setShowCancel] = useStateLE(false);
+  return (
+    <FrameLE label="41 — Result · Accepted">
+      <BackBarLE title=""/>
+      <div style={{ flex:1, overflow:'auto', padding:'6px 24px 24px' }}>
+        <div style={{ borderRadius:22, padding:24, color:'#fff', textAlign:'center', background:`linear-gradient(150deg, ${CLE.green} 0%, #0B8F60 60%, ${CLE.navy3} 140%)`, position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', right:-40, top:-40, width:160, height:160, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,.22), transparent 70%)'}}/>
+          <div style={{ position:'relative' }}>
+            <div style={{ width:60, height:60, borderRadius:999, margin:'0 auto', background:'rgba(255,255,255,.16)', border:'1px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, marginTop:14, opacity:.85 }}>Зээлийн хүсэлт зөвшөөрөгдлөө</div>
+            <div style={{ fontSize:36, fontWeight:800, letterSpacing:'-0.02em', marginTop:6, fontVariantNumeric:'tabular-nums' }}>₮ {fmtMNT(LOAN_REQUESTED)}</div>
+            <div style={{ fontSize:12, opacity:.8, marginTop:4 }}>зөвшөөрсөн дүн</div>
+          </div>
+        </div>
+        <div style={{ fontSize:20, fontWeight:800, color:CLE.ink, marginTop:20, letterSpacing:'-0.02em', lineHeight:1.25, textWrap:'pretty' }}>Зээл бүрэн зөвшөөрөгдлөө</div>
+        <div style={{ fontSize:13, color:CLE.muted, marginTop:8, lineHeight:1.55 }}>
+          Таны хүсэлт зөвшөөрөгдлөө. Шимтгэл хасагдсан дүн таны хэтэвчинд орно.
+        </div>
+        <LoanResultCard rows={[
+          { l:'Зөвшөөрсөн дүн',          v:'₮ ' + fmtMNT(LOAN_REQUESTED),                      strong:true, tone: CLE.green },
+          { l:'Шимтгэл (1%)',             v:'− ₮ ' + fmtMNT(calcFee(LOAN_REQUESTED)),            tone: CLE.red },
+          { l:'Хэтэвчинд орох дүн',       v:'₮ ' + fmtMNT(calcNet(LOAN_REQUESTED)),              strong:true },
+          { l:'Хүү (2.5% / 30 хоног)',    v:'₮ ' + fmtMNT(Math.round(LOAN_REQUESTED * 0.025)) },
+          { l:'Эргэн төлөх огноо',        v:'2026.06.28' },
+          { l:'ЗМС шимтгэл (төлөгдсөн)', v:'₮ ' + fmtMNT(ZMS_FEE),                             tone: CLE.muted },
+        ]}/>
+      </div>
+      <LEFooter onSecondary={() => setShowCancel(true)} secondary="Татгалзах">
+        ₮ {fmtMNT(calcNet(LOAN_REQUESTED))} хэтэвчинд авах <Arrow/>
+      </LEFooter>
+      {showCancel && <CancelModal onBack={() => setShowCancel(false)} onDecline={() => { setShowCancel(false); onNav && onNav("loanDeclined"); }}/>}
+    </FrameLE>
+  );
+};
 
 // 41B — PARTIALLY ACCEPTED · a lower amount is offered
-const LoanPartial = () => (
-  <FrameLE label="41A — Result · Partial">
-    <BackBarLE title=""/>
-    <div style={{ flex: 1, overflow:'auto', padding: '6px 24px 24px' }}>
-      <div style={{
-        borderRadius: 22, padding: 24, color:'#fff', textAlign:'center',
-        background:`linear-gradient(150deg, ${CLE.indigo} 0%, #3D34C9 60%, ${CLE.navy3} 150%)`,
-        position:'relative', overflow:'hidden',
-      }}>
-        <div style={{ position:'absolute', right:-40, top:-40, width: 160, height: 160, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,.20), transparent 70%)'}}/>
-        <div style={{ position:'relative' }}>
-          <div style={{ width: 60, height: 60, borderRadius: 999, margin:'0 auto', background:'rgba(255,255,255,.16)', border:'1px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+const LoanPartial = ({ onNav }) => {
+  const [showCancel, setShowCancel] = useStateLE(false);
+  return (
+    <FrameLE label="41A — Result · Partial">
+      <BackBarLE title=""/>
+      <div style={{ flex:1, overflow:'auto', padding:'6px 24px 24px' }}>
+        <div style={{ borderRadius:22, padding:24, color:'#fff', textAlign:'center', background:`linear-gradient(150deg, ${CLE.indigo} 0%, #3D34C9 60%, ${CLE.navy3} 150%)`, position:'relative', overflow:'hidden' }}>
+          <div style={{ position:'absolute', right:-40, top:-40, width:160, height:160, borderRadius:'50%', background:'radial-gradient(circle, rgba(255,255,255,.20), transparent 70%)'}}/>
+          <div style={{ position:'relative' }}>
+            <div style={{ width:60, height:60, borderRadius:999, margin:'0 auto', background:'rgba(255,255,255,.16)', border:'1px solid rgba(255,255,255,.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L19 7" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <div style={{ fontSize:13, fontWeight:700, marginTop:14, opacity:.85 }}>Хэсэгчлэн зөвшөөрөгдлөө</div>
+            <div style={{ fontSize:36, fontWeight:800, letterSpacing:'-0.02em', marginTop:6, fontVariantNumeric:'tabular-nums' }}>₮ {fmtMNT(LOAN_PARTIAL)}</div>
+            <div style={{ fontSize:12, opacity:.8, marginTop:4 }}>зөвшөөрсөн дүн · хүссэн ₮{fmtMNT(LOAN_REQUESTED)}</div>
           </div>
-          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 14, opacity:.85 }}>Хэсэгчлэн зөвшөөрөгдлөө</div>
-          <div style={{ fontSize: 36, fontWeight: 800, letterSpacing:'-0.02em', marginTop: 6, fontVariantNumeric:'tabular-nums' }}>₮ {fmtMNT(LOAN_PARTIAL)}</div>
-          <div style={{ fontSize: 12, opacity:.8, marginTop: 4 }}>зөвшөөрсөн дүн · хүссэн ₮{fmtMNT(LOAN_REQUESTED)}</div>
         </div>
+        <div style={{ fontSize:20, fontWeight:800, color:CLE.ink, marginTop:20, letterSpacing:'-0.02em', lineHeight:1.25, textWrap:'pretty' }}>Зээл хэсэгчлэн зөвшөөрөгдлөө</div>
+        <div style={{ fontSize:13, color:CLE.muted, marginTop:8, lineHeight:1.55 }}>
+          Таны хүссэн ₮{fmtMNT(LOAN_REQUESTED)}-аас <strong style={{ color:CLE.ink }}>₮{fmtMNT(LOAN_PARTIAL)}</strong> зөвшөөрөгдлөө. Шимтгэл хасагдсан дүн хэтэвчинд орно.
+        </div>
+        <LoanResultCard rows={[
+          { l:'Хүссэн дүн',                v:'₮ ' + fmtMNT(LOAN_REQUESTED) },
+          { l:'Зөвшөөрсөн дүн',            v:'₮ ' + fmtMNT(LOAN_PARTIAL),                       strong:true, tone: CLE.indigo },
+          { l:'Шимтгэл (1%)',              v:'− ₮ ' + fmtMNT(calcFee(LOAN_PARTIAL)),             tone: CLE.red },
+          { l:'Хэтэвчинд орох дүн',        v:'₮ ' + fmtMNT(calcNet(LOAN_PARTIAL)),               strong:true },
+          { l:'Хүү (2.5% / 30 хоног)',     v:'₮ ' + fmtMNT(Math.round(LOAN_PARTIAL * 0.025)) },
+          { l:'Эргэн төлөх огноо',         v:'2026.06.28' },
+          { l:'ЗМС шимтгэл (төлөгдсөн)',   v:'₮ ' + fmtMNT(ZMS_FEE),                            tone: CLE.muted },
+        ]}/>
       </div>
-
-      <div style={{ fontSize: 20, fontWeight: 800, color: CLE.ink, marginTop: 20, letterSpacing:'-0.02em', lineHeight: 1.25, textWrap:'pretty' }}>
-        Зээл хэсэгчлэн зөвшөөрөгдлөө
-      </div>
-      <div style={{ fontSize: 13, color: CLE.muted, marginTop: 8, lineHeight: 1.55 }}>
-        Таны хүссэн ₮{fmtMNT(LOAN_REQUESTED)}-аас <strong style={{ color: CLE.ink }}>₮{fmtMNT(LOAN_PARTIAL)}</strong> зээл зөвшөөрөгдлөө. Энэ дүнг авах эсэхээ сонгоно уу.
-      </div>
-
-      <LoanResultCard rows={[
-        { l:'Хүссэн дүн', v:'₮ ' + fmtMNT(LOAN_REQUESTED) },
-        { l:'Зөвшөөрсөн дүн', v:'₮ ' + fmtMNT(LOAN_PARTIAL), strong:true, tone: CLE.indigo },
-        { l:'Хүү (2.5% / 30 хоног)', v:'₮ ' + fmtMNT(Math.round(LOAN_PARTIAL * 0.025)) },
-        { l:'Эргэн төлөх огноо', v:'2026.06.28' },
-      ]}/>
-    </div>
-    <LEFooter secondary="Татгалзах">₮{fmtMNT(LOAN_PARTIAL)} зээл авах <Arrow/></LEFooter>
-  </FrameLE>
-);
+      <LEFooter onSecondary={() => setShowCancel(true)} secondary="Татгалзах">
+        ₮ {fmtMNT(calcNet(LOAN_PARTIAL))} хэтэвчинд авах <Arrow/>
+      </LEFooter>
+      {showCancel && <CancelModal onBack={() => setShowCancel(false)} onDecline={() => { setShowCancel(false); onNav && onNav("loanDeclined"); }}/>}
+    </FrameLE>
+  );
+};
 
 // ============================================================
 // 43 — LOAN DISBURSED (after submit)  [NEW]
@@ -412,7 +523,7 @@ const LoanSubmitted = () => (
           Зээл амжилттай олгогдлоо
         </div>
         <div style={{ fontSize: 13.5, color: CLE.muted, marginTop: 10, lineHeight: 1.55, maxWidth: 290 }}>
-          <strong style={{ color: CLE.ink }}>₮ 3,000,000</strong> таны дансанд шилжлээ.
+          <strong style={{ color: CLE.ink }}>₮ 3,000,000</strong> таны хэтэвчинд шилжлээ.
         </div>
       </div>
 
@@ -503,10 +614,49 @@ const LoanDeclined = () => {
 };
 
 // ============================================================
+// 42 — LOAN PIN CONFIRM (PIN auth before disbursement)
+// ============================================================
+const LoanPinConfirm = () => {
+  const [pinDone, setPinDone] = useStateLE(false);
+  return (
+    <FrameLE label="42 — Loan · PIN confirm">
+      <BackBarLE title="Гүйлгээний ПИН код"/>
+      <div style={{ flex: 1, overflow:'auto', padding: '14px 24px 20px', display:'flex', flexDirection:'column' }}>
+        <div style={{ fontSize: 21, fontWeight: 800, color: CLE.ink, letterSpacing:'-0.02em', lineHeight: 1.18 }}>
+          ПИН кодоо оруулна уу
+        </div>
+        <div style={{ fontSize: 12.5, color: CLE.muted, marginTop: 8, lineHeight: 1.5 }}>
+          <strong style={{ color: CLE.ink }}>₮ {fmtMNT(LOAN_REQUESTED)}</strong> зээл авахыг гүйлгээний ПИН кодоор баталгаажуулна уу.
+        </div>
+        <div style={{ marginTop:14, background:'#FAFBFE', borderRadius:14, border:`1px solid ${CLE.line2}`, overflow:'hidden' }}>
+          {[
+            { l:'Зөвшөөрөгдсөн дүн',      v:'₮ ' + fmtMNT(LOAN_REQUESTED) },
+            { l:'Шимтгэл (1%)',          v:'− ₮ ' + fmtMNT(calcFee(LOAN_REQUESTED)), tone: CLE.red },
+            { l:'Хэтэвчинд орох дүн',   v:'₮ ' + fmtMNT(calcNet(LOAN_REQUESTED)),   strong:true },
+            { l:'ЗМС шимтгэл',           v:'₮ ' + fmtMNT(ZMS_FEE) + ' (төлөгдсөн)', tone: CLE.muted },
+          ].map((r, i) => (
+            <div key={i} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'11px 14px', borderTop: i ? `1px solid ${CLE.line2}` : 'none' }}>
+              <span style={{ fontSize:12, color:CLE.muted, fontWeight:600 }}>{r.l}</span>
+              <span style={{ fontSize: r.strong ? 13 : 12.5, fontWeight: r.strong ? 800 : 700, color: r.tone || CLE.ink, fontVariantNumeric:'tabular-nums' }}>{r.v}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ flex: 1, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', paddingTop: 16 }}>
+          <TransactionPin onFilled={() => setPinDone(true)}/>
+        </div>
+      </div>
+      <LEFooter disabled={!pinDone}>
+        Баталгаажуулах <Arrow/>
+      </LEFooter>
+    </FrameLE>
+  );
+};
+
+// ============================================================
 // EXPORT TO WINDOW
 // ============================================================
 Object.assign(window, {
-  LoanCheckEntry, QPayPayment,
+  LoanCheckEntry, LoanBlocked, QPayPayment,
   PayWaiting, PayConfirmed, PayFailed, PayTimeout,
-  ZmsChecking, LoanAccepted, LoanPartial, LoanSubmitted, LoanDeclined,
+  ZmsChecking, LoanAccepted, LoanPartial, LoanPinConfirm, LoanSubmitted, LoanDeclined,
 });

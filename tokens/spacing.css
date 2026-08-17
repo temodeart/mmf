@@ -1,0 +1,43 @@
+/* =========================================================================
+   Money Market Fund — Spacing, layout & radii tokens
+   Only these gap/padding values are allowed. Nothing off-scale.
+   ========================================================================= */
+
+:root {
+  /* -------- SPACING SCALE (4 / 8 / 12 / 16 / 24 / 32 / 48) -------- */
+  --s-1:            4px;
+  --s-2:            8px;
+  --s-3:            12px;
+  --s-4:            16px;
+  --s-5:            24px;
+  --s-6:            32px;
+  --s-7:            48px;
+
+  --margin-h:       24px;   /* mobile horizontal margin */
+  --card-pad:       20px;   /* default card padding */
+  --tabbar-h:       80px;   /* bottom tab bar height incl. safe area */
+
+  /* -------- DESKTOP LAYOUT -------- */
+  --sidebar-w:      268px;  /* left navigation rail */
+  --topbar-h:       72px;   /* sticky top bar */
+  --content-pad-x:  36px;   /* main content horizontal padding */
+  --content-pad-y:  30px;   /* main content top padding */
+  --rail-w:         384px;  /* order-ticket / detail right rail */
+  --app-rail:       320px;  /* F-01 · fixed side column in fluid app content grid */
+
+  /* -------- RADII -------- */
+  --r-1:            6px;    /* checkbox glyph */
+  --r-2:            8px;    /* small chip */
+  --r-3:            10px;   /* badge, icon container */
+  --r-4:            12px;   /* button-small, chip */
+  --r-5:            14px;   /* button, input */
+  --r-6:            16px;   /* card */
+  --r-7:            18px;   /* card */
+  --r-8:            22px;   /* hero card */
+  --r-9:            28px;   /* large hero / device frame */
+  --r-frame:        48px;   /* device frame outer */
+  --r-pill:         999px;
+
+  /* -------- A11Y -------- */
+  --target-min:     40px;   /* minimum tap/click target height */
+}

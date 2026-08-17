@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Мэдээ мэдээлэл — Money Market Fund</title>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<script src="../foundations.js"></script>
+<script src="../portal-scope.js"></script>
+<script src="../mmf_notifications.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../comp_atoms.jsx"></script>
+<script type="text/babel" src="../comp_kit.jsx"></script>
+<style>
+  body {
+    background:
+      radial-gradient(1200px 600px at 18% -5%, #EEF0FE 0%, transparent 58%),
+      radial-gradient(1000px 520px at 100% 105%, #FFEDE2 0%, transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #DADEEA; border-radius: 99px; border: 3px solid transparent; background-clip: content-box; }
+  .clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+/* ═════════════════════════════════════════════════════════════════════════
+   DEV-HANDOFF NOTE (F-18) — not UI, do not render this block.
+   • News URLs must use semantic slugs: /news/{slug}  e.g. /news/tsb-huu-tuvshin
+     — never /news/{numeric-id} or a raw DB primary key in the URL.
+   • id=-1 (or any "not found" sentinel id) must NEVER render as an article.
+     A missing/invalid slug must fall back to the index (or a proper 404),
+     not a blank or partially-hydrated article shell. This prototype models
+     that by resolving `currentSlug` against the dataset on every render —
+     an unresolved slug simply falls back to `null` → index view.
+   • Real routing layer: server/CDN redirects any legacy numeric-id news URL
+     to its canonical slug (301), rather than serving both forms live.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+const { useState, useMemo } = React;
+const {
+  T, WebBadge, WebButton, WebEmptyState, WebPagination, WebSidebar, WebTopbar, WebFooter,
+} = window;
+
+/* ── Data ─────────────────────────────────────────────────────── */
+const CATS = [
+  { key:'all',       label:'Бүгд' },
+  { key:'market',    label:'Зах зээл' },
+  { key:'product',   label:'Бүтээгдэхүүн' },
+  { key:'reg',       label:'Зохицуулалт' },
+  { key:'econ',      label:'Эдийн засаг' },
+];
+const CAT_COLOR = { market:T.blue, product:T.pos, reg:T.warn, econ:T.indigo };
+
+const P = (n) => Array.from({ length:n }, (_,i) => `Энэ хэсэгт мэдээллийн ${i+1}-р дэд агуулга орно. Энд зах зээлийн нөхцөл байдал, холбогдох тоо баримт болон мэргэжлийн тайлбарыг дэлгэрэнгүй өгүүлнэ.`);
+
+const NEWS = [
+  { id:1,  slug:'ta-huu-tuvshin-togtvortoi',        cat:'market',  source:'Монцамэ', title:'ТБ: Хүүгийн хэмжээ тогтвортой хэвээр байна',                              snippet:'Монголбанкны мөнгөний бодлогын хорооны хурлаас гарсан шийдвэрийн дагуу бодлогын хүүг өөрчлөхгүй орхилоо.', body:P(3), date:new Date(Date.now()-2*3600000) },
+  { id:2,  slug:'dari-finance-shine-itgeltsel',      cat:'product', source:'MMF',    title:'Дарь Финанс ББСБ шинэ итгэлцэл гаргалаа',                                  snippet:'23.0% жилийн өгөөжтэй, 272 хоногийн хугацаатай шинэ итгэлцлийн багц худалдаанд гарлаа.', body:P(4), date:new Date(Date.now()-14*3600000) },
+  { id:3,  slug:'szh-hagas-jiliin-tailan',           cat:'reg',     source:'СЗХ',    title:'СЗХ 2026 оны хагас жилийн тайланг нийтэллээ',                              snippet:'Санхүүгийн зохицуулах хороо зах зээлийн эрсдэлийн үнэлгээ болон хяналт шалгалтын дүнг танилцууллаа.', body:P(5), date:new Date(Date.now()-2*86400000) },
+  { id:4,  slug:'mongolbank-inflyatsiin-medee',      cat:'econ',    source:'Монголбанк', title:'Монголбанк: Инфляц 7.2%-д хүрч буй дохио илэрхийлэв',                  snippet:'Хэрэглээний үнийн индексийн өсөлт сүүлийн улирлын дүнгээр өссөн хэвээр байгааг мэдээллээ.', body:P(4), date:new Date(Date.now()-5*86400000) },
+  { id:5,  slug:'hotolnomgon-ittseltseel-hugatsaa',  cat:'product', source:'MMF',    title:'Хөтөлномгон ББСБ итгэлцлийн эргэн төлөлт эхэллээ',                       snippet:'Эхний ээлжийн эргэн төлөлт хугацаандаа хэтэвчинд шилжсэн тухай мэдээлж байна.', body:P(3), date:new Date(Date.now()-6*86400000) },
+  { id:6,  slug:'zah-zeeliin-longiin-noloolol',      cat:'market',  source:'Bloomberg MN', title:'Зах зээлийн ложистикийн өөрчлөлт ХС-ийн эрэлтэд нөлөөлж байна',        snippet:'Хадгаламжийн сертификатын эрэлт өссөөр байгааг зах зээлийн шинжээчид онцолж байна.', body:P(4), date:new Date(Date.now()-9*86400000) },
+  { id:7,  slug:'anlok-bbsb-lisenz-sungalt',         cat:'reg',     source:'СЗХ',    title:'Анлок ББСБ-ийн тусгай зөвшөөрлийг сунгалаа',                              snippet:'Хугацаа дуусахаас өмнө шаардлагатай бичиг баримтыг бүрдүүлж, сунгалтыг баталгаажууллаа.', body:P(3), date:new Date(Date.now()-12*86400000) },
+  { id:8,  slug:'gadaad-valyutin-noloolol',          cat:'econ',    source:'Монголбанк', title:'Гадаад валютын ханшийн хэлбэлзэл дотоодын хүүд нөлөөлж байна',           snippet:'Ам.долларын ханшийн хэлбэлзэл дунд хугацааны өгөөжид шууд бус нөлөө үзүүлж болзошгүй.', body:P(4), date:new Date(Date.now()-16*86400000) },
+  { id:9,  slug:'kapitron-cd-shine-hugatsaa',        cat:'product', source:'Капитрон Банк', title:'Капитрон Банк 12 сарын ХС-ийн багц нэмж гаргалаа',                    snippet:'14.5% жилийн өгөөжтэй, 12 сарын хугацаатай хадгаламжийн сертификат худалдаанд нэмэгдлээ.', body:P(3), date:new Date(Date.now()-20*86400000) },
+  { id:10, slug:'zah-zeeliin-долоо-hоногийн-тойм',   cat:'market',  source:'Bloomberg MN', title:'Долоо хоногийн тойм: Хоёрдогч зах зээлийн идэвх нэмэгдлээ',            snippet:'Арилжааны эргэлт өнгөрсөн долоо хоногтой харьцуулахад 12%-иар өссөн байна.', body:P(4), date:new Date(Date.now()-24*86400000) },
+  { id:11, slug:'ubu-nehemjleh-zah-zeel',            cat:'product', source:'MMF',    title:'Нэхэмжлэхийн зах зээлд шинэ гаргагч бүртгүүллээ',                          snippet:'Дунд хэмжээний бизнесийн санхүүжилтийн эрэлт нэмэгдэж буйг үзүүлж байна.', body:P(3), date:new Date(Date.now()-30*86400000) },
+  { id:12, slug:'szh-zohitsuulaltiin-shinechlel',    cat:'reg',     source:'СЗХ',    title:'СЗХ зохицуулалтын шинэчилсэн журам гаргалаа',                              snippet:'Арилжааны бичгийн гаргагчдад тавигдах шаардлага өндөрсч байгааг мэдэгдлээ.', body:P(5), date:new Date(Date.now()-40*86400000) },
+];
+
+const cats = () => CATS;
+const catLabel = k => CATS.find(c=>c.key===k)?.label || k;
+const PER_PAGE = 6;
+
+/* ── Article card ─────────────────────────────────────────────── */
+const NewsCard = ({ item, onOpen }) => (
+  <button onClick={() => onOpen(item.slug)} style={{ textAlign:'left', display:'flex', flexDirection:'column', background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20, padding:20, cursor:'pointer', fontFamily:'inherit', height:'100%' }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12, gap:10 }}>
+      <span style={{ fontSize:10.5, fontWeight:700, color:CAT_COLOR[item.cat], background:`${CAT_COLOR[item.cat]}14`, padding:'3px 10px', borderRadius:99, flexShrink:0 }}>{catLabel(item.cat)}</span>
+      <span className="num" style={{ fontSize:11, color:T.muted2, fontWeight:600, fontFamily:"'JetBrains Mono',monospace", whiteSpace:'nowrap' }} title={window.formatDateTime(item.date)}>{window.formatRelative(item.date)}</span>
+    </div>
+    <div className="clamp-2" title={item.title} style={{ fontSize:15, fontWeight:800, color:T.ink, lineHeight:1.4, letterSpacing:'-0.01em', marginBottom:8, minHeight:42 }}>{item.title}</div>
+    <div className="clamp-2" style={{ fontSize:12.5, color:T.muted, fontWeight:500, lineHeight:1.55, flex:1 }}>{item.snippet}</div>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:14, paddingTop:12, borderTop:`1px solid ${T.line2}` }}>
+      <span style={{ fontSize:11.5, fontWeight:700, color:T.muted }}>{item.source}</span>
+      <span style={{ fontSize:12, fontWeight:700, color:T.indigo, display:'flex', alignItems:'center', gap:4 }}>Дэлгэрэнгүй
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke={T.indigo} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
+      </span>
+    </div>
+  </button>
+);
+
+/* ── Index page (F-19) ───────────────────────────────────────── */
+const NewsIndex = ({ onOpen }) => {
+  const [cat, setCat] = useState('all');
+  const [raw, setRaw] = useState('');
+  const [page, setPage] = useState(1);
+
+  const filtered = useMemo(() => {
+    const q = raw.trim().toLowerCase();
+    return NEWS.filter(n => (cat==='all' || n.cat===cat) && (!q || n.title.toLowerCase().includes(q) || n.snippet.toLowerCase().includes(q) || n.source.toLowerCase().includes(q)));
+  }, [cat, raw]);
+
+  const pageRows = filtered.slice((page-1)*PER_PAGE, page*PER_PAGE);
+
+  return (
+    <>
+      <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', gap:24, marginBottom:22, flexWrap:'wrap' }}>
+        <div>
+          <h1 style={{ fontSize:30, fontWeight:800, letterSpacing:'-0.03em', color:T.navy, margin:0 }}>Мэдээ мэдээлэл</h1>
+          <p style={{ margin:'8px 0 0', fontSize:13.5, fontWeight:600, color:T.muted }}>Зах зээл, бүтээгдэхүүн, зохицуулалтын сүүлийн үеийн мэдээ</p>
+        </div>
+      </div>
+
+      <div style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', marginBottom:16 }}>
+        <div style={{ position:'relative', flex:'1 1 260px', minWidth:0, maxWidth:360 }}>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style={{ position:'absolute', left:13, top:'50%', transform:'translateY(-50%)' }}><circle cx="11" cy="11" r="7" stroke={T.muted2} strokeWidth="1.9"/><path d="M20 20l-3.5-3.5" stroke={T.muted2} strokeWidth="1.9" strokeLinecap="round"/></svg>
+          <input value={raw} onChange={e => { setRaw(e.target.value); setPage(1); }} placeholder="Мэдээ хайх…"
+            style={{ width:'100%', height:42, borderRadius:12, border:`1.5px solid ${T.line}`, background:T.field, padding:'0 38px', fontFamily:'inherit', fontSize:13.5, fontWeight:500, color:T.ink, outline:'none' }}/>
+          {raw && (
+            <button onClick={() => setRaw('')} aria-label="Хайлт цэвэрлэх" style={{ position:'absolute', right:8, top:'50%', transform:'translateY(-50%)', width:26, height:26, borderRadius:8, border:'none', background:T.line2, color:T.muted, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', minHeight:0 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+            </button>
+          )}
+        </div>
+        <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+          {cats().map(c => {
+            const on = cat===c.key;
+            return <button key={c.key} onClick={() => { setCat(c.key); setPage(1); }} style={{ height:38, padding:'0 15px', borderRadius:99, border:`1px solid ${on?T.ink:T.line}`, background:on?T.ink:T.surface, color:on?'#fff':T.text, fontSize:12.5, fontWeight:700, cursor:'pointer', fontFamily:'inherit' }}>{c.label}</button>;
+          })}
+        </div>
+      </div>
+
+      <div style={{ fontSize:12.5, fontWeight:700, color:T.text, marginBottom:16 }}>Илэрц: <span className="num" style={{ fontFamily:"'JetBrains Mono',monospace", color:T.indigo }}>{filtered.length}</span> / <span className="num" style={{ fontFamily:"'JetBrains Mono',monospace" }}>{NEWS.length}</span></div>
+
+      {filtered.length === 0 ? (
+        <div style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:20 }}>
+          <WebEmptyState
+            icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 4h11l3 3v13H5z" stroke={T.muted} strokeWidth="1.8" strokeLinejoin="round"/><path d="M8 9h8M8 13h8M8 17h5" stroke={T.muted} strokeWidth="1.8" strokeLinecap="round"/></svg>}
+            title="Одоогоор мэдээ алга"
+            body="Шүүлтүүр эсвэл хайлтаа өөрчилж дахин үзнэ үү."
+          />
+        </div>
+      ) : (
+        <>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(0,1fr))', gap:18 }}>
+            {pageRows.map(item => <NewsCard key={item.id} item={item} onOpen={onOpen}/>)}
+          </div>
+          <div style={{ display:'flex', justifyContent:'center', marginTop:26 }}>
+            <WebPagination page={page} total={filtered.length} perPage={PER_PAGE} onChange={setPage}/>
+          </div>
+        </>
+      )}
+    </>
+  );
+};
+
+/* ── Article page ────────────────────────────────────────────── */
+const ArticlePage = ({ item, onOpen, onBack }) => {
+  const related = NEWS.filter(n => n.cat===item.cat && n.id!==item.id).slice(0,3);
+  return (
+    <>
+      <button onClick={onBack} style={{ display:'inline-flex', alignItems:'center', gap:7, background:'none', border:'none', color:T.muted, fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit', padding:'6px 4px', marginBottom:18, minHeight:0 }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke={T.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        Мэдээ мэдээлэл рүү буцах
+      </button>
+
+      <article style={{ background:T.surface, border:`1px solid ${T.line2}`, borderRadius:24, padding:'32px 36px', maxWidth:760 }}>
+        <span style={{ fontSize:11, fontWeight:700, color:CAT_COLOR[item.cat], background:`${CAT_COLOR[item.cat]}14`, padding:'4px 11px', borderRadius:99 }}>{catLabel(item.cat)}</span>
+        <h1 style={{ fontSize:26, fontWeight:800, color:T.ink, letterSpacing:'-0.02em', lineHeight:1.3, margin:'16px 0 12px' }}>{item.title}</h1>
+        <div style={{ display:'flex', alignItems:'center', gap:10, fontSize:12.5, color:T.muted, fontWeight:600, marginBottom:26, paddingBottom:22, borderBottom:`1px solid ${T.line2}` }}>
+          <span style={{ fontWeight:700, color:T.text }}>{item.source}</span>
+          <span style={{ width:3, height:3, borderRadius:99, background:T.muted2 }}/>
+          <span className="num" style={{ fontFamily:"'JetBrains Mono',monospace" }}>{window.formatDateTime(item.date)}</span>
+        </div>
+        {item.body.map((p,i) => <p key={i} style={{ fontSize:14.5, color:T.text, lineHeight:1.75, margin: i? '16px 0 0':'0' }}>{p}</p>)}
+      </article>
+
+      {related.length > 0 && (
+        <div style={{ maxWidth:760, marginTop:28 }}>
+          <div style={{ fontSize:13, fontWeight:800, color:T.ink, marginBottom:14 }}>Холбоотой мэдээ</div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, minmax(0,1fr))', gap:16 }}>
+            {related.map(r => <NewsCard key={r.id} item={r} onOpen={onOpen}/>)}
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+/* ── Page shell — resolves slug → article; unresolved slug always
+   falls back to the index (F-18: id=-1 / bad slugs never render). ── */
+const NewsPage = () => {
+  /* F-18 parity: resolve ?article=<slug> deep links (e.g. from a notification)
+     against the dataset on mount — an unresolved/missing slug always falls
+     back to the index, never a blank shell. */
+  const initialSlug = (() => {
+    if (typeof location === 'undefined') return null;
+    const m = /(?:\?|&)article=([^&]+)/.exec(location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  })();
+  const [slug, setSlug] = useState(initialSlug);
+  const current = slug ? NEWS.find(n => n.slug === slug) || null : null;
+
+  const openArticle = (s) => { setSlug(s); window.scrollTo(0,0); };
+  const backToIndex = () => { setSlug(null); window.scrollTo(0,0); };
+
+  return (
+    <div style={{ display:'flex', minHeight:'100vh' }}>
+      <a href="#mmf-main" className="skip-link">Үндсэн хэсэг рүү очих</a>
+      <WebSidebar activePath="/news"/>
+      <div style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+        <WebTopbar title="Мэдээ мэдээлэл" notifCount={0}/>
+        <main id="mmf-main" tabIndex={-1} style={{ flex:1, padding:'30px 36px 40px', outline:'none' }}>
+          {current
+            ? <ArticlePage item={current} onOpen={openArticle} onBack={backToIndex}/>
+            : <NewsIndex onOpen={openArticle}/>}
+        </main>
+        <WebFooter/>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<NewsPage/>);
+</script>
+<script src="../portal-return.js"></script>
+</body>
+</html>

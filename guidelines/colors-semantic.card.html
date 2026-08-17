@@ -1,0 +1,22 @@
+<!-- @dsCard group="Colors" viewport="700x180" name="Semantic status" subtitle="pos / neg / warn / info — one meaning per color" -->
+<!DOCTYPE html>
+<html lang="mn"><head><meta charset="UTF-8"/><link rel="stylesheet" href="../styles.css"/>
+<style>
+  body{margin:0;background:var(--surface);padding:22px;}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .sw{border-radius:14px;overflow:hidden;border:1px solid var(--line-2);}
+  .chip{height:52px;display:flex;}
+  .chip span{flex:1;}
+  .meta{padding:10px 12px;}
+  .nm{font-size:12.5px;font-weight:800;color:var(--ink);}
+  .hex{font-family:var(--font-mono);font-size:11px;color:var(--muted);margin-top:3px;}
+  .use{font-size:10.5px;color:var(--muted-2);font-weight:600;margin-top:2px;}
+</style></head>
+<body>
+<div class="row">
+  <div class="sw"><div class="chip"><span style="background:var(--pos)"></span><span style="background:var(--pos-soft)"></span></div><div class="meta"><div class="nm" style="color:var(--pos)">pos</div><div class="hex">#0E9F6E</div><div class="use">Авах · ашиг · шинэ</div></div></div>
+  <div class="sw"><div class="chip"><span style="background:var(--neg)"></span><span style="background:var(--neg-soft)"></span></div><div class="meta"><div class="nm" style="color:var(--neg)">neg</div><div class="hex">#DC2626</div><div class="use">Зарах · алдагдал · алдаа</div></div></div>
+  <div class="sw"><div class="chip"><span style="background:var(--warn)"></span><span style="background:var(--warn-soft)"></span></div><div class="meta"><div class="nm" style="color:var(--warn)">warn</div><div class="hex">#B7791F</div><div class="use">Хүлээгдэж буй · анхаар</div></div></div>
+  <div class="sw"><div class="chip"><span style="background:var(--info)"></span><span style="background:var(--info-soft)"></span></div><div class="meta"><div class="nm" style="color:var(--info)">info</div><div class="hex">#4F46E5</div><div class="use">Мэдээлэл</div></div></div>
+</div>
+</body></html>

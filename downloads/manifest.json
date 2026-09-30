@@ -1,0 +1,2773 @@
+{
+ "generated": "2026-09-30T05:17:28.677Z",
+ "packages": {
+  "all": {
+   "title": "Бүх төсөл",
+   "zip": "mmf-full-project.zip",
+   "folder": "mmf-full-project",
+   "entry": "Portal.html",
+   "count": 463,
+   "bytes": 96427149,
+   "files": [
+    {
+     "p": ".nojekyll",
+     "s": 0
+    },
+    {
+     "p": ".thumbnail",
+     "s": 17896
+    },
+    {
+     "p": "app_proto.jsx",
+     "s": 29124
+    },
+    {
+     "p": "assets/logo-black.svg",
+     "s": 26748
+    },
+    {
+     "p": "assets/logo-mark.svg",
+     "s": 499
+    },
+    {
+     "p": "assets/logo-white.svg",
+     "s": 26726
+    },
+    {
+     "p": "assets/partners/bichil.png",
+     "s": 19502
+    },
+    {
+     "p": "assets/partners/invescore.png",
+     "s": 20399
+    },
+    {
+     "p": "assets/partners/lendmn.png",
+     "s": 11843
+    },
+    {
+     "p": "assets/partners/ochir.png",
+     "s": 38348
+    },
+    {
+     "p": "assets/partners/omni.png",
+     "s": 32896
+    },
+    {
+     "p": "assets/partners/sendly.png",
+     "s": 13602
+    },
+    {
+     "p": "assets/partners/simple.png",
+     "s": 12382
+    },
+    {
+     "p": "assets/partners/sono.png",
+     "s": 12503
+    },
+    {
+     "p": "assets/partners/tus.png",
+     "s": 9545
+    },
+    {
+     "p": "assets/partners/yesun.png",
+     "s": 35257
+    },
+    {
+     "p": "auto_invest_app.jsx",
+     "s": 13223
+    },
+    {
+     "p": "auto_invest_v2.jsx",
+     "s": 50077
+    },
+    {
+     "p": "auto_invest_web.jsx",
+     "s": 64263
+    },
+    {
+     "p": "auto_invest.jsx",
+     "s": 94064
+    },
+    {
+     "p": "bank_verify.jsx",
+     "s": 45298
+    },
+    {
+     "p": "card_link.jsx",
+     "s": 26085
+    },
+    {
+     "p": "card_manage.jsx",
+     "s": 19971
+    },
+    {
+     "p": "cards_desktop.jsx",
+     "s": 37302
+    },
+    {
+     "p": "CHANGELOG.md",
+     "s": 7323
+    },
+    {
+     "p": "colors_and_type.css",
+     "s": 20567
+    },
+    {
+     "p": "comp_atoms.jsx",
+     "s": 12047
+    },
+    {
+     "p": "comp_kit.jsx",
+     "s": 49103
+    },
+    {
+     "p": "components/data/data.card.html",
+     "s": 3647
+    },
+    {
+     "p": "components/data/DataTable.d.ts",
+     "s": 1061
+    },
+    {
+     "p": "components/data/DataTable.jsx",
+     "s": 7273
+    },
+    {
+     "p": "components/data/DataTable.prompt.md",
+     "s": 369
+    },
+    {
+     "p": "components/data/Pagination.d.ts",
+     "s": 231
+    },
+    {
+     "p": "components/data/Pagination.jsx",
+     "s": 1540
+    },
+    {
+     "p": "components/data/Pagination.prompt.md",
+     "s": 196
+    },
+    {
+     "p": "components/data/StatCard.d.ts",
+     "s": 461
+    },
+    {
+     "p": "components/data/StatCard.jsx",
+     "s": 2543
+    },
+    {
+     "p": "components/data/StatCard.prompt.md",
+     "s": 317
+    },
+    {
+     "p": "components/feedback/Disclaimer.d.ts",
+     "s": 165
+    },
+    {
+     "p": "components/feedback/Disclaimer.jsx",
+     "s": 888
+    },
+    {
+     "p": "components/feedback/Disclaimer.prompt.md",
+     "s": 312
+    },
+    {
+     "p": "components/feedback/EmptyState.d.ts",
+     "s": 246
+    },
+    {
+     "p": "components/feedback/EmptyState.jsx",
+     "s": 1232
+    },
+    {
+     "p": "components/feedback/EmptyState.prompt.md",
+     "s": 311
+    },
+    {
+     "p": "components/feedback/ErrorState.d.ts",
+     "s": 257
+    },
+    {
+     "p": "components/feedback/ErrorState.jsx",
+     "s": 2201
+    },
+    {
+     "p": "components/feedback/ErrorState.prompt.md",
+     "s": 264
+    },
+    {
+     "p": "components/feedback/feedback.card.html",
+     "s": 3377
+    },
+    {
+     "p": "components/feedback/Skeleton.d.ts",
+     "s": 253
+    },
+    {
+     "p": "components/feedback/Skeleton.jsx",
+     "s": 742
+    },
+    {
+     "p": "components/feedback/Skeleton.prompt.md",
+     "s": 203
+    },
+    {
+     "p": "components/navigation/AppShell.jsx",
+     "s": 1656
+    },
+    {
+     "p": "components/navigation/Footer.jsx",
+     "s": 1206
+    },
+    {
+     "p": "components/navigation/navigation.card.html",
+     "s": 2394
+    },
+    {
+     "p": "components/navigation/PageHeader.d.ts",
+     "s": 200
+    },
+    {
+     "p": "components/navigation/PageHeader.jsx",
+     "s": 704
+    },
+    {
+     "p": "components/navigation/PageHeader.prompt.md",
+     "s": 266
+    },
+    {
+     "p": "components/navigation/Sidebar.d.ts",
+     "s": 318
+    },
+    {
+     "p": "components/navigation/Sidebar.jsx",
+     "s": 5157
+    },
+    {
+     "p": "components/navigation/Sidebar.prompt.md",
+     "s": 286
+    },
+    {
+     "p": "components/navigation/Topbar.d.ts",
+     "s": 205
+    },
+    {
+     "p": "components/navigation/Topbar.jsx",
+     "s": 5998
+    },
+    {
+     "p": "components/navigation/Topbar.prompt.md",
+     "s": 298
+    },
+    {
+     "p": "components/overlay/Modal.d.ts",
+     "s": 498
+    },
+    {
+     "p": "components/overlay/Modal.jsx",
+     "s": 2393
+    },
+    {
+     "p": "components/overlay/Modal.prompt.md",
+     "s": 354
+    },
+    {
+     "p": "components/overlay/overlay.card.html",
+     "s": 2629
+    },
+    {
+     "p": "components/primitives/Badge.d.ts",
+     "s": 280
+    },
+    {
+     "p": "components/primitives/Badge.jsx",
+     "s": 1212
+    },
+    {
+     "p": "components/primitives/Badge.prompt.md",
+     "s": 253
+    },
+    {
+     "p": "components/primitives/Button.d.ts",
+     "s": 508
+    },
+    {
+     "p": "components/primitives/Button.jsx",
+     "s": 2279
+    },
+    {
+     "p": "components/primitives/Button.prompt.md",
+     "s": 339
+    },
+    {
+     "p": "components/primitives/Dot.d.ts",
+     "s": 238
+    },
+    {
+     "p": "components/primitives/Dot.jsx",
+     "s": 597
+    },
+    {
+     "p": "components/primitives/Dot.prompt.md",
+     "s": 172
+    },
+    {
+     "p": "components/primitives/primitives.card.html",
+     "s": 3596
+    },
+    {
+     "p": "components/primitives/Sparkline.d.ts",
+     "s": 206
+    },
+    {
+     "p": "components/primitives/Sparkline.jsx",
+     "s": 1150
+    },
+    {
+     "p": "components/primitives/Sparkline.prompt.md",
+     "s": 193
+    },
+    {
+     "p": "components/primitives/TextInput.d.ts",
+     "s": 455
+    },
+    {
+     "p": "components/primitives/TextInput.jsx",
+     "s": 2061
+    },
+    {
+     "p": "components/primitives/TextInput.prompt.md",
+     "s": 249
+    },
+    {
+     "p": "components/trade/FilterChips.d.ts",
+     "s": 294
+    },
+    {
+     "p": "components/trade/FilterChips.jsx",
+     "s": 1172
+    },
+    {
+     "p": "components/trade/FilterChips.prompt.md",
+     "s": 284
+    },
+    {
+     "p": "components/trade/InstrumentCard.d.ts",
+     "s": 609
+    },
+    {
+     "p": "components/trade/InstrumentCard.jsx",
+     "s": 4732
+    },
+    {
+     "p": "components/trade/InstrumentCard.prompt.md",
+     "s": 241
+    },
+    {
+     "p": "components/trade/OrderTicket.d.ts",
+     "s": 522
+    },
+    {
+     "p": "components/trade/OrderTicket.jsx",
+     "s": 10511
+    },
+    {
+     "p": "components/trade/OrderTicket.prompt.md",
+     "s": 404
+    },
+    {
+     "p": "components/trade/OTPInput.d.ts",
+     "s": 187
+    },
+    {
+     "p": "components/trade/OTPInput.jsx",
+     "s": 1470
+    },
+    {
+     "p": "components/trade/OTPInput.prompt.md",
+     "s": 184
+    },
+    {
+     "p": "components/trade/SegmentedControl.d.ts",
+     "s": 397
+    },
+    {
+     "p": "components/trade/SegmentedControl.jsx",
+     "s": 1928
+    },
+    {
+     "p": "components/trade/SegmentedControl.prompt.md",
+     "s": 312
+    },
+    {
+     "p": "components/trade/trade.card.html",
+     "s": 3177
+    },
+    {
+     "p": "design-canvas.jsx",
+     "s": 50083
+    },
+    {
+     "p": "exports/changes.json",
+     "s": 59
+    },
+    {
+     "p": "exports/components.json",
+     "s": 7876
+    },
+    {
+     "p": "exports/manifest.json",
+     "s": 20448
+    },
+    {
+     "p": "exports/MMF Landing/13 Landing - App First.html",
+     "s": 1923196
+    },
+    {
+     "p": "exports/MMF Landing/About Us.html",
+     "s": 19569474
+    },
+    {
+     "p": "exports/MMF Landing/Benchmark.html",
+     "s": 301374
+    },
+    {
+     "p": "exports/screens/AddMoneyAmount.jsx",
+     "s": 152655
+    },
+    {
+     "p": "exports/screens/AddMoneyBank.jsx",
+     "s": 152042
+    },
+    {
+     "p": "exports/screens/AddMoneyBankNotFound.jsx",
+     "s": 10824
+    },
+    {
+     "p": "exports/screens/AddMoneyBankPending.jsx",
+     "s": 10290
+    },
+    {
+     "p": "exports/screens/AddMoneyBankSuccess.jsx",
+     "s": 10131
+    },
+    {
+     "p": "exports/screens/AddMoneyQPay.jsx",
+     "s": 11674
+    },
+    {
+     "p": "exports/screens/AddMoneySuccess.jsx",
+     "s": 10018
+    },
+    {
+     "p": "exports/screens/app.css",
+     "s": 1981
+    },
+    {
+     "p": "exports/screens/BankVerified.jsx",
+     "s": 16382
+    },
+    {
+     "p": "exports/screens/BankVerify.jsx",
+     "s": 31047
+    },
+    {
+     "p": "exports/screens/BiometricSetup.jsx",
+     "s": 7659
+    },
+    {
+     "p": "exports/screens/Category.jsx",
+     "s": 24235
+    },
+    {
+     "p": "exports/screens/CertRequest.jsx",
+     "s": 8984
+    },
+    {
+     "p": "exports/screens/CertSuccess.jsx",
+     "s": 6118
+    },
+    {
+     "p": "exports/screens/CodeEntry.jsx",
+     "s": 23146
+    },
+    {
+     "p": "exports/screens/ContractViewer.jsx",
+     "s": 10520
+    },
+    {
+     "p": "exports/screens/CreatePassword.jsx",
+     "s": 16651
+    },
+    {
+     "p": "exports/screens/CreatePin.jsx",
+     "s": 17366
+    },
+    {
+     "p": "exports/screens/DepositInfo.jsx",
+     "s": 18725
+    },
+    {
+     "p": "exports/screens/DepositSending.jsx",
+     "s": 16477
+    },
+    {
+     "p": "exports/screens/EduDetail.jsx",
+     "s": 115723
+    },
+    {
+     "p": "exports/screens/EmailVerify.jsx",
+     "s": 15280
+    },
+    {
+     "p": "exports/screens/ESignCanvas.jsx",
+     "s": 10158
+    },
+    {
+     "p": "exports/screens/ESignSuccess.jsx",
+     "s": 9617
+    },
+    {
+     "p": "exports/screens/GSignRequest.jsx",
+     "s": 11450
+    },
+    {
+     "p": "exports/screens/GSignSuccess.jsx",
+     "s": 7215
+    },
+    {
+     "p": "exports/screens/GSignTutorial.jsx",
+     "s": 9082
+    },
+    {
+     "p": "exports/screens/GSignWaiting.jsx",
+     "s": 9154
+    },
+    {
+     "p": "exports/screens/Home.jsx",
+     "s": 108579
+    },
+    {
+     "p": "exports/screens/IbanLookupResult.jsx",
+     "s": 22864
+    },
+    {
+     "p": "exports/screens/IbanLookupSheet.jsx",
+     "s": 22504
+    },
+    {
+     "p": "exports/screens/KycComplete.jsx",
+     "s": 14773
+    },
+    {
+     "p": "exports/screens/KycConsent.jsx",
+     "s": 16547
+    },
+    {
+     "p": "exports/screens/Loan.jsx",
+     "s": 108579
+    },
+    {
+     "p": "exports/screens/LoanAccepted.jsx",
+     "s": 13389
+    },
+    {
+     "p": "exports/screens/LoanBlocked.jsx",
+     "s": 112290
+    },
+    {
+     "p": "exports/screens/LoanCheckEntry.jsx",
+     "s": 117643
+    },
+    {
+     "p": "exports/screens/LoanDeclined.jsx",
+     "s": 10224
+    },
+    {
+     "p": "exports/screens/LoanPartial.jsx",
+     "s": 13761
+    },
+    {
+     "p": "exports/screens/LoanPinConfirm.jsx",
+     "s": 118785
+    },
+    {
+     "p": "exports/screens/LoanSubmitted.jsx",
+     "s": 113755
+    },
+    {
+     "p": "exports/screens/Login.jsx",
+     "s": 12276
+    },
+    {
+     "p": "exports/screens/MasterContract.jsx",
+     "s": 15764
+    },
+    {
+     "p": "exports/screens/MonpepCheck.jsx",
+     "s": 12682
+    },
+    {
+     "p": "exports/screens/MonpepFailed.jsx",
+     "s": 8096
+    },
+    {
+     "p": "exports/screens/MyContracts.jsx",
+     "s": 9335
+    },
+    {
+     "p": "exports/screens/News.jsx",
+     "s": 108579
+    },
+    {
+     "p": "exports/screens/NewsDetail.jsx",
+     "s": 114136
+    },
+    {
+     "p": "exports/screens/NotificationDetail.jsx",
+     "s": 11031
+    },
+    {
+     "p": "exports/screens/NotificationDetailCrit.jsx",
+     "s": 11158
+    },
+    {
+     "p": "exports/screens/NotificationList.jsx",
+     "s": 15789
+    },
+    {
+     "p": "exports/screens/NotifSettings.jsx",
+     "s": 7927
+    },
+    {
+     "p": "exports/screens/Onb1.jsx",
+     "s": 9581
+    },
+    {
+     "p": "exports/screens/Onb2.jsx",
+     "s": 8981
+    },
+    {
+     "p": "exports/screens/Onb3.jsx",
+     "s": 114766
+    },
+    {
+     "p": "exports/screens/Onb4.jsx",
+     "s": 10230
+    },
+    {
+     "p": "exports/screens/OwnedDetail.jsx",
+     "s": 15901
+    },
+    {
+     "p": "exports/screens/PayConfirmed.jsx",
+     "s": 11058
+    },
+    {
+     "p": "exports/screens/PayFailed.jsx",
+     "s": 11046
+    },
+    {
+     "p": "exports/screens/PersonalInfo.jsx",
+     "s": 8537
+    },
+    {
+     "p": "exports/screens/PhoneVerify.jsx",
+     "s": 17373
+    },
+    {
+     "p": "exports/screens/PrimaryBuyPin.jsx",
+     "s": 13850
+    },
+    {
+     "p": "exports/screens/PrimaryBuyReview.jsx",
+     "s": 16681
+    },
+    {
+     "p": "exports/screens/PrimaryBuySetup.jsx",
+     "s": 20545
+    },
+    {
+     "p": "exports/screens/PrimaryBuySuccess.jsx",
+     "s": 8690
+    },
+    {
+     "p": "exports/screens/PrimaryDetail.jsx",
+     "s": 12560
+    },
+    {
+     "p": "exports/screens/PrimaryMarket.jsx",
+     "s": 11586
+    },
+    {
+     "p": "exports/screens/ProfileMain.jsx",
+     "s": 14246
+    },
+    {
+     "p": "exports/screens/QPayPayment.jsx",
+     "s": 11508
+    },
+    {
+     "p": "exports/screens/ResetEnterPhone.jsx",
+     "s": 9044
+    },
+    {
+     "p": "exports/screens/ResetNewPassword.jsx",
+     "s": 11834
+    },
+    {
+     "p": "exports/screens/ResetSuccess.jsx",
+     "s": 8450
+    },
+    {
+     "p": "exports/screens/ResetVerifyCode.jsx",
+     "s": 9774
+    },
+    {
+     "p": "exports/screens/SecondaryBuyPin.jsx",
+     "s": 13902
+    },
+    {
+     "p": "exports/screens/SecondaryBuyReview.jsx",
+     "s": 21934
+    },
+    {
+     "p": "exports/screens/SecondaryBuySetup.jsx",
+     "s": 24859
+    },
+    {
+     "p": "exports/screens/SecondaryBuySuccess.jsx",
+     "s": 8818
+    },
+    {
+     "p": "exports/screens/SecondaryDetail.jsx",
+     "s": 10726
+    },
+    {
+     "p": "exports/screens/SellPin.jsx",
+     "s": 13849
+    },
+    {
+     "p": "exports/screens/SellReview.jsx",
+     "s": 17077
+    },
+    {
+     "p": "exports/screens/SellSetup.jsx",
+     "s": 25727
+    },
+    {
+     "p": "exports/screens/SellSuccess.jsx",
+     "s": 8690
+    },
+    {
+     "p": "exports/screens/SigningMethod.jsx",
+     "s": 17700
+    },
+    {
+     "p": "exports/screens/Splash.jsx",
+     "s": 7830
+    },
+    {
+     "p": "exports/screens/StateInsufficient.jsx",
+     "s": 10300
+    },
+    {
+     "p": "exports/screens/StateNetworkError.jsx",
+     "s": 9946
+    },
+    {
+     "p": "exports/screens/StateOtpError.jsx",
+     "s": 13528
+    },
+    {
+     "p": "exports/screens/StatePriceChanged.jsx",
+     "s": 13767
+    },
+    {
+     "p": "exports/screens/StateSoldOut.jsx",
+     "s": 9979
+    },
+    {
+     "p": "exports/screens/StateUnavailable.jsx",
+     "s": 10092
+    },
+    {
+     "p": "exports/screens/TermsOfUse.jsx",
+     "s": 14981
+    },
+    {
+     "p": "exports/screens/TermsScreen.jsx",
+     "s": 8290
+    },
+    {
+     "p": "exports/screens/Trading.jsx",
+     "s": 108588
+    },
+    {
+     "p": "exports/screens/TransactionHistory.jsx",
+     "s": 13015
+    },
+    {
+     "p": "exports/screens/Wallet.jsx",
+     "s": 145616
+    },
+    {
+     "p": "exports/screens/WithdrawAmount.jsx",
+     "s": 156925
+    },
+    {
+     "p": "exports/screens/WithdrawInsufficient.jsx",
+     "s": 10623
+    },
+    {
+     "p": "exports/screens/WithdrawPin.jsx",
+     "s": 13957
+    },
+    {
+     "p": "exports/screens/WithdrawReview.jsx",
+     "s": 10430
+    },
+    {
+     "p": "exports/screens/WithdrawSuccess.jsx",
+     "s": 10144
+    },
+    {
+     "p": "exports/tokens.css",
+     "s": 10660
+    },
+    {
+     "p": "F0 Gap Map.md",
+     "s": 18506
+    },
+    {
+     "p": "flow_kit.jsx",
+     "s": 15164
+    },
+    {
+     "p": "foundations.js",
+     "s": 9782
+    },
+    {
+     "p": "guidelines/brand-iconography.card.html",
+     "s": 2922
+    },
+    {
+     "p": "guidelines/brand-logo.card.html",
+     "s": 1217
+    },
+    {
+     "p": "guidelines/colors-brand.card.html",
+     "s": 1597
+    },
+    {
+     "p": "guidelines/colors-hero.card.html",
+     "s": 1445
+    },
+    {
+     "p": "guidelines/colors-neutrals.card.html",
+     "s": 1655
+    },
+    {
+     "p": "guidelines/colors-semantic.card.html",
+     "s": 2028
+    },
+    {
+     "p": "guidelines/spacing-radii.card.html",
+     "s": 1461
+    },
+    {
+     "p": "guidelines/spacing-scale.card.html",
+     "s": 1632
+    },
+    {
+     "p": "guidelines/spacing-shadows.card.html",
+     "s": 1202
+    },
+    {
+     "p": "guidelines/type-body.card.html",
+     "s": 1366
+    },
+    {
+     "p": "guidelines/type-headings.card.html",
+     "s": 1140
+    },
+    {
+     "p": "guidelines/type-mono.card.html",
+     "s": 1509
+    },
+    {
+     "p": "holdings_summary.jsx",
+     "s": 12325
+    },
+    {
+     "p": "index.html",
+     "s": 736
+    },
+    {
+     "p": "landing-ca.css",
+     "s": 29785
+    },
+    {
+     "p": "landing-ca.js",
+     "s": 8070
+    },
+    {
+     "p": "landings/13 Landing - App First.html",
+     "s": 72780
+    },
+    {
+     "p": "landings/About Us.html",
+     "s": 14514
+    },
+    {
+     "p": "landings/app-first-phone.css",
+     "s": 17745
+    },
+    {
+     "p": "landings/app-first-tweaks.jsx",
+     "s": 1442
+    },
+    {
+     "p": "landings/app-first.css",
+     "s": 48257
+    },
+    {
+     "p": "landings/app-first.js",
+     "s": 17480
+    },
+    {
+     "p": "landings/Benchmark.html",
+     "s": 7052
+    },
+    {
+     "p": "landings/image-slot.js",
+     "s": 65350
+    },
+    {
+     "p": "landings/team/batenkh.png",
+     "s": 2783975
+    },
+    {
+     "p": "landings/team/bolortseren.png",
+     "s": 1718718
+    },
+    {
+     "p": "landings/team/chinbat.jpg",
+     "s": 70301
+    },
+    {
+     "p": "landings/team/enkhmunkh.png",
+     "s": 4802734
+    },
+    {
+     "p": "landings/team/enkhtur.jpg",
+     "s": 270142
+    },
+    {
+     "p": "landings/team/ikhmurun.jpeg",
+     "s": 867696
+    },
+    {
+     "p": "landings/team/tsolmon.jpg",
+     "s": 106971
+    },
+    {
+     "p": "landings/team/zorigtbaatar.png",
+     "s": 3825891
+    },
+    {
+     "p": "landings/tweaks-panel.jsx",
+     "s": 24657
+    },
+    {
+     "p": "loan_desktop.jsx",
+     "s": 9461
+    },
+    {
+     "p": "loan_eligibility.jsx",
+     "s": 46148
+    },
+    {
+     "p": "loan_payoff_flow.jsx",
+     "s": 24316
+    },
+    {
+     "p": "loan_payoff.jsx",
+     "s": 15007
+    },
+    {
+     "p": "loan_request_flow.jsx",
+     "s": 27601
+    },
+    {
+     "p": "mmf_notifications.js",
+     "s": 5455
+    },
+    {
+     "p": "mmf_status.js",
+     "s": 2397
+    },
+    {
+     "p": "Mobile Flows.html",
+     "s": 16711
+    },
+    {
+     "p": "mobile-app/Auto Invest Prototype.html",
+     "s": 2229
+    },
+    {
+     "p": "mobile-app/Home - Product Options.html",
+     "s": 12127
+    },
+    {
+     "p": "mobile-app/Home Cards Redesign.html",
+     "s": 2140
+    },
+    {
+     "p": "mobile-app/Home Hero Exploration.html",
+     "s": 13649
+    },
+    {
+     "p": "mobile-app/MMF Bundle Preview.html",
+     "s": 12243
+    },
+    {
+     "p": "mobile-app/Money Market Fund - Mobile App.html",
+     "s": 23711
+    },
+    {
+     "p": "mobile-app/Money Market Fund - Prototype.html",
+     "s": 4578
+    },
+    {
+     "p": "mobile-app/Registration Prototype.html",
+     "s": 3938
+    },
+    {
+     "p": "notifications.jsx",
+     "s": 16336
+    },
+    {
+     "p": "onboarding_v2.jsx",
+     "s": 79310
+    },
+    {
+     "p": "order_modal.jsx",
+     "s": 30736
+    },
+    {
+     "p": "portal-download.js",
+     "s": 7636
+    },
+    {
+     "p": "portal-return.js",
+     "s": 1768
+    },
+    {
+     "p": "portal-scope.js",
+     "s": 731
+    },
+    {
+     "p": "portal-version.js",
+     "s": 2535
+    },
+    {
+     "p": "portal.css",
+     "s": 10245
+    },
+    {
+     "p": "Portal.html",
+     "s": 13914
+    },
+    {
+     "p": "primary_flow.jsx",
+     "s": 14830
+    },
+    {
+     "p": "products_data.jsx",
+     "s": 9662
+    },
+    {
+     "p": "products_page.jsx",
+     "s": 26670
+    },
+    {
+     "p": "profile_extra.jsx",
+     "s": 31877
+    },
+    {
+     "p": "profile_security.jsx",
+     "s": 24370
+    },
+    {
+     "p": "profile.jsx",
+     "s": 25529
+    },
+    {
+     "p": "README.md",
+     "s": 15876
+    },
+    {
+     "p": "reg_shell.jsx",
+     "s": 14982
+    },
+    {
+     "p": "reg_step1_3.jsx",
+     "s": 14494
+    },
+    {
+     "p": "reg_step4_5.jsx",
+     "s": 15740
+    },
+    {
+     "p": "reg_step6_8.jsx",
+     "s": 22624
+    },
+    {
+     "p": "reg_step9.jsx",
+     "s": 25955
+    },
+    {
+     "p": "registration_proto.jsx",
+     "s": 17406
+    },
+    {
+     "p": "reset_password.jsx",
+     "s": 10046
+    },
+    {
+     "p": "screen-export.js",
+     "s": 24647
+    },
+    {
+     "p": "screens.jsx",
+     "s": 238966
+    },
+    {
+     "p": "screenshots/01-cancel-dialog.png",
+     "s": 51480
+    },
+    {
+     "p": "screenshots/01-cancel-flow.png",
+     "s": 51480
+    },
+    {
+     "p": "screenshots/01-cash-slides.png",
+     "s": 32772
+    },
+    {
+     "p": "screenshots/01-dash-states.png",
+     "s": 62838
+    },
+    {
+     "p": "screenshots/01-lp-check.png",
+     "s": 3664
+    },
+    {
+     "p": "screenshots/01-lp-sections.png",
+     "s": 4065
+    },
+    {
+     "p": "screenshots/01-nav-states.png",
+     "s": 47951
+    },
+    {
+     "p": "screenshots/01-sell-success.png",
+     "s": 63734
+    },
+    {
+     "p": "screenshots/01-trade-dbg.png",
+     "s": 34390
+    },
+    {
+     "p": "screenshots/01-trade-fresh2.png",
+     "s": 67159
+    },
+    {
+     "p": "screenshots/01-trade-newsuccess.png",
+     "s": 46922
+    },
+    {
+     "p": "screenshots/01-trade-primary-confirm.png",
+     "s": 46789
+    },
+    {
+     "p": "screenshots/01-trade-primary-success.png",
+     "s": 36162
+    },
+    {
+     "p": "screenshots/01-trade-sec.png",
+     "s": 64842
+    },
+    {
+     "p": "screenshots/01-trade-ticket.png",
+     "s": 26627
+    },
+    {
+     "p": "screenshots/02-cancel-dialog.png",
+     "s": 51480
+    },
+    {
+     "p": "screenshots/02-cancel-flow.png",
+     "s": 51480
+    },
+    {
+     "p": "screenshots/02-cash-slides.png",
+     "s": 32743
+    },
+    {
+     "p": "screenshots/02-dash-states.png",
+     "s": 64487
+    },
+    {
+     "p": "screenshots/02-lp-check.png",
+     "s": 3897
+    },
+    {
+     "p": "screenshots/02-lp-sections.png",
+     "s": 3666
+    },
+    {
+     "p": "screenshots/02-nav-states.png",
+     "s": 47951
+    },
+    {
+     "p": "screenshots/02-sell-success.png",
+     "s": 41970
+    },
+    {
+     "p": "screenshots/02-trade-dbg.png",
+     "s": 34390
+    },
+    {
+     "p": "screenshots/02-trade-fresh2.png",
+     "s": 64842
+    },
+    {
+     "p": "screenshots/02-trade-newsuccess.png",
+     "s": 34297
+    },
+    {
+     "p": "screenshots/02-trade-primary-confirm.png",
+     "s": 34184
+    },
+    {
+     "p": "screenshots/02-trade-primary-success.png",
+     "s": 36477
+    },
+    {
+     "p": "screenshots/02-trade-sec.png",
+     "s": 46922
+    },
+    {
+     "p": "screenshots/02-trade-ticket.png",
+     "s": 14406
+    },
+    {
+     "p": "screenshots/03-lp-check.png",
+     "s": 3666
+    },
+    {
+     "p": "screenshots/03-lp-sections.png",
+     "s": 4058
+    },
+    {
+     "p": "screenshots/03-sell-success.png",
+     "s": 34157
+    },
+    {
+     "p": "screenshots/03-trade-newsuccess.png",
+     "s": 36198
+    },
+    {
+     "p": "screenshots/03-trade-sec.png",
+     "s": 34297
+    },
+    {
+     "p": "screenshots/04-lp-check.png",
+     "s": 3666
+    },
+    {
+     "p": "screenshots/04-lp-sections.png",
+     "s": 3666
+    },
+    {
+     "p": "screenshots/04-sell-success.png",
+     "s": 36922
+    },
+    {
+     "p": "screenshots/04-trade-newsuccess.png",
+     "s": 39658
+    },
+    {
+     "p": "screenshots/04-trade-sec.png",
+     "s": 36198
+    },
+    {
+     "p": "screenshots/05-lp-check.png",
+     "s": 4344
+    },
+    {
+     "p": "screenshots/05-sell-success.png",
+     "s": 40005
+    },
+    {
+     "p": "screenshots/05-trade-sec.png",
+     "s": 36484
+    },
+    {
+     "p": "screenshots/06-lp-check.png",
+     "s": 3897
+    },
+    {
+     "p": "screenshots/07-lp-check.png",
+     "s": 3666
+    },
+    {
+     "p": "screenshots/cancel-applied.png",
+     "s": 72957
+    },
+    {
+     "p": "screenshots/cancel-dialog2.png",
+     "s": 51480
+    },
+    {
+     "p": "screenshots/cancel-dialog3.png",
+     "s": 55847
+    },
+    {
+     "p": "screenshots/dash-full.png",
+     "s": 71522
+    },
+    {
+     "p": "screenshots/gen-a.png",
+     "s": 3963307
+    },
+    {
+     "p": "screenshots/gen-b.png",
+     "s": 4143809
+    },
+    {
+     "p": "screenshots/hero-callouts.png",
+     "s": 46996
+    },
+    {
+     "p": "screenshots/laf-grow.png",
+     "s": 93140
+    },
+    {
+     "p": "screenshots/laf-phone-check.png",
+     "s": 518094
+    },
+    {
+     "p": "screenshots/laf-products.png",
+     "s": 711600
+    },
+    {
+     "p": "screenshots/p14-ticket.png",
+     "s": 28825
+    },
+    {
+     "p": "screenshots/sec-ticket.png",
+     "s": 27838
+    },
+    {
+     "p": "screenshots/sell-clamp.png",
+     "s": 65632
+    },
+    {
+     "p": "screenshots/sell-flow.png",
+     "s": 63756
+    },
+    {
+     "p": "screenshots/trade-buy-review.png",
+     "s": 83065
+    },
+    {
+     "p": "screenshots/trade-cp-sell.png",
+     "s": 88743
+    },
+    {
+     "p": "screenshots/trade-detail.png",
+     "s": 27838
+    },
+    {
+     "p": "screenshots/trade-primary-detail.png",
+     "s": 64348
+    },
+    {
+     "p": "screenshots/weav-hero-scroll.png",
+     "s": 40130
+    },
+    {
+     "p": "secondary_flow.jsx",
+     "s": 9703
+    },
+    {
+     "p": "sell_flow.jsx",
+     "s": 30396
+    },
+    {
+     "p": "SKILL.md",
+     "s": 2689
+    },
+    {
+     "p": "styles.css",
+     "s": 568
+    },
+    {
+     "p": "tokens/base.css",
+     "s": 12968
+    },
+    {
+     "p": "tokens/colors.css",
+     "s": 2988
+    },
+    {
+     "p": "tokens/effects.css",
+     "s": 1618
+    },
+    {
+     "p": "tokens/fonts.css",
+     "s": 415
+    },
+    {
+     "p": "tokens/spacing.css",
+     "s": 1797
+    },
+    {
+     "p": "tokens/typography.css",
+     "s": 1452
+    },
+    {
+     "p": "tools/build-packages.mjs",
+     "s": 7772
+    },
+    {
+     "p": "trade_f03.jsx",
+     "s": 27911
+    },
+    {
+     "p": "trade_flow.jsx",
+     "s": 46723
+    },
+    {
+     "p": "trading_states.jsx",
+     "s": 3577
+    },
+    {
+     "p": "ui_kits/mobile/index.html",
+     "s": 4306
+    },
+    {
+     "p": "ui_kits/mobile/README.md",
+     "s": 1060
+    },
+    {
+     "p": "ui_kits/web/index.html",
+     "s": 20768
+    },
+    {
+     "p": "ui_kits/web/README.md",
+     "s": 1106
+    },
+    {
+     "p": "ui_kits/web/trade.html",
+     "s": 51498
+    },
+    {
+     "p": "uploads/_pane21.png",
+     "s": 15229
+    },
+    {
+     "p": "uploads/00-Foundations.md",
+     "s": 8951
+    },
+    {
+     "p": "uploads/01-Component-Kit-79431980.md",
+     "s": 10637
+    },
+    {
+     "p": "uploads/01-Component-Kit.md",
+     "s": 10637
+    },
+    {
+     "p": "uploads/02-Trade-Screen.md",
+     "s": 10488
+    },
+    {
+     "p": "uploads/03-Order-Modal.md",
+     "s": 9282
+    },
+    {
+     "p": "uploads/04-Dashboard.md",
+     "s": 7628
+    },
+    {
+     "p": "uploads/05-Login.md",
+     "s": 6753
+    },
+    {
+     "p": "uploads/06-Landing.md",
+     "s": 6327
+    },
+    {
+     "p": "uploads/audit_report.html",
+     "s": 67476
+    },
+    {
+     "p": "uploads/batenkh 2x1.png",
+     "s": 2783975
+    },
+    {
+     "p": "uploads/blend-a.jpg",
+     "s": 484699
+    },
+    {
+     "p": "uploads/blend-b.jpg",
+     "s": 454866
+    },
+    {
+     "p": "uploads/bolortseren 2x1.png",
+     "s": 1718718
+    },
+    {
+     "p": "uploads/contract-spec.md",
+     "s": 10266
+    },
+    {
+     "p": "uploads/DSFoundation.pdf",
+     "s": 1052121
+    },
+    {
+     "p": "uploads/Enkhmunkh.png",
+     "s": 4802734
+    },
+    {
+     "p": "uploads/Enkhtur.jpg",
+     "s": 270142
+    },
+    {
+     "p": "uploads/green-a.jpg",
+     "s": 491328
+    },
+    {
+     "p": "uploads/green-b.jpg",
+     "s": 558638
+    },
+    {
+     "p": "uploads/hero-blend-v2.png",
+     "s": 3963307
+    },
+    {
+     "p": "uploads/hero-blend.png",
+     "s": 1283742
+    },
+    {
+     "p": "uploads/hero-hand-a.png",
+     "s": 854765
+    },
+    {
+     "p": "uploads/hero-hand-b.png",
+     "s": 820425
+    },
+    {
+     "p": "uploads/hero-hand-cutout.png",
+     "s": 466868
+    },
+    {
+     "p": "uploads/hero-hand-grounded.png",
+     "s": 1622875
+    },
+    {
+     "p": "uploads/hero-hand2-a.jpg",
+     "s": 668004
+    },
+    {
+     "p": "uploads/hero-hand2-b.jpg",
+     "s": 581442
+    },
+    {
+     "p": "uploads/hero-straight.png",
+     "s": 1436008
+    },
+    {
+     "p": "uploads/IMG_2829.jpg",
+     "s": 13709
+    },
+    {
+     "p": "uploads/IMG_2830.jpg",
+     "s": 62259
+    },
+    {
+     "p": "uploads/IMG_2831.jpg",
+     "s": 15781
+    },
+    {
+     "p": "uploads/IMG_4127.PNG",
+     "s": 165054
+    },
+    {
+     "p": "uploads/Loan_App_Onboarding_Research_filled.pdf",
+     "s": 153658
+    },
+    {
+     "p": "uploads/Logo_Black.svg",
+     "s": 26748
+    },
+    {
+     "p": "uploads/Logo_White.svg",
+     "s": 26726
+    },
+    {
+     "p": "uploads/Murun.jpeg",
+     "s": 867696
+    },
+    {
+     "p": "uploads/screen21.png",
+     "s": 41463
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 12.59.26.png",
+     "s": 511233
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 12.59.40.png",
+     "s": 539456
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 12.59.51.png",
+     "s": 526084
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.00.png",
+     "s": 555774
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.07.png",
+     "s": 350828
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.17.png",
+     "s": 448090
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.29.png",
+     "s": 364183
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.36.png",
+     "s": 387505
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.42.png",
+     "s": 357191
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.49.png",
+     "s": 356926
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.00.56.png",
+     "s": 673675
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.01.03.png",
+     "s": 72862
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.01.10.png",
+     "s": 182443
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.14.52.png",
+     "s": 835940
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.15.08.png",
+     "s": 481879
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.15.24.png",
+     "s": 586348
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.15.34.png",
+     "s": 466342
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.17.02.png",
+     "s": 358371
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.20.04.png",
+     "s": 801559
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.21.06.png",
+     "s": 402640
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.21.13.png",
+     "s": 1198320
+    },
+    {
+     "p": "uploads/Screenshot 2026-05-22 at 13.21.23.png",
+     "s": 344813
+    },
+    {
+     "p": "uploads/Screenshot 2026-06-08 at 14.10.02.png",
+     "s": 24742
+    },
+    {
+     "p": "uploads/Screenshot 2026-06-08 at 14.10.10.png",
+     "s": 8234
+    },
+    {
+     "p": "uploads/Screenshot 2026-06-08 at 14.10.18.png",
+     "s": 16712
+    },
+    {
+     "p": "uploads/Screenshot 2026-06-14 at 15.57.51.png",
+     "s": 46633
+    },
+    {
+     "p": "uploads/Screenshot 2026-06-14 at 15.58.14.png",
+     "s": 196161
+    },
+    {
+     "p": "uploads/Screenshot 2026-06-24 at 11.31.55.png",
+     "s": 1239429
+    },
+    {
+     "p": "uploads/Screenshot 2026-07-02 at 14.06.49.png",
+     "s": 248611
+    },
+    {
+     "p": "uploads/zotig 2x1.png",
+     "s": 3825891
+    },
+    {
+     "p": "uploads/Репо хэлцэл.docx",
+     "s": 23026
+    },
+    {
+     "p": "uploads/Цолмон.jpg",
+     "s": 106971
+    },
+    {
+     "p": "uploads/Чинбат.jpg",
+     "s": 70301
+    },
+    {
+     "p": "wallet_desktop.jsx",
+     "s": 36361
+    },
+    {
+     "p": "wallet_flows.jsx",
+     "s": 58145
+    },
+    {
+     "p": "Web Flows.html",
+     "s": 12652
+    },
+    {
+     "p": "web-app/00 Foundations Preview.html",
+     "s": 46072
+    },
+    {
+     "p": "web-app/01 Component Kit Preview.html",
+     "s": 28992
+    },
+    {
+     "p": "web-app/02 Trade Screen (F-03).html",
+     "s": 11174
+    },
+    {
+     "p": "web-app/02 Trade Screen.html",
+     "s": 2911
+    },
+    {
+     "p": "web-app/03 Order Modal Preview.html",
+     "s": 11906
+    },
+    {
+     "p": "web-app/04 Dashboard.html",
+     "s": 62473
+    },
+    {
+     "p": "web-app/05 Login.html",
+     "s": 21552
+    },
+    {
+     "p": "web-app/06 Wallet.html",
+     "s": 11157
+    },
+    {
+     "p": "web-app/07 Profile.html",
+     "s": 17980
+    },
+    {
+     "p": "web-app/08 News.html",
+     "s": 19783
+    },
+    {
+     "p": "web-app/09 Registration.html",
+     "s": 6799
+    },
+    {
+     "p": "web-app/10 Loan.html",
+     "s": 21406
+    },
+    {
+     "p": "web-app/11 Reset Password.html",
+     "s": 22605
+    },
+    {
+     "p": "web-app/12 Notifications.html",
+     "s": 11595
+    },
+    {
+     "p": "web-app/13 Transaction History.html",
+     "s": 14971
+    },
+    {
+     "p": "web-app/14 Education.html",
+     "s": 10834
+    },
+    {
+     "p": "web-app/15 Terms.html",
+     "s": 14242
+    },
+    {
+     "p": "web-app/16 Auto Invest.html",
+     "s": 30573
+    },
+    {
+     "p": "web-app/17 My Products.html",
+     "s": 4808
+    },
+    {
+     "p": "web-app/AppShell (annotated).html",
+     "s": 13035
+    },
+    {
+     "p": "web-app/Page 13 - Dashboard (New Style).html",
+     "s": 26921
+    },
+    {
+     "p": "web-app/Page 14 - Trade (Primary Market).html",
+     "s": 51340
+    }
+   ]
+  },
+  "landing": {
+   "title": "Landing",
+   "zip": "mmf-landing.zip",
+   "folder": "mmf-landing",
+   "entry": "landings/13 Landing - App First.html",
+   "count": 30,
+   "bytes": 14929093,
+   "files": [
+    {
+     "p": "assets/logo-black.svg",
+     "s": 26748
+    },
+    {
+     "p": "assets/logo-mark.svg",
+     "s": 499
+    },
+    {
+     "p": "assets/partners/bichil.png",
+     "s": 19502
+    },
+    {
+     "p": "assets/partners/invescore.png",
+     "s": 20399
+    },
+    {
+     "p": "assets/partners/lendmn.png",
+     "s": 11843
+    },
+    {
+     "p": "assets/partners/ochir.png",
+     "s": 38348
+    },
+    {
+     "p": "assets/partners/omni.png",
+     "s": 32896
+    },
+    {
+     "p": "assets/partners/sendly.png",
+     "s": 13602
+    },
+    {
+     "p": "assets/partners/simple.png",
+     "s": 12382
+    },
+    {
+     "p": "assets/partners/sono.png",
+     "s": 12503
+    },
+    {
+     "p": "assets/partners/tus.png",
+     "s": 9545
+    },
+    {
+     "p": "assets/partners/yesun.png",
+     "s": 35257
+    },
+    {
+     "p": "colors_and_type.css",
+     "s": 20567
+    },
+    {
+     "p": "landings/13 Landing - App First.html",
+     "s": 72780
+    },
+    {
+     "p": "landings/About Us.html",
+     "s": 14514
+    },
+    {
+     "p": "landings/app-first-phone.css",
+     "s": 17745
+    },
+    {
+     "p": "landings/app-first-tweaks.jsx",
+     "s": 1442
+    },
+    {
+     "p": "landings/app-first.css",
+     "s": 48257
+    },
+    {
+     "p": "landings/app-first.js",
+     "s": 17480
+    },
+    {
+     "p": "landings/Benchmark.html",
+     "s": 7052
+    },
+    {
+     "p": "landings/team/batenkh.png",
+     "s": 2783975
+    },
+    {
+     "p": "landings/team/bolortseren.png",
+     "s": 1718718
+    },
+    {
+     "p": "landings/team/chinbat.jpg",
+     "s": 70301
+    },
+    {
+     "p": "landings/team/enkhmunkh.png",
+     "s": 4802734
+    },
+    {
+     "p": "landings/team/enkhtur.jpg",
+     "s": 270142
+    },
+    {
+     "p": "landings/team/ikhmurun.jpeg",
+     "s": 867696
+    },
+    {
+     "p": "landings/team/tsolmon.jpg",
+     "s": 106971
+    },
+    {
+     "p": "landings/team/zorigtbaatar.png",
+     "s": 3825891
+    },
+    {
+     "p": "landings/tweaks-panel.jsx",
+     "s": 24657
+    },
+    {
+     "p": "screen-export.js",
+     "s": 24647
+    }
+   ]
+  },
+  "mobile": {
+   "title": "Гар утасны апп",
+   "zip": "mmf-mobile-app.zip",
+   "folder": "mmf-mobile-app",
+   "entry": "Mobile Flows.html",
+   "count": 136,
+   "bytes": 4024875,
+   "files": [
+    {
+     "p": "app_proto.jsx",
+     "s": 29124
+    },
+    {
+     "p": "auto_invest_app.jsx",
+     "s": 13223
+    },
+    {
+     "p": "auto_invest_v2.jsx",
+     "s": 50077
+    },
+    {
+     "p": "auto_invest.jsx",
+     "s": 94064
+    },
+    {
+     "p": "bank_verify.jsx",
+     "s": 45298
+    },
+    {
+     "p": "card_link.jsx",
+     "s": 26085
+    },
+    {
+     "p": "card_manage.jsx",
+     "s": 19971
+    },
+    {
+     "p": "design-canvas.jsx",
+     "s": 50083
+    },
+    {
+     "p": "exports/screens/AddMoneyAmount.jsx",
+     "s": 152655
+    },
+    {
+     "p": "exports/screens/AddMoneyBank.jsx",
+     "s": 152042
+    },
+    {
+     "p": "exports/screens/AddMoneyBankNotFound.jsx",
+     "s": 10824
+    },
+    {
+     "p": "exports/screens/AddMoneyBankPending.jsx",
+     "s": 10290
+    },
+    {
+     "p": "exports/screens/AddMoneyBankSuccess.jsx",
+     "s": 10131
+    },
+    {
+     "p": "exports/screens/AddMoneyQPay.jsx",
+     "s": 11674
+    },
+    {
+     "p": "exports/screens/AddMoneySuccess.jsx",
+     "s": 10018
+    },
+    {
+     "p": "exports/screens/app.css",
+     "s": 1981
+    },
+    {
+     "p": "exports/screens/BankVerified.jsx",
+     "s": 16382
+    },
+    {
+     "p": "exports/screens/BankVerify.jsx",
+     "s": 31047
+    },
+    {
+     "p": "exports/screens/BiometricSetup.jsx",
+     "s": 7659
+    },
+    {
+     "p": "exports/screens/Category.jsx",
+     "s": 24235
+    },
+    {
+     "p": "exports/screens/CertRequest.jsx",
+     "s": 8984
+    },
+    {
+     "p": "exports/screens/CertSuccess.jsx",
+     "s": 6118
+    },
+    {
+     "p": "exports/screens/CodeEntry.jsx",
+     "s": 23146
+    },
+    {
+     "p": "exports/screens/ContractViewer.jsx",
+     "s": 10520
+    },
+    {
+     "p": "exports/screens/CreatePassword.jsx",
+     "s": 16651
+    },
+    {
+     "p": "exports/screens/CreatePin.jsx",
+     "s": 17366
+    },
+    {
+     "p": "exports/screens/DepositInfo.jsx",
+     "s": 18725
+    },
+    {
+     "p": "exports/screens/DepositSending.jsx",
+     "s": 16477
+    },
+    {
+     "p": "exports/screens/EduDetail.jsx",
+     "s": 115723
+    },
+    {
+     "p": "exports/screens/EmailVerify.jsx",
+     "s": 15280
+    },
+    {
+     "p": "exports/screens/ESignCanvas.jsx",
+     "s": 10158
+    },
+    {
+     "p": "exports/screens/ESignSuccess.jsx",
+     "s": 9617
+    },
+    {
+     "p": "exports/screens/GSignRequest.jsx",
+     "s": 11450
+    },
+    {
+     "p": "exports/screens/GSignSuccess.jsx",
+     "s": 7215
+    },
+    {
+     "p": "exports/screens/GSignTutorial.jsx",
+     "s": 9082
+    },
+    {
+     "p": "exports/screens/GSignWaiting.jsx",
+     "s": 9154
+    },
+    {
+     "p": "exports/screens/Home.jsx",
+     "s": 108579
+    },
+    {
+     "p": "exports/screens/IbanLookupResult.jsx",
+     "s": 22864
+    },
+    {
+     "p": "exports/screens/IbanLookupSheet.jsx",
+     "s": 22504
+    },
+    {
+     "p": "exports/screens/KycComplete.jsx",
+     "s": 14773
+    },
+    {
+     "p": "exports/screens/KycConsent.jsx",
+     "s": 16547
+    },
+    {
+     "p": "exports/screens/Loan.jsx",
+     "s": 108579
+    },
+    {
+     "p": "exports/screens/LoanAccepted.jsx",
+     "s": 13389
+    },
+    {
+     "p": "exports/screens/LoanBlocked.jsx",
+     "s": 112290
+    },
+    {
+     "p": "exports/screens/LoanCheckEntry.jsx",
+     "s": 117643
+    },
+    {
+     "p": "exports/screens/LoanDeclined.jsx",
+     "s": 10224
+    },
+    {
+     "p": "exports/screens/LoanPartial.jsx",
+     "s": 13761
+    },
+    {
+     "p": "exports/screens/LoanPinConfirm.jsx",
+     "s": 118785
+    },
+    {
+     "p": "exports/screens/LoanSubmitted.jsx",
+     "s": 113755
+    },
+    {
+     "p": "exports/screens/Login.jsx",
+     "s": 12276
+    },
+    {
+     "p": "exports/screens/MasterContract.jsx",
+     "s": 15764
+    },
+    {
+     "p": "exports/screens/MonpepCheck.jsx",
+     "s": 12682
+    },
+    {
+     "p": "exports/screens/MonpepFailed.jsx",
+     "s": 8096
+    },
+    {
+     "p": "exports/screens/MyContracts.jsx",
+     "s": 9335
+    },
+    {
+     "p": "exports/screens/News.jsx",
+     "s": 108579
+    },
+    {
+     "p": "exports/screens/NewsDetail.jsx",
+     "s": 114136
+    },
+    {
+     "p": "exports/screens/NotificationDetail.jsx",
+     "s": 11031
+    },
+    {
+     "p": "exports/screens/NotificationDetailCrit.jsx",
+     "s": 11158
+    },
+    {
+     "p": "exports/screens/NotificationList.jsx",
+     "s": 15789
+    },
+    {
+     "p": "exports/screens/NotifSettings.jsx",
+     "s": 7927
+    },
+    {
+     "p": "exports/screens/Onb1.jsx",
+     "s": 9581
+    },
+    {
+     "p": "exports/screens/Onb2.jsx",
+     "s": 8981
+    },
+    {
+     "p": "exports/screens/Onb3.jsx",
+     "s": 114766
+    },
+    {
+     "p": "exports/screens/Onb4.jsx",
+     "s": 10230
+    },
+    {
+     "p": "exports/screens/OwnedDetail.jsx",
+     "s": 15901
+    },
+    {
+     "p": "exports/screens/PayConfirmed.jsx",
+     "s": 11058
+    },
+    {
+     "p": "exports/screens/PayFailed.jsx",
+     "s": 11046
+    },
+    {
+     "p": "exports/screens/PersonalInfo.jsx",
+     "s": 8537
+    },
+    {
+     "p": "exports/screens/PhoneVerify.jsx",
+     "s": 17373
+    },
+    {
+     "p": "exports/screens/PrimaryBuyPin.jsx",
+     "s": 13850
+    },
+    {
+     "p": "exports/screens/PrimaryBuyReview.jsx",
+     "s": 16681
+    },
+    {
+     "p": "exports/screens/PrimaryBuySetup.jsx",
+     "s": 20545
+    },
+    {
+     "p": "exports/screens/PrimaryBuySuccess.jsx",
+     "s": 8690
+    },
+    {
+     "p": "exports/screens/PrimaryDetail.jsx",
+     "s": 12560
+    },
+    {
+     "p": "exports/screens/PrimaryMarket.jsx",
+     "s": 11586
+    },
+    {
+     "p": "exports/screens/ProfileMain.jsx",
+     "s": 14246
+    },
+    {
+     "p": "exports/screens/QPayPayment.jsx",
+     "s": 11508
+    },
+    {
+     "p": "exports/screens/ResetEnterPhone.jsx",
+     "s": 9044
+    },
+    {
+     "p": "exports/screens/ResetNewPassword.jsx",
+     "s": 11834
+    },
+    {
+     "p": "exports/screens/ResetSuccess.jsx",
+     "s": 8450
+    },
+    {
+     "p": "exports/screens/ResetVerifyCode.jsx",
+     "s": 9774
+    },
+    {
+     "p": "exports/screens/SecondaryBuyPin.jsx",
+     "s": 13902
+    },
+    {
+     "p": "exports/screens/SecondaryBuyReview.jsx",
+     "s": 21934
+    },
+    {
+     "p": "exports/screens/SecondaryBuySetup.jsx",
+     "s": 24859
+    },
+    {
+     "p": "exports/screens/SecondaryBuySuccess.jsx",
+     "s": 8818
+    },
+    {
+     "p": "exports/screens/SecondaryDetail.jsx",
+     "s": 10726
+    },
+    {
+     "p": "exports/screens/SellPin.jsx",
+     "s": 13849
+    },
+    {
+     "p": "exports/screens/SellReview.jsx",
+     "s": 17077
+    },
+    {
+     "p": "exports/screens/SellSetup.jsx",
+     "s": 25727
+    },
+    {
+     "p": "exports/screens/SellSuccess.jsx",
+     "s": 8690
+    },
+    {
+     "p": "exports/screens/SigningMethod.jsx",
+     "s": 17700
+    },
+    {
+     "p": "exports/screens/Splash.jsx",
+     "s": 7830
+    },
+    {
+     "p": "exports/screens/StateInsufficient.jsx",
+     "s": 10300
+    },
+    {
+     "p": "exports/screens/StateNetworkError.jsx",
+     "s": 9946
+    },
+    {
+     "p": "exports/screens/StateOtpError.jsx",
+     "s": 13528
+    },
+    {
+     "p": "exports/screens/StatePriceChanged.jsx",
+     "s": 13767
+    },
+    {
+     "p": "exports/screens/StateSoldOut.jsx",
+     "s": 9979
+    },
+    {
+     "p": "exports/screens/StateUnavailable.jsx",
+     "s": 10092
+    },
+    {
+     "p": "exports/screens/TermsOfUse.jsx",
+     "s": 14981
+    },
+    {
+     "p": "exports/screens/TermsScreen.jsx",
+     "s": 8290
+    },
+    {
+     "p": "exports/screens/Trading.jsx",
+     "s": 108588
+    },
+    {
+     "p": "exports/screens/TransactionHistory.jsx",
+     "s": 13015
+    },
+    {
+     "p": "exports/screens/Wallet.jsx",
+     "s": 145616
+    },
+    {
+     "p": "exports/screens/WithdrawAmount.jsx",
+     "s": 156925
+    },
+    {
+     "p": "exports/screens/WithdrawInsufficient.jsx",
+     "s": 10623
+    },
+    {
+     "p": "exports/screens/WithdrawPin.jsx",
+     "s": 13957
+    },
+    {
+     "p": "exports/screens/WithdrawReview.jsx",
+     "s": 10430
+    },
+    {
+     "p": "exports/screens/WithdrawSuccess.jsx",
+     "s": 10144
+    },
+    {
+     "p": "exports/tokens.css",
+     "s": 10660
+    },
+    {
+     "p": "flow_kit.jsx",
+     "s": 15164
+    },
+    {
+     "p": "loan_eligibility.jsx",
+     "s": 46148
+    },
+    {
+     "p": "loan_payoff.jsx",
+     "s": 15007
+    },
+    {
+     "p": "Mobile Flows.html",
+     "s": 16711
+    },
+    {
+     "p": "mobile-app/Auto Invest Prototype.html",
+     "s": 2229
+    },
+    {
+     "p": "mobile-app/Home - Product Options.html",
+     "s": 12127
+    },
+    {
+     "p": "mobile-app/Home Cards Redesign.html",
+     "s": 2140
+    },
+    {
+     "p": "mobile-app/Home Hero Exploration.html",
+     "s": 13649
+    },
+    {
+     "p": "mobile-app/MMF Bundle Preview.html",
+     "s": 12243
+    },
+    {
+     "p": "mobile-app/Money Market Fund - Mobile App.html",
+     "s": 23711
+    },
+    {
+     "p": "mobile-app/Money Market Fund - Prototype.html",
+     "s": 4578
+    },
+    {
+     "p": "mobile-app/Registration Prototype.html",
+     "s": 3938
+    },
+    {
+     "p": "notifications.jsx",
+     "s": 16336
+    },
+    {
+     "p": "onboarding_v2.jsx",
+     "s": 79310
+    },
+    {
+     "p": "portal-version.js",
+     "s": 2535
+    },
+    {
+     "p": "portal.css",
+     "s": 10245
+    },
+    {
+     "p": "primary_flow.jsx",
+     "s": 14830
+    },
+    {
+     "p": "profile_security.jsx",
+     "s": 24370
+    },
+    {
+     "p": "profile.jsx",
+     "s": 25529
+    },
+    {
+     "p": "registration_proto.jsx",
+     "s": 17406
+    },
+    {
+     "p": "reset_password.jsx",
+     "s": 10046
+    },
+    {
+     "p": "screen-export.js",
+     "s": 24647
+    },
+    {
+     "p": "screens.jsx",
+     "s": 238966
+    },
+    {
+     "p": "secondary_flow.jsx",
+     "s": 9703
+    },
+    {
+     "p": "sell_flow.jsx",
+     "s": 30396
+    },
+    {
+     "p": "trading_states.jsx",
+     "s": 3577
+    },
+    {
+     "p": "wallet_flows.jsx",
+     "s": 58145
+    }
+   ]
+  },
+  "web": {
+   "title": "Веб апп",
+   "zip": "mmf-web-app.zip",
+   "folder": "mmf-web-app",
+   "entry": "Web Flows.html",
+   "count": 53,
+   "bytes": 1120809,
+   "files": [
+    {
+     "p": "assets/logo-black.svg",
+     "s": 26748
+    },
+    {
+     "p": "auto_invest_web.jsx",
+     "s": 64263
+    },
+    {
+     "p": "cards_desktop.jsx",
+     "s": 37302
+    },
+    {
+     "p": "colors_and_type.css",
+     "s": 20567
+    },
+    {
+     "p": "comp_atoms.jsx",
+     "s": 12047
+    },
+    {
+     "p": "comp_kit.jsx",
+     "s": 49103
+    },
+    {
+     "p": "foundations.js",
+     "s": 9782
+    },
+    {
+     "p": "holdings_summary.jsx",
+     "s": 12325
+    },
+    {
+     "p": "loan_desktop.jsx",
+     "s": 9461
+    },
+    {
+     "p": "loan_payoff_flow.jsx",
+     "s": 24316
+    },
+    {
+     "p": "loan_request_flow.jsx",
+     "s": 27601
+    },
+    {
+     "p": "mmf_notifications.js",
+     "s": 5455
+    },
+    {
+     "p": "mmf_status.js",
+     "s": 2397
+    },
+    {
+     "p": "order_modal.jsx",
+     "s": 30736
+    },
+    {
+     "p": "portal-return.js",
+     "s": 1768
+    },
+    {
+     "p": "portal-scope.js",
+     "s": 731
+    },
+    {
+     "p": "portal-version.js",
+     "s": 2535
+    },
+    {
+     "p": "portal.css",
+     "s": 10245
+    },
+    {
+     "p": "products_data.jsx",
+     "s": 9662
+    },
+    {
+     "p": "products_page.jsx",
+     "s": 26670
+    },
+    {
+     "p": "profile_extra.jsx",
+     "s": 31877
+    },
+    {
+     "p": "reg_shell.jsx",
+     "s": 14982
+    },
+    {
+     "p": "reg_step1_3.jsx",
+     "s": 14494
+    },
+    {
+     "p": "reg_step4_5.jsx",
+     "s": 15740
+    },
+    {
+     "p": "reg_step6_8.jsx",
+     "s": 22624
+    },
+    {
+     "p": "reg_step9.jsx",
+     "s": 25955
+    },
+    {
+     "p": "screen-export.js",
+     "s": 24647
+    },
+    {
+     "p": "trade_f03.jsx",
+     "s": 27911
+    },
+    {
+     "p": "trade_flow.jsx",
+     "s": 46723
+    },
+    {
+     "p": "wallet_desktop.jsx",
+     "s": 36361
+    },
+    {
+     "p": "Web Flows.html",
+     "s": 12652
+    },
+    {
+     "p": "web-app/00 Foundations Preview.html",
+     "s": 46072
+    },
+    {
+     "p": "web-app/01 Component Kit Preview.html",
+     "s": 28992
+    },
+    {
+     "p": "web-app/02 Trade Screen (F-03).html",
+     "s": 11174
+    },
+    {
+     "p": "web-app/02 Trade Screen.html",
+     "s": 2911
+    },
+    {
+     "p": "web-app/03 Order Modal Preview.html",
+     "s": 11906
+    },
+    {
+     "p": "web-app/04 Dashboard.html",
+     "s": 62473
+    },
+    {
+     "p": "web-app/05 Login.html",
+     "s": 21552
+    },
+    {
+     "p": "web-app/06 Wallet.html",
+     "s": 11157
+    },
+    {
+     "p": "web-app/07 Profile.html",
+     "s": 17980
+    },
+    {
+     "p": "web-app/08 News.html",
+     "s": 19783
+    },
+    {
+     "p": "web-app/09 Registration.html",
+     "s": 6799
+    },
+    {
+     "p": "web-app/10 Loan.html",
+     "s": 21406
+    },
+    {
+     "p": "web-app/11 Reset Password.html",
+     "s": 22605
+    },
+    {
+     "p": "web-app/12 Notifications.html",
+     "s": 11595
+    },
+    {
+     "p": "web-app/13 Transaction History.html",
+     "s": 14971
+    },
+    {
+     "p": "web-app/14 Education.html",
+     "s": 10834
+    },
+    {
+     "p": "web-app/15 Terms.html",
+     "s": 14242
+    },
+    {
+     "p": "web-app/16 Auto Invest.html",
+     "s": 30573
+    },
+    {
+     "p": "web-app/17 My Products.html",
+     "s": 4808
+    },
+    {
+     "p": "web-app/AppShell (annotated).html",
+     "s": 13035
+    },
+    {
+     "p": "web-app/Page 13 - Dashboard (New Style).html",
+     "s": 26921
+    },
+    {
+     "p": "web-app/Page 14 - Trade (Primary Market).html",
+     "s": 51340
+    }
+   ]
+  }
+ }
+}

@@ -103,6 +103,52 @@
 
 </div>
 
+<section class="pt-dl" id="pt-dl" aria-labelledby="pt-dl-title">
+  <div class="pt-dl-h">
+    <h3 id="pt-dl-title">Татаж авах</h3>
+    <p>Эх файлуудыг ZIP багцаар. Дэлгэц тус бүрийг PNG / SVG-ээр татах товч прототип болон хуудас бүр дээр байна.</p>
+  </div>
+  <div class="pt-dl-grid">
+    <button type="button" class="pt-dl-item primary" data-pkg="all" disabled>
+      <span class="pt-dl-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span class="pt-dl-b">
+        <strong>Бүх төсөл</strong>
+        <span class="pt-dl-sub">Дизайн систем, эх материал, гурван бүтээгдэхүүн</span>
+        <span class="pt-dl-meta">Ачаалж байна…</span>
+      </span>
+      <span class="pt-dl-bar" aria-hidden="true"><i></i></span>
+    </button>
+    <button type="button" class="pt-dl-item" data-pkg="landing" disabled>
+      <span class="pt-dl-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span class="pt-dl-b">
+        <strong>Зөвхөн Landing</strong>
+        <span class="pt-dl-sub">Нүүр, бидний тухай, бенчмарк</span>
+        <span class="pt-dl-meta">Ачаалж байна…</span>
+      </span>
+      <span class="pt-dl-bar" aria-hidden="true"><i></i></span>
+    </button>
+    <button type="button" class="pt-dl-item" data-pkg="mobile" disabled>
+      <span class="pt-dl-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span class="pt-dl-b">
+        <strong>Зөвхөн гар утасны апп</strong>
+        <span class="pt-dl-sub">Прототип, урсгалууд, дэлгэцүүд</span>
+        <span class="pt-dl-meta">Ачаалж байна…</span>
+      </span>
+      <span class="pt-dl-bar" aria-hidden="true"><i></i></span>
+    </button>
+    <button type="button" class="pt-dl-item" data-pkg="web" disabled>
+      <span class="pt-dl-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span class="pt-dl-b">
+        <strong>Зөвхөн веб апп</strong>
+        <span class="pt-dl-sub">Хуудсууд, урсгалууд, компонентууд</span>
+        <span class="pt-dl-meta">Ачаалж байна…</span>
+      </span>
+      <span class="pt-dl-bar" aria-hidden="true"><i></i></span>
+    </button>
+  </div>
+  <p class="pt-dl-status" id="pt-dl-status" role="status" aria-live="polite"></p>
+</section>
+
 <div class="pt-note">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#9099B5" stroke-width="1.8"></circle><path d="M12 11v5M12 7.6v.6" stroke="#9099B5" stroke-width="2" stroke-linecap="round"></path></svg>
   <div>Бүх урсгал бодит дизайнаараа ажиллана — товч, талбар, шилжилт бүр дарагдана. Бүртгэлийн урсгал дуусахад <b>шинэ, хоосон</b> нүүр хуудас, нэвтрэх урсгал дуусахад <b>бүтээгдэхүүн эзэмшсэн</b> нүүр хуудас нээгдэнэ.</div>
@@ -159,5 +205,6 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 })();
 </script>
+<script src="portal-download.js"></script>
 </body>
 </html>

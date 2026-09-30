@@ -39,6 +39,9 @@ This system was derived from the **mobile app design** (`Money Market Fund - Mob
 | `ui_kits/mobile/` | Mobile app kit — full interactive click-through prototype |
 | `assets/logo-black.svg`, `logo-white.svg`, `logo-mark.svg` | Official logo files (black wordmark / white wordmark / glyph-only) |
 | `exports/` | Prior custom bundle snapshot (manifest, components, tokens) — reference only |
+| `Portal.html` · `Mobile Flows.html` · `Web Flows.html` | Review portal (site entrypoint) and the two flow pickers; styles in `portal.css` |
+| `screen-export.js` | Review-only PNG / SVG download for any screen (mobile dock, canvas labels, floating button on web + landing pages) |
+| `portal-download.js` · `downloads/manifest.json` | Portal ZIP downloads (full project / landing / mobile / web). Rebuild the manifest with `node tools/build-packages.mjs` after adding files |
 
 ### Components (21, grouped)
 - **primitives** — Button · Badge · Dot · TextInput · Sparkline

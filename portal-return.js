@@ -9,6 +9,7 @@
     if (document.getElementById('mmf-portal-return')) return;
     var a = document.createElement('a');
     a.id = 'mmf-portal-return';
+    a.setAttribute('data-mmf-noexport', '');
     var v = new URLSearchParams(location.search).get('v');
     try { v = v || sessionStorage.getItem('mmf_scope_v'); } catch (e) {}
     a.href = '../Web Flows.html?v=' + (v === '1' ? '1' : '2');

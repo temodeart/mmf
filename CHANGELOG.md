@@ -1,5 +1,39 @@
 # Money Market Fund — Changelog
 
+## Downloads — screens as PNG / SVG, packages as ZIP
+
+Client request: take screens and source out of the review portal.
+
+### Per-screen download (PNG / SVG)
+- **Mobile prototype** — download button in the bottom dock, next to the
+  prev / next controls. Exports the current phone screen at true 390 × 844
+  (the viewer's fit-to-window scale is removed for the capture).
+- **Mobile canvases** (Mobile App, Registration / Auto Invest prototypes, Home
+  explorations) — a small download icon beside every screen label, via the
+  shared `Frame` in `screens.jsx`.
+- **Web app pages and landing pages** — floating **Татах** button,
+  bottom-right. Captures the whole page. Scroll reveals are settled and
+  count-up numbers show their final value first.
+- PNG is pixel-exact (2x, reduced for very long pages to stay under browser
+  canvas limits), fonts embedded. SVG is true vector (`<text>`, `<rect>`,
+  `<path>`), so it opens editable in Figma / Illustrator. Blur and
+  backdrop-blur can't be expressed there: frosted glass gets a thicker tint and
+  soft glows drop out. Use the PNG as the pixel reference.
+- Review chrome (flow-list pill, state switchers, tweaks panel, the download
+  UI itself) is hidden while capturing.
+- `screen-export.js` holds all of this. html-to-image and dom-to-svg load from
+  jsDelivr on first use.
+
+### Portal → Татаж авах (ZIP)
+- Four packages: **Бүх төсөл**, **Зөвхөн Landing**, **Зөвхөн гар утасны
+  апп**, **Зөвхөн веб апп**. Zipped in the browser (JSZip), one folder per
+  zip with paths intact, plus a README.txt on how to run it locally.
+- File lists come from `downloads/manifest.json`, built by
+  `node tools/build-packages.mjs`. Product packages are crawled from their
+  pages (src/href, CSS url/@import, asset strings in JS/JSX), and each was
+  checked to run standalone with no missing files. **Re-run the script after
+  adding or renaming files.**
+
 ## Flow audit pass — loose controls & missing steps
 
 A full sweep of every web-app screen and mobile-app screen, probing each

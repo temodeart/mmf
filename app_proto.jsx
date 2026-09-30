@@ -166,6 +166,24 @@ const APIconBtn = ({ dir, disabled, onClick }) => (
   </button>
 );
 
+// Download the current phone screen as PNG / SVG (screen-export.js).
+// The host is CSS-scaled to fit the window; capture it at true 390×844.
+const APExportBtn = ({ getEl, host, name }) => (
+  <button data-nodrag aria-label="Дэлгэцийг татах" aria-haspopup="menu" title="Дэлгэцийг PNG / SVG-ээр татах"
+    onClick={(e) => window.MMFExport && window.MMFExport.openMenu(e.currentTarget, {
+      target: getEl, name,
+      prepare: () => {
+        const el = host.current; if (!el) return null;
+        const prev = el.style.cssText;
+        el.style.transition = 'none'; el.style.transform = 'none'; el.style.width = '390px'; el.style.height = '844px';
+        return () => { el.style.cssText = prev; };
+      },
+    })}
+    style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, cursor: 'pointer', background: '#fff', border: '1px solid #E7E9F2', color: '#2A3052', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+  </button>
+);
+
 function AppProtoApp() {
   const startIdx = (() => {
     if (AP_START && AP_START in AP_INDEX) return AP_INDEX[AP_START];
@@ -277,11 +295,14 @@ function AppProtoApp() {
       {/* dock */}
       <div style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 30, display: 'flex', alignItems: 'center', gap: 10, padding: 8, borderRadius: 20, background: 'rgba(255,255,255,0.82)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(11,16,32,0.06)', boxShadow: '0 18px 50px -18px rgba(15,20,55,.5)' }}>
         <APIconBtn dir="prev" disabled={hist.length <= 1} onClick={back}/>
-        <button onClick={() => setMenu(m => !m)} style={{ minWidth: 210, height: 46, padding: '0 16px', borderRadius: 13, cursor: 'pointer', background: '#fff', border: '1px solid #E7E9F2', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 1 }}>
-          <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9099B5' }}>{cur.sect}</span>
-          <span style={{ fontSize: 13.5, fontWeight: 700, color: '#0B1020', letterSpacing: '-0.01em' }}>{cur.name}</span>
+        <button onClick={() => setMenu(m => !m)} style={{ minWidth: 'min(210px, calc(100vw - 232px))', maxWidth: 'calc(100vw - 232px)', height: 46, padding: '0 16px', borderRadius: 13, cursor: 'pointer', background: '#fff', border: '1px solid #E7E9F2', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', gap: 1 }}>
+          <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9099B5', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur.sect}</span>
+          <span style={{ fontSize: 13.5, fontWeight: 700, color: '#0B1020', letterSpacing: '-0.01em', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cur.name}</span>
         </button>
         <APIconBtn dir="next" disabled={i === AP_FLOW.length - 1} onClick={next}/>
+        <div style={{ width: 1, height: 28, background: '#E7E9F2', margin: '0 2px' }}/>
+        <APExportBtn getEl={() => hostRef.current && hostRef.current.querySelector('.rp-screen')} host={hostRef}
+          name={'mmf-mobile-' + String(i + 1).padStart(2, '0') + '-' + cur.id}/>
       </div>
 
       {/* quick-jump menu */}

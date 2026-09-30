@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-30T05:17:28.677Z",
+ "generated": "2026-09-30T05:52:27.661Z",
  "packages": {
   "all": {
    "title": "Бүх төсөл",
@@ -7,7 +7,7 @@
    "folder": "mmf-full-project",
    "entry": "Portal.html",
    "count": 463,
-   "bytes": 96427149,
+   "bytes": 96451824,
    "files": [
     {
      "p": ".nojekyll",
@@ -19,7 +19,7 @@
     },
     {
      "p": "app_proto.jsx",
-     "s": 29124
+     "s": 30655
     },
     {
      "p": "assets/logo-black.svg",
@@ -107,7 +107,7 @@
     },
     {
      "p": "CHANGELOG.md",
-     "s": 7323
+     "s": 8587
     },
     {
      "p": "colors_and_type.css",
@@ -1059,7 +1059,7 @@
     },
     {
      "p": "portal-download.js",
-     "s": 7636
+     "s": 13313
     },
     {
      "p": "portal-return.js",
@@ -1075,11 +1075,11 @@
     },
     {
      "p": "portal.css",
-     "s": 10245
+     "s": 11152
     },
     {
      "p": "Portal.html",
-     "s": 13914
+     "s": 16251
     },
     {
      "p": "primary_flow.jsx",
@@ -1139,11 +1139,11 @@
     },
     {
      "p": "screen-export.js",
-     "s": 24647
+     "s": 37729
     },
     {
      "p": "screens.jsx",
-     "s": 238966
+     "s": 238843
     },
     {
      "p": "screenshots/01-cancel-dialog.png",
@@ -1869,7 +1869,7 @@
    "folder": "mmf-landing",
    "entry": "landings/13 Landing - App First.html",
    "count": 30,
-   "bytes": 14929093,
+   "bytes": 14942175,
    "files": [
     {
      "p": "assets/logo-black.svg",
@@ -1989,7 +1989,7 @@
     },
     {
      "p": "screen-export.js",
-     "s": 24647
+     "s": 37729
     }
    ]
   },
@@ -1999,11 +1999,11 @@
    "folder": "mmf-mobile-app",
    "entry": "Mobile Flows.html",
    "count": 136,
-   "bytes": 4024875,
+   "bytes": 4040272,
    "files": [
     {
      "p": "app_proto.jsx",
-     "s": 29124
+     "s": 30655
     },
     {
      "p": "auto_invest_app.jsx",
@@ -2499,7 +2499,7 @@
     },
     {
      "p": "portal.css",
-     "s": 10245
+     "s": 11152
     },
     {
      "p": "primary_flow.jsx",
@@ -2523,11 +2523,11 @@
     },
     {
      "p": "screen-export.js",
-     "s": 24647
+     "s": 37729
     },
     {
      "p": "screens.jsx",
-     "s": 238966
+     "s": 238843
     },
     {
      "p": "secondary_flow.jsx",
@@ -2553,7 +2553,7 @@
    "folder": "mmf-web-app",
    "entry": "Web Flows.html",
    "count": 53,
-   "bytes": 1120809,
+   "bytes": 1134798,
    "files": [
     {
      "p": "assets/logo-black.svg",
@@ -2625,7 +2625,7 @@
     },
     {
      "p": "portal.css",
-     "s": 10245
+     "s": 11152
     },
     {
      "p": "products_data.jsx",
@@ -2661,7 +2661,7 @@
     },
     {
      "p": "screen-export.js",
-     "s": 24647
+     "s": 37729
     },
     {
      "p": "trade_f03.jsx",

@@ -171,3 +171,125 @@
 
   items.forEach(function (b) { b.addEventListener('click', function () { build(b); }); });
 })();
+
+/**
+ * Portal "Дэлгэцүүдийг зургаар" — every screen of a product as PNG / SVG in one
+ * ZIP. Each product is loaded into a same-origin iframe (shown as a live
+ * preview in the progress dialog) and captured with that page's own
+ * screen-export.js, so names and output match the single-screen downloads.
+ */
+(function () {
+  var cards = document.querySelectorAll('[data-shots]');
+  if (!cards.length) return;
+  var X = window.MMFExport;
+  if (!X || location.protocol === 'file:') {
+    cards.forEach(function (c) { c.querySelectorAll('button').forEach(function (b) { b.disabled = true; }); });
+    return;
+  }
+  function href(p) { return p.split('/').map(encodeURIComponent).join('/'); }
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  // Web pages come from the curated flow list, in its order.
+  var webList = fetch('Web Flows.html').then(function (r) { return r.text(); }).then(function (html) {
+    var d = new DOMParser().parseFromString(html, 'text/html'), seen = {};
+    return Array.prototype.map.call(d.querySelectorAll('a.pt-flow'), function (a) { return a.getAttribute('href'); })
+      .filter(function (h) { var k = h.split('?')[0]; if (seen[k]) return false; seen[k] = 1; return true; });
+  });
+  webList.then(function (l) {
+    var m = document.querySelector('[data-shots="web"] .pt-dl-meta');
+    if (m) m.textContent = l.length + ' хуудас';
+  }).catch(function () {});
+  var LANDING = ['landings/13 Landing - App First.html', 'landings/About Us.html', 'landings/Benchmark.html'];
+
+  // A real-size iframe, scaled down to fit the dialog's preview box.
+  function makeStage(w, h) {
+    var box = document.createElement('div');
+    box.style.cssText = 'position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center';
+    var f = document.createElement('iframe');
+    var k = Math.min(380 / w, 240 / h);
+    f.setAttribute('aria-hidden', 'true');
+    f.tabIndex = -1;
+    f.style.cssText = 'flex-shrink:0;border:0;background:#fff;width:' + w + 'px;height:' + h + 'px;transform:scale(' + k + ');transform-origin:top center;margin-bottom:' + (-(h * (1 - k))) + 'px;pointer-events:none';
+    box.appendChild(f);
+    return { box: box, frame: f };
+  }
+  // Load a URL and wait until the page is rendered and settled.
+  function load(f, url, ready) {
+    return new Promise(function (res, rej) {
+      var done = false, t0 = Date.now(), last = -1, calm = 0;
+      f.onload = function () {
+        var poll = function () {
+          if (done) return;
+          var w = f.contentWindow, d = f.contentDocument;
+          var len = d && d.body ? d.body.innerText.length : 0;
+          calm = len > 40 && len === last ? calm + 1 : 0;
+          last = len;
+          if (w && w.MMFExport && ready(w) && calm >= 2) { done = true; return X.wait(400).then(function () { res(w); }); }
+          if (Date.now() - t0 > 25000) { done = true; return rej(new Error('timeout ' + url)); }
+          setTimeout(poll, 300);
+        };
+        poll();
+      };
+      f.src = url;
+    });
+  }
+  function withV2(u) { return u + (u.indexOf('?') >= 0 ? '&' : '?') + 'v=2'; }
+
+  var RUN = {
+    mobile: function (fmt) {
+      var st = makeStage(480, 1000), w = null;
+      var cfg = {
+        fmt: fmt, title: 'Гар утасны апп — бүх дэлгэц', zipName: 'MMF Mobile - ' + fmt.toUpperCase(),
+        total: 0, stage: st.box,
+        start: function () {
+          return load(st.frame, href('mobile-app/Money Market Fund - Prototype.html') + '?v=2&sess=returning&start=splash', function (win) { return !!win.MMFProto; })
+            .then(function (win) { w = win; cfg.total = win.MMFProto.total; });
+        },
+        item: function (k) { return w.MMFProto.item(k, fmt); },
+      };
+      return X.runBatch(cfg);
+    },
+    web: function (fmt) {
+      var st = makeStage(1440, 900);
+      return webList.then(function (list) {
+        return X.runBatch({
+          fmt: fmt, title: 'Веб апп — бүх хуудас', zipName: 'MMF Web - ' + fmt.toUpperCase(),
+          total: list.length, stage: st.box,
+          item: function (k) {
+            return load(st.frame, withV2(list[k]), function () { return true; }).then(function (w) {
+              return { name: w.MMFExport.screenLabel(), capture: function () { return w.MMFExport.render(fmt, { page: true }); } };
+            });
+          },
+        });
+      });
+    },
+    landing: function (fmt) {
+      var st = makeStage(1440, 900);
+      return X.runBatch({
+        fmt: fmt, title: 'Landing — бүх хуудас', zipName: 'MMF Landing - ' + fmt.toUpperCase(),
+        total: LANDING.length, stage: st.box,
+        item: function (k) {
+          return load(st.frame, href(LANDING[k]), function () { return true; }).then(function (w) {
+            return { name: pad(k + 1) + ' ' + w.MMFExport.screenLabel(), capture: function () { return w.MMFExport.render(fmt, { page: true }); } };
+          });
+        },
+      });
+    },
+  };
+
+  var busy = false;
+  cards.forEach(function (card) {
+    var key = card.getAttribute('data-shots');
+    card.querySelectorAll('button[data-fmt]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (busy) return;
+        busy = true;
+        Promise.resolve(RUN[key](b.getAttribute('data-fmt'))).catch(function (e) {
+          console.error('[portal-shots]', e);
+          var s = document.getElementById('pt-dl-status');
+          if (s) { s.textContent = 'Дэлгэцүүдийг татаж чадсангүй. Дахин оролдоно уу.'; s.className = 'pt-dl-status err'; }
+        }).then(function () { busy = false; b.focus(); });
+      });
+    });
+  });
+})();

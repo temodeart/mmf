@@ -167,17 +167,34 @@ const APIconBtn = ({ dir, disabled, onClick }) => (
 );
 
 // Download the current phone screen as PNG / SVG (screen-export.js).
+// Files are named by screen: "048 Худалдан авах - Анхдагч зах".
+// Zero-padded to the flow length (001…131) so files sort in flow order.
+const apLabel = (k) => String(k + 1).padStart(String(AP_FLOW.length).length, '0') + ' ' + AP_FLOW[k].sect + ' - ' + AP_FLOW[k].name;
 // The host is CSS-scaled to fit the window; capture it at true 390×844.
-const APExportBtn = ({ getEl, host, name }) => (
+const apCapture = (host) => ({
+  target: () => host.current && host.current.querySelector('.rp-screen'),
+  prepare: () => {
+    const el = host.current; if (!el) return null;
+    const prev = el.style.cssText;
+    el.style.transition = 'none'; el.style.transform = 'none'; el.style.width = '390px'; el.style.height = '844px';
+    return () => { el.style.cssText = prev; };
+  },
+});
+// Every screen of the flow into one ZIP; returns to where the reviewer was.
+const apBatch = (fmt) => {
+  const P = window.MMFProto; if (!P) return;
+  const snap = P.snapshot();
+  window.MMFExport.runBatch({
+    fmt, title: 'Гар утасны апп — бүх дэлгэц', zipName: 'MMF Mobile - ' + fmt.toUpperCase(),
+    total: P.total, item: (k) => P.item(k, fmt), onClose: () => P.restore(snap),
+  });
+};
+
+const APExportBtn = ({ host, name }) => (
   <button data-nodrag aria-label="Дэлгэцийг татах" aria-haspopup="menu" title="Дэлгэцийг PNG / SVG-ээр татах"
     onClick={(e) => window.MMFExport && window.MMFExport.openMenu(e.currentTarget, {
-      target: getEl, name,
-      prepare: () => {
-        const el = host.current; if (!el) return null;
-        const prev = el.style.cssText;
-        el.style.transition = 'none'; el.style.transform = 'none'; el.style.width = '390px'; el.style.height = '844px';
-        return () => { el.style.cssText = prev; };
-      },
+      ...apCapture(host), name,
+      batch: { label: 'Бүх ' + AP_FLOW.length + ' дэлгэц', run: apBatch },
     })}
     style={{ width: 46, height: 46, borderRadius: 14, flexShrink: 0, cursor: 'pointer', background: '#fff', border: '1px solid #E7E9F2', color: '#2A3052', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -196,8 +213,29 @@ function AppProtoApp() {
   const [loan, setLoan] = useStateAP('none');
   const [menu, setMenu] = useStateAP(false);
   const hostRef = useRefAP(null);
+  const histRef = useRefAP(hist);
+  histRef.current = hist;
   const i = hist[hist.length - 1];
   const cur = AP_FLOW[i];
+
+  // Batch-export hook (screen-export.js, also driven from the Portal via iframe):
+  // show screen k without growing history, let it paint, hand back a capture.
+  useEffectAP(() => {
+    const X = () => window.MMFExport;
+    window.MMFProto = {
+      total: AP_FLOW.length,
+      label: apLabel,
+      item: (k, fmt) => {
+        setMenu(false);
+        setHist([k]);
+        return X().wait(60).then(X().frame).then(() => X().wait(250))
+          .then(() => ({ name: apLabel(k), capture: () => X().render(fmt, apCapture(hostRef)) }));
+      },
+      snapshot: () => histRef.current.slice(),
+      restore: (h) => setHist(h && h.length ? h : [0]),
+    };
+    return () => { delete window.MMFProto; };
+  }, []);
 
   useEffectAP(() => { localStorage.setItem(AP_KEY, AP_FLOW[i].id); }, [i]);
 
@@ -301,8 +339,7 @@ function AppProtoApp() {
         </button>
         <APIconBtn dir="next" disabled={i === AP_FLOW.length - 1} onClick={next}/>
         <div style={{ width: 1, height: 28, background: '#E7E9F2', margin: '0 2px' }}/>
-        <APExportBtn getEl={() => hostRef.current && hostRef.current.querySelector('.rp-screen')} host={hostRef}
-          name={'mmf-mobile-' + String(i + 1).padStart(2, '0') + '-' + cur.id}/>
+        <APExportBtn host={hostRef} name={'MMF Mobile - ' + apLabel(i)}/>
       </div>
 
       {/* quick-jump menu */}

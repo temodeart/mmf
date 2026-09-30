@@ -99,3 +99,12 @@ a:hover{color:#3D34C9}
 .pt-dl-status.ok{color:#0E9A5B}
 .pt-dl-status.warn{color:#B7791F}
 .pt-dl-status.err{color:#B42318}
+.pt-dl-h2{margin-top:30px}
+.pt-shot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+@media(max-width:900px){.pt-shot-grid{grid-template-columns:1fr}}
+.pt-shot{display:flex;align-items:stretch;gap:14px;padding:16px;border-radius:18px;border:1px solid var(--line);background:var(--surface)}
+.pt-shot-btns{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.pt-shot-btns button{height:34px;min-width:64px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--indigo-soft);color:var(--indigo);font:600 11.5px/1 'JetBrains Mono',monospace;letter-spacing:.04em;cursor:pointer;transition:background .15s ease,color .15s ease}
+.pt-shot-btns button:hover:not(:disabled){background:var(--indigo);color:#fff}
+.pt-shot-btns button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.pt-shot-btns button:disabled{opacity:.5;cursor:default}

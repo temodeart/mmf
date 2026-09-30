@@ -146,6 +146,45 @@
       <span class="pt-dl-bar" aria-hidden="true"><i></i></span>
     </button>
   </div>
+  <div class="pt-dl-h pt-dl-h2">
+    <h3>Дэлгэцүүдийг зургаар</h3>
+    <p>Бүтээгдэхүүн бүрийн бүх дэлгэцийг нэг ZIP-ээр — PNG (яг харагдах байдлаар) эсвэл SVG (Figma, Illustrator-т засварлана). Файл бүр дэлгэцийн нэрээр нэрлэгдэнэ.</p>
+  </div>
+  <div class="pt-shot-grid">
+    <div class="pt-shot" data-shots="mobile">
+      <div class="pt-dl-b">
+        <strong>Гар утасны апп</strong>
+        <span class="pt-dl-sub">Прототипын бүх дэлгэц · 390 × 844</span>
+        <span class="pt-dl-meta">Бүх дэлгэц</span>
+      </div>
+      <div class="pt-shot-btns">
+        <button type="button" data-fmt="png" aria-label="Гар утасны апп — бүх дэлгэцийг PNG-ээр татах">PNG</button>
+        <button type="button" data-fmt="svg" aria-label="Гар утасны апп — бүх дэлгэцийг SVG-ээр татах">SVG</button>
+      </div>
+    </div>
+    <div class="pt-shot" data-shots="web">
+      <div class="pt-dl-b">
+        <strong>Веб апп</strong>
+        <span class="pt-dl-sub">Урсгал бүрийн хуудас · бүтэн хуудсаар</span>
+        <span class="pt-dl-meta">Бүх хуудас</span>
+      </div>
+      <div class="pt-shot-btns">
+        <button type="button" data-fmt="png" aria-label="Веб апп — бүх дэлгэцийг PNG-ээр татах">PNG</button>
+        <button type="button" data-fmt="svg" aria-label="Веб апп — бүх дэлгэцийг SVG-ээр татах">SVG</button>
+      </div>
+    </div>
+    <div class="pt-shot" data-shots="landing">
+      <div class="pt-dl-b">
+        <strong>Landing</strong>
+        <span class="pt-dl-sub">Нүүр, бидний тухай, бенчмарк · бүтэн хуудсаар</span>
+        <span class="pt-dl-meta">3 хуудас</span>
+      </div>
+      <div class="pt-shot-btns">
+        <button type="button" data-fmt="png" aria-label="Landing — бүх дэлгэцийг PNG-ээр татах">PNG</button>
+        <button type="button" data-fmt="svg" aria-label="Landing — бүх дэлгэцийг SVG-ээр татах">SVG</button>
+      </div>
+    </div>
+  </div>
   <p class="pt-dl-status" id="pt-dl-status" role="status" aria-live="polite"></p>
 </section>
 
@@ -205,6 +244,7 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
 })();
 </script>
+<script src="screen-export.js"></script>
 <script src="portal-download.js"></script>
 </body>
 </html>

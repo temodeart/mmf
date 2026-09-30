@@ -6,7 +6,10 @@
  *        editable in Figma / Illustrator. Blur and backdrop-blur effects are
  *        dropped; the PNG is the pixel reference.
  *
- * Two ways in:
+ * Files are named by screen title ("MMF Web - 04 Нүүр - Бүрэн.png",
+ * "MMF Mobile - 048 Худалдан авах - Анхдагч зах.svg"). Batch ZIPs: runBatch().
+ *
+ * Ways in:
  *   <script src="../screen-export.js" data-page></script>
  *       Web app / landing pages. Mounts a floating "Татах" button (bottom-right)
  *       that captures the whole document.
@@ -90,13 +93,26 @@
     '.mmfx-frame-btn{width:24px;height:24px;padding:0;border-radius:7px;border:1px solid #E7E9F2;background:#fff;color:#9099B5;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}',
     '.mmfx-frame-btn:hover,.mmfx-frame-btn[aria-expanded="true"]{color:#4F46E5;border-color:#C9CDF7}',
     '.mmfx-frame-btn svg{width:13px;height:13px}',
+    '.mmfx-sep{height:1px;margin:6px 4px;background:#EFF1F7}',
+    '.mmfx-batch{position:fixed;inset:0;z-index:10002;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(8,11,25,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);font-family:Manrope,system-ui,sans-serif}',
+    '.mmfx-batch-card{width:420px;max-width:100%;padding:20px;border-radius:22px;background:#fff;box-shadow:0 30px 70px -20px rgba(15,20,55,.45)}',
+    '.mmfx-batch-h{display:flex;align-items:center;gap:12px}',
+    '.mmfx-batch-h strong{display:block;font-size:15.5px;font-weight:800;letter-spacing:-.02em;color:#0B1020}',
+    '.mmfx-batch-sub{display:block;margin-top:3px;font:600 11.5px/1 "JetBrains Mono",ui-monospace,monospace;color:#9099B5;font-variant-numeric:tabular-nums}',
+    '.mmfx-batch-stage{position:relative;margin-top:16px;height:240px;border-radius:14px;overflow:hidden;background:#F4F6FA;border:1px solid #EFF1F7}',
+    '.mmfx-batch-bar{margin-top:16px;height:6px;border-radius:999px;background:#EEF0F6;overflow:hidden}',
+    '.mmfx-batch-bar i{display:block;height:100%;width:0;border-radius:999px;background:#4F46E5;transition:width .2s ease}',
+    '.mmfx-batch-f{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}',
+    '.mmfx-batch-now{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600;color:#5A6285}',
+    '.mmfx-batch-f button{flex-shrink:0;height:36px;padding:0 15px;border-radius:11px;border:1px solid #E7E9F2;background:#fff;font:700 12.5px/1 Manrope,system-ui,sans-serif;color:#5A6285;cursor:pointer}',
+    '.mmfx-batch-f button:hover{color:#0B1020}',
     '.mmfx-toast{position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:10001;display:flex;align-items:center;gap:9px;padding:9px 15px;border-radius:999px;background:#0B1020;color:#fff;font:700 12.5px/1.2 Manrope,system-ui,sans-serif;box-shadow:0 14px 34px -14px rgba(15,20,55,.6)}',
     '.mmfx-toast.err{background:#B42318}',
     '.mmfx-spin{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:mmfx-spin .8s linear infinite}',
     '@keyframes mmfx-spin{to{transform:rotate(360deg)}}',
     // While capturing: land every scroll-reveal and freeze transitions.
     'html.mmfx-capturing [data-reveal]{opacity:1!important;transform:none!important}',
-    'html.mmfx-capturing *,html.mmfx-capturing *::before,html.mmfx-capturing *::after{transition:none!important}',
+    'html.mmfx-capturing *,html.mmfx-capturing *::before,html.mmfx-capturing *::after{transition:none!important;animation-duration:1ms!important;animation-delay:0s!important;animation-iteration-count:1!important}',
   ].join('\n');
   function injectCss() {
     if (document.getElementById('mmfx-css')) return;
@@ -109,18 +125,71 @@
   var DL_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   // ── helpers ───────────────────────────────────────────────────────
-  function slug(s) {
-    return String(s || 'screen').toLowerCase()
-      .replace(/\.html?$/, '')
-      .replace(/[^a-z0-9а-яөүё]+/gi, '-')
-      .replace(/^-+|-+$/g, '') || 'screen';
+  // File-system-safe, human-readable name (keeps Cyrillic titles as-is).
+  function cleanName(t) {
+    return String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' - ')
+      .replace(/\s+/g, ' ').replace(/(\s-\s)+/g, ' - ').replace(/^[\s-]+|[\s-]+$/g, '')
+      .slice(0, 110).trim() || 'screen';
   }
-  function pageName() {
-    var file = decodeURIComponent(location.pathname.split('/').pop() || 'index');
-    var dir = decodeURIComponent(location.pathname.split('/').slice(-2, -1)[0] || '');
-    var prefix = dir === 'web-app' ? 'mmf-web-' : dir === 'landings' ? 'mmf-landing-' : 'mmf-';
-    return prefix + slug(file);
+  function visible(n) {
+    if (!n || n.closest(REVIEW_CHROME)) return false;
+    var r = n.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && getComputedStyle(n).visibility !== 'hidden';
   }
+  function text(n) { return n ? n.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  // An open modal / drawer: a fixed layer covering most of the viewport.
+  function openOverlay(doc) {
+    var W = window.innerWidth, H = window.innerHeight, best = null;
+    doc.querySelectorAll('body *').forEach(function (n) {
+      if (best && best.contains(n)) return;
+      var cs = getComputedStyle(n);
+      if (cs.position !== 'fixed' || cs.display === 'none' || !visible(n)) return;
+      var r = n.getBoundingClientRect();
+      if (r.width >= W * 0.6 && r.height >= H * 0.6 && n.querySelector('h1,h2,h3,[role=heading],button')) best = n;
+    });
+    return best;
+  }
+  // A modal's title: its first heading, else its largest short line of text.
+  function headingIn(root) {
+    var hs = root.querySelectorAll('h1,h2,h3,[role=heading]');
+    for (var i = 0; i < hs.length; i++) if (visible(hs[i]) && text(hs[i])) return text(hs[i]);
+    var best = '', size = 0, top = Infinity;
+    root.querySelectorAll('*').forEach(function (n) {
+      var own = Array.prototype.some.call(n.childNodes, function (c) { return c.nodeType === 3 && c.textContent.trim(); });
+      if (!own || n.closest('button, a, input, label') || !visible(n)) return;
+      var t = text(n);
+      // a title reads as words, not a figure or unit ("14.5%", "% / жил")
+      var letters = (t.match(/[A-Za-zА-Яа-яӨөҮүЁё]/g) || []).length, chars = t.replace(/\s/g, '').length;
+      if (t.length > 70 || letters < 4 || letters / chars < 0.7) return;
+      var fs = parseFloat(getComputedStyle(n).fontSize) || 0, y = n.getBoundingClientRect().top;
+      if (fs > size + 0.5 || (Math.abs(fs - size) <= 0.5 && y < top)) { best = t; size = fs; top = y; }
+    });
+    return best;
+  }
+  var pathParts = location.pathname.split('/').map(function (x) { try { return decodeURIComponent(x); } catch (e) { return x; } });
+  var FILE = (pathParts[pathParts.length - 1] || 'index').replace(/\.html?$/i, '');
+  var DIR = pathParts[pathParts.length - 2] || '';
+  var KIND = DIR === 'web-app' ? 'Web' : DIR === 'landings' ? 'Landing' : DIR === 'mobile-app' ? 'Mobile' : '';
+  // "04 Нүүр - Эхний удаа": page number, the page's title, then whatever tells
+  // this state apart — preview-state switcher, open modal, or the step heading.
+  function screenLabel() {
+    var base = document.title.split(/\s+[—–]\s+/).map(function (x) { return x.trim(); })
+      .filter(function (x) { return x && !/^money market fund$/i.test(x); })[0] || FILE;
+    var num = KIND === 'Web' && (FILE.match(/^(\d+)\s/) || [])[1];
+    var parts = [base];
+    var state = document.querySelector('.scn-btn.active, .prev-btn.active');
+    if (state) parts.push(text(state));
+    var ov = openOverlay(document);
+    var ctx = ov ? headingIn(ov) : '';
+    if (!ctx) {
+      var h1 = Array.prototype.filter.call(document.querySelectorAll('main h1, h1'), visible)[0];
+      var h = text(h1);
+      if (h && h !== base && !/^сайн байна уу/i.test(h)) ctx = h;
+    }
+    if (ctx && ctx !== base) parts.push(ctx);
+    return cleanName((num ? num + ' ' : '') + parts.join(' - '));
+  }
+  function pageName() { return cleanName('MMF' + (KIND ? ' ' + KIND : '') + ' - ' + screenLabel()); }
   function save(href, filename, revoke) {
     var a = document.createElement('a');
     a.href = href;
@@ -155,10 +224,10 @@
   }
 
   // Hide review chrome and settle animations; returns an undo function.
-  function enterCapture() {
+  function enterCapture(root) {
     var hidden = [];
     document.querySelectorAll(REVIEW_CHROME).forEach(function (n) {
-      if (n === toastEl) return;
+      if (n === toastEl || (root && !root.contains(n))) return;
       hidden.push([n, n.style.display]);
       n.style.display = 'none';
     });
@@ -314,19 +383,17 @@
   }
 
   // ── capture ───────────────────────────────────────────────────────
+  // render(): capture only → Promise<{ blob, ext }>. Used by single downloads
+  // here and by batch ZIPs (including from a parent page into an iframe).
   var running = false;
-  function exportScreen(fmt, opts) {
-    if (running) return Promise.resolve();
-    running = true;
+  function render(fmt, opts) {
     var isPage = !!opts.page;
     var restorePrep = null, restoreCapture = null, sx = window.scrollX, sy = window.scrollY;
-    var name = (typeof opts.name === 'function' ? opts.name() : opts.name) || pageName();
-    toast(fmt.toUpperCase() + ' бэлтгэж байна…', 'busy');
-
     var libs = fmt === 'png' ? loadHti() : loadD2s();
     return Promise.all([libs, fmt === 'png' ? fontEmbedCss() : null, document.fonts ? document.fonts.ready : null]).then(function (r) {
       var lib = r[0], fontCss = r[1];
-      restoreCapture = enterCapture();
+      var el0 = isPage ? null : (typeof opts.target === 'function' ? opts.target() : opts.target);
+      restoreCapture = enterCapture(el0);
       if (isPage) window.scrollTo(0, 0);
       return frame().then(function () {
         // Right before measuring: viewers may re-apply their own scaling on a timer.
@@ -372,22 +439,165 @@
           return { blob: new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }), ext: 'svg' };
         });
       });
-    }).then(function (out) {
-      cleanup();
-      save(URL.createObjectURL(out.blob), name + '.' + out.ext, true);
-      toast(name + '.' + out.ext + ' татагдлаа');
-    }, function (err) {
-      cleanup();
-      console.error('[screen-export]', err);
-      toast('Татаж чадсангүй — дахин оролдоно уу', 'err');
-    });
+    }).then(function (out) { cleanup(); return out; }, function (err) { cleanup(); throw err; });
 
     function cleanup() {
-      running = false;
       if (restorePrep) { try { restorePrep(); } catch (e) {} restorePrep = null; }
       if (restoreCapture) { restoreCapture(); restoreCapture = null; }
       if (isPage) window.scrollTo(sx, sy);
     }
+  }
+
+  function exportScreen(fmt, opts) {
+    if (running) return Promise.resolve();
+    running = true;
+    // Name first: the state switcher and modals are read before chrome is hidden.
+    var name = cleanName((typeof opts.name === 'function' ? opts.name() : opts.name) || pageName());
+    toast(fmt.toUpperCase() + ' бэлтгэж байна…', 'busy');
+    return render(fmt, opts).then(function (out) {
+      running = false;
+      save(URL.createObjectURL(out.blob), name + '.' + out.ext, true);
+      toast(name + '.' + out.ext + ' татагдлаа');
+    }, function (err) {
+      running = false;
+      console.error('[screen-export]', err);
+      toast('Татаж чадсангүй — дахин оролдоно уу', 'err');
+    });
+  }
+
+  // ── batch → ZIP ───────────────────────────────────────────────────
+  // runBatch({ fmt, title, zipName, total, item(i) → Promise<{ name, capture() → Promise<{blob, ext}> }>, stage?, start?, onClose? })
+  // Captures one screen at a time into a ZIP, with a progress dialog and cancel.
+  // `stage` (optional element, e.g. an iframe) is shown as a live preview.
+  var JSZIP_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+  var jszipP = null;
+  function loadJSZip() {
+    if (window.JSZip) return Promise.resolve(window.JSZip);
+    if (!jszipP) jszipP = new Promise(function (res, rej) {
+      var s = document.createElement('script');
+      s.src = JSZIP_URL;
+      s.onload = function () { res(window.JSZip); };
+      s.onerror = function () { jszipP = null; rej(new Error('JSZip failed to load')); };
+      document.head.appendChild(s);
+    });
+    return jszipP;
+  }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  function runBatch(cfg) {
+    if (running) return Promise.resolve();
+    running = true;
+    injectCss();
+    var cancelled = false, failed = [];
+    var scrim = document.createElement('div');
+    scrim.className = 'mmfx-batch';
+    scrim.setAttribute('data-mmf-noexport', '');
+    scrim.setAttribute('role', 'dialog');
+    scrim.setAttribute('aria-modal', 'true');
+    scrim.setAttribute('aria-labelledby', 'mmfx-batch-t');
+    scrim.innerHTML =
+      '<div class="mmfx-batch-card">' +
+        '<div class="mmfx-batch-h"><span class="mmfx-fmt">' + cfg.fmt.toUpperCase() + '</span>' +
+        '<div><strong id="mmfx-batch-t"></strong><span class="mmfx-batch-sub"></span></div></div>' +
+        '<div class="mmfx-batch-stage"></div>' +
+        '<div class="mmfx-batch-bar"><i></i></div>' +
+        '<div class="mmfx-batch-f"><span class="mmfx-batch-now" aria-live="polite"></span><button type="button">Болих</button></div>' +
+      '</div>';
+    scrim.querySelector('strong').textContent = cfg.title;
+    var sub = scrim.querySelector('.mmfx-batch-sub'), now = scrim.querySelector('.mmfx-batch-now');
+    var bar = scrim.querySelector('.mmfx-batch-bar i'), btn = scrim.querySelector('button');
+    var stage = scrim.querySelector('.mmfx-batch-stage');
+    if (cfg.stage) stage.appendChild(cfg.stage); else stage.remove();
+    btn.addEventListener('click', function () { cancelled = true; btn.disabled = true; now.textContent = 'Зогсоож байна…'; });
+    document.body.appendChild(scrim);
+    btn.focus();
+    var set = function (i, label) {
+      sub.textContent = Math.min(i, cfg.total) + ' / ' + cfg.total;
+      bar.style.width = (100 * i / Math.max(1, cfg.total)).toFixed(1) + '%';
+      if (label != null) now.textContent = label;
+    };
+    set(0, 'Бэлтгэж байна…');
+
+    var used = {};
+    var unique = function (n) {
+      var k = n.toLowerCase(), c = used[k] || 0;
+      used[k] = c + 1;
+      return c ? n + ' (' + (c + 1) + ')' : n;
+    };
+    var finish = function () {
+      running = false;
+      scrim.remove();
+      if (cfg.onClose) try { cfg.onClose(); } catch (e) {}
+    };
+
+    // start(): optional async setup once the dialog (and stage) is on screen —
+    // e.g. load the iframe and set cfg.total.
+    return Promise.resolve(cfg.start && cfg.start()).then(function () {
+      set(0);
+      return loadJSZip();
+    }).then(function (JSZip) {
+      var zip = new JSZip();
+      var folder = zip.folder(cleanName(cfg.zipName));
+      var i = 0;
+      var step = function () {
+        if (cancelled || i >= cfg.total) return Promise.resolve();
+        var k = i++;
+        return Promise.resolve(cfg.item(k)).then(function (it) {
+          if (!it) return;
+          var name = cleanName(it.name);
+          set(k, name);
+          return it.capture().then(function (out) {
+            // Bytes copied into this realm: the blob may come from an iframe's window.
+            return out.blob.arrayBuffer().then(function (buf) {
+              folder.file(unique(name) + '.' + out.ext, new Uint8Array(buf), out.ext === 'png' ? { compression: 'STORE' } : { compression: 'DEFLATE' });
+            });
+          }).catch(function (err) {
+            console.error('[screen-export] batch item failed', name, err);
+            failed.push(name);
+          });
+        }).then(function () { set(k + 1); return step(); });
+      };
+      return step().then(function () {
+        if (cancelled) { finish(); toast('Цуцлагдлаа'); return; }
+        if (failed.length) folder.file('_татагдаагүй.txt', failed.join('\r\n') + '\r\n');
+        now.textContent = 'ZIP шахаж байна…';
+        return zip.generateAsync({ type: 'blob' }).then(function (blob) {
+          finish();
+          save(URL.createObjectURL(blob), cleanName(cfg.zipName) + '.zip', true);
+          toast(cfg.total - failed.length + ' дэлгэц татагдлаа' + (failed.length ? ' · ' + failed.length + ' алдаатай' : ''), failed.length ? 'err' : null);
+        });
+      });
+    }).catch(function (err) {
+      finish();
+      console.error('[screen-export] batch', err);
+      toast('Багц татаж чадсангүй — дахин оролдоно уу', 'err');
+    });
+  }
+
+  // Every Frame on a canvas page (the download icon beside each screen label).
+  function frameBatch(fmt) {
+    var btns = Array.prototype.slice.call(document.querySelectorAll('.mmfx-frame-btn'));
+    return runBatch({
+      fmt: fmt,
+      title: 'Энэ хуудасны бүх дэлгэц',
+      zipName: 'MMF Mobile - ' + FILE.replace(/^Money Market Fund\s*-\s*/i, '') + ' - ' + fmt.toUpperCase(),
+      total: btns.length,
+      item: function (i) {
+        var b = btns[i];
+        return {
+          name: b.getAttribute('data-label') || ('Screen ' + (i + 1)),
+          capture: function () { return render(fmt, { target: b.parentElement.nextElementSibling }); },
+        };
+      },
+    });
+  }
+  function openFrameMenu(anchor, label) {
+    var n = document.querySelectorAll('.mmfx-frame-btn').length;
+    openMenu(anchor, {
+      target: function () { return anchor.parentElement.nextElementSibling; },
+      name: 'MMF Mobile - ' + label,
+      batch: n > 1 ? { label: 'Энэ хуудасны бүх ' + n + ' дэлгэц', run: frameBatch } : null,
+    });
   }
 
   // ── menu ──────────────────────────────────────────────────────────
@@ -415,14 +625,21 @@
     menuEl.innerHTML =
       '<div class="mmfx-h">' + (opts.page ? 'Хуудсыг татах' : 'Дэлгэцийг татах') + '</div>' +
       '<button type="button" role="menuitem" class="mmfx-opt" data-fmt="png"><span class="mmfx-fmt">PNG</span><span><span class="mmfx-t">Зураг (PNG)</span><span class="mmfx-s">Яг харагдаж буйгаар, 2x</span></span></button>' +
-      '<button type="button" role="menuitem" class="mmfx-opt" data-fmt="svg"><span class="mmfx-fmt">SVG</span><span><span class="mmfx-t">Вектор (SVG)</span><span class="mmfx-s">Figma, Illustrator-т засварлана</span></span></button>';
+      '<button type="button" role="menuitem" class="mmfx-opt" data-fmt="svg"><span class="mmfx-fmt">SVG</span><span><span class="mmfx-t">Вектор (SVG)</span><span class="mmfx-s">Figma, Illustrator-т засварлана</span></span></button>' +
+      (opts.batch ?
+        '<div class="mmfx-sep"></div><div class="mmfx-h">Бүгдийг ZIP-ээр</div>' +
+        '<button type="button" role="menuitem" class="mmfx-opt" data-fmt="png" data-batch><span class="mmfx-fmt">ZIP</span><span><span class="mmfx-t">Бүх дэлгэц · PNG</span><span class="mmfx-s"></span></span></button>' +
+        '<button type="button" role="menuitem" class="mmfx-opt" data-fmt="svg" data-batch><span class="mmfx-fmt">ZIP</span><span><span class="mmfx-t">Бүх дэлгэц · SVG</span><span class="mmfx-s"></span></span></button>'
+        : '');
+    if (opts.batch) menuEl.querySelectorAll('[data-batch] .mmfx-s').forEach(function (n) { n.textContent = opts.batch.label; });
     menuEl.addEventListener('click', function (e) {
       var b = e.target.closest('[data-fmt]');
       if (!b) return;
       e.stopPropagation();
       var fmt = b.getAttribute('data-fmt');
       closeMenu();
-      exportScreen(fmt, opts);
+      if (b.hasAttribute('data-batch')) opts.batch.run(fmt);
+      else exportScreen(fmt, opts);
     });
     document.body.appendChild(menuEl);
 
@@ -453,7 +670,11 @@
     document.body.appendChild(b);
   }
 
-  window.MMFExport = { openMenu: openMenu, exportScreen: exportScreen, icon: DL_ICON, slug: slug };
+  window.MMFExport = {
+    openMenu: openMenu, openFrameMenu: openFrameMenu, exportScreen: exportScreen,
+    render: render, runBatch: runBatch, frame: frame, wait: wait,
+    pageName: pageName, screenLabel: screenLabel, cleanName: cleanName, icon: DL_ICON,
+  };
   injectCss();
 
   var me = document.currentScript;

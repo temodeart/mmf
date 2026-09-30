@@ -172,12 +172,9 @@ const Frame = ({ label, children, bg = C.bg, statusDark = false }) => (
       {label}
       {/* review-only: PNG / SVG download of this screen (screen-export.js) */}
       {window.MMFExport && (
-        <button type="button" className="mmfx-frame-btn" data-nodrag aria-haspopup="menu"
+        <button type="button" className="mmfx-frame-btn" data-nodrag aria-haspopup="menu" data-label={label}
           aria-label={'Дэлгэцийг татах: ' + label} title="PNG / SVG-ээр татах"
-          onClick={(e) => { e.stopPropagation(); const b = e.currentTarget; window.MMFExport.openMenu(b, {
-            target: () => b.parentElement.nextElementSibling,
-            name: 'mmf-mobile-' + window.MMFExport.slug(label),
-          }); }}
+          onClick={(e) => { e.stopPropagation(); window.MMFExport.openFrameMenu(e.currentTarget, label); }}
           dangerouslySetInnerHTML={{ __html: window.MMFExport.icon }}/>
       )}
     </div>

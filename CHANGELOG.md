@@ -1,5 +1,25 @@
 # Money Market Fund — Changelog
 
+## Screen names + batch downloads
+
+- **Files are named by screen title**, not by page file. Web:
+  `MMF Web - 04 Нүүр - Бүрэн.png`: page number, page title, then the active
+  preview state, open modal / drawer title, or step heading (Registration,
+  Education article…). Mobile prototype: `MMF Mobile - 048 Худалдан авах -
+  Анхдагч зах.svg` (flow number + section + screen, since names like
+  "ПИН код" repeat across flows). Canvas pages use each screen's label.
+- **Batch ZIP of every screen**, PNG or SVG:
+  - Mobile prototype dock menu → *Бүх 131 дэлгэц*. Walks the whole flow and
+    returns to the screen you were on.
+  - Mobile canvas pages → any screen's download menu → *Энэ хуудасны бүх
+    дэлгэц*.
+  - Portal → **Дэлгэцүүдийг зургаар** → Гар утасны апп / Веб апп (the 15 flow
+    pages, full-page) / Landing (3 pages), each as PNG or SVG. Pages load in a
+    preview frame inside the progress dialog. Cancel stops at any point.
+  - Repeated names get " (2)"; any screen that fails is listed in
+    `_татагдаагүй.txt` inside the ZIP instead of failing the batch.
+- Captures now finish CSS entrance animations before shooting.
+
 ## Downloads — screens as PNG / SVG, packages as ZIP
 
 Client request: take screens and source out of the review portal.
